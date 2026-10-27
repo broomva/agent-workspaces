@@ -2751,8 +2751,8 @@ function apply(){const sc=scenes[cur],o=S(cur),act=+sc.dataset.act;readColors();
   $('#actname').textContent=ACTS[act];$('#dockact').textContent=ACTS[act];$('#count').textContent=`${String(cur+1).padStart(2,'0')} / ${N}`;
   $$('#dots button').forEach((d,k)=>{d.classList.toggle('on',k===cur);d.classList.toggle('done',k<cur)});
   $('#notesBody').innerHTML=$('.notes',sc)?.innerHTML||'';renderLedger();renderGuide();$('#srlive').textContent=`Scene ${cur+1} of ${N}: ${sc.getAttribute('aria-label')}${steps(cur)>1?`, beat ${step+1} of ${steps(cur)}`:''}`}
-function next(){step<steps(cur)-1?go(cur,step+1):go(cur+1,0)}
-function prev(){step>0?go(cur,step-1):cur>0&&go(cur-1,steps(cur-1)-1)}
+function next(){if(playback?.active){playback.cue(1);return}step<steps(cur)-1?go(cur,step+1):go(cur+1,0)}
+function prev(){if(playback?.active){playback.cue(-1);return}step>0?go(cur,step-1):cur>0&&go(cur-1,steps(cur-1)-1)}
 
 /* per-frame DOM springs */
 const prog=new Sp(0),tipSp=new Sp(0),hudSp=new Sp(1),dotSp=new Map(),panels={notes:{el:null,sp:new Sp(0),open:0,side:1},ledger:{el:null,sp:new Sp(0),open:0,side:-1},guide:{el:null,sp:new Sp(0),open:0,side:1}};
@@ -2868,7 +2868,9 @@ function renderPresenter(){$('#pTitle').textContent=sceneTitle(cur);$('#pStep').
 /* Narration: media time is the only navigation clock. No elapsed-time timers. */
 function createPlayback(){
   const data=JSON.parse($('#narration-data').textContent),audio=$('#keynote-audio'),box=$('#playback'),seek=$('#playback-seek'),caption=$('#playback-caption');
-  const api={active:false,syncing:false,open,close,toggle,navigate,tick};
+  const api={active:false,syncing:false,open,close,toggle,navigate,cue:cueStep,tick};
+  // next/previous follow spoken order: a chapter's beats are not always narrated in numeric order
+  const CUES=data.chapters.flatMap(ch=>ch.cues.map(c=>ch.startSeconds+c.at)).sort((a,b)=>a-b);
   let pending=null,cc=true,lastCaption='',lastScene=-1,request=0;
   const clock=t=>`${Math.floor(t/60)}:${String(Math.floor(t%60)).padStart(2,'0')}`;
   const status=text=>{$('#playback-status').textContent=text};
@@ -2888,6 +2890,7 @@ function createPlayback(){
     if(!available){if(audio.readyState>=3){request++;audio.pause();settings(true);status('This host cannot seek yet. Restart from the beginning, or download the release for offline playback.')}return}try{audio.currentTime=target;if(!audio.seeking&&Math.abs(audio.currentTime-target)<.05){pending=null;audio.muted=false}}catch{}
   }
   function setTime(t){status('');pending=clamp(t,0,data.duration);audio.muted=true;applyPending();sync()}
+  function cueStep(dir){const t=position()+.0001;let k=-1;while(k+1<CUES.length&&CUES[k+1]<=t)k++;const j=k+dir;if(j>=0&&j<CUES.length)setTime(CUES[j])}
   function navigate(i,beat){const ch=data.chapters[i],cue=ch.cues.find(c=>c.beat===beat);setTime(ch.startSeconds+(cue?.at||0))}
   function settings(on){box.classList.toggle('expanded',on);$('#playback-settings').setAttribute('aria-expanded',on);wake()}
   function open(){if(api.active)return;api.active=true;box.hidden=false;document.body.classList.add('play-mode');fit();$('#bPlay').setAttribute('aria-expanded','true');lastScene=-1;

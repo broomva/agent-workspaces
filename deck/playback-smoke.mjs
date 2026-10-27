@@ -53,6 +53,14 @@ try{
   await p.evaluate(()=>playback.open());await p.focus(target);await p.keyboard.press('Escape');assert.equal(await p.evaluate(()=>playback.active),false,`Escape must exit from ${target}`);assert(await p.$eval('audio',a=>a.paused));assert(await p.$eval('#playback',e=>e.hidden));
  }
  await p.evaluate(()=>go(4,1));assert.equal(await p.evaluate(()=>step),1);assert.equal(await p.evaluate(()=>playback.active),false);
+ // Manual next/previous in play mode follow spoken order, not numeric beats (hooks narrates 0,1,2,4,3).
+ {const h=data.chapters.findIndex(c=>c.id==='hooks'),order=[...data.chapters[h].cues].sort((a,b)=>a.at-b.at).map(c=>c.beat);assert.notDeepEqual(order,[...order].sort((a,b)=>a-b),'hooks must keep a non-monotonic cue order for this check');
+  await p.evaluate(h=>{playback.open();go(h,0)},h);await p.waitForFunction(h=>cur===h&&step===0&&!document.querySelector('audio').seeking,h);
+  const seen=[0];let t0=await p.$eval('audio',a=>a.currentTime);
+  for(let n=1;n<order.length;n++){await p.evaluate(()=>document.activeElement.blur());await p.keyboard.press('ArrowRight');await p.waitForFunction(b=>step===b&&!document.querySelector('audio').seeking,order[n]);
+   const t1=await p.$eval('audio',a=>a.currentTime);assert(t1>t0,`ArrowRight must move forward in time (${t0} -> ${t1})`);t0=t1;seen.push(await p.evaluate(()=>step))}
+  assert.deepEqual(seen,order);await p.keyboard.press('ArrowLeft');await p.waitForFunction(b=>step===b&&!document.querySelector('audio').seeking,order.at(-2));assert(await p.$eval('audio',a=>a.currentTime)<t0);
+  await p.evaluate(()=>playback.close())}
  console.log('playback: native play/pause, speed, captions, manual jumps, slider keyboard, exit and pause stability passed');
  // Finish and replay; opening while paused does not generate audio automatically.
  await p.evaluate(()=>{playback.open();const input=document.querySelector('#playback-seek');input.value=String(document.querySelector('audio').duration-.15);input.dispatchEvent(new Event('input'))});
