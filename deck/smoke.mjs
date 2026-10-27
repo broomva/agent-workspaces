@@ -3,6 +3,8 @@
 // Checks: every scene and beat runs without an error; reduced motion paints a non-empty still frame per scene;
 // narration highlights the current beat; capture mode (?t=) is byte-identical across paint orders.
 import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
@@ -32,16 +34,81 @@ const page = async (url, opts = {}) => { const p = await browser.newPage({ viewp
   if (empty.motion || empty.out.length) fails.push(`reduced motion: MOTION=${empty.motion}, empty frames ${empty.out.join(',')}`);
   console.log(`reduced motion: ${empty.out.length} empty frames`); await p.close(); }
 
+// Snapshot A after its screenshot, then close it before loading B as in the original assertion.
+// Diagnostics never rerender, wait for, normalize or replace either compared screenshot.
+const collectPurityState = p => p.evaluate(() => {
+    const rect = el => { const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height }; };
+    const layers = [...document.querySelectorAll('canvas')].filter(cv => cv.width > 1 && cv.height > 1).map((cv, i) => ({
+      name: `canvas-${i}`, id: cv.id, className: cv.className, scene: cv.closest('[data-id]')?.dataset.id,
+      width: cv.width, height: cv.height, rect: rect(cv), png: cv.toDataURL('image/png')
+    }));
+    // Atlas snapshots distinguish font/glyph baking from scene simulation and page compositing.
+    const atlases = Object.entries(atlasCache).map(([key, atlas], i) => ({
+      name: `atlas-${i}`, key, cw: atlas.cw, ch: atlas.ch, scale: atlas.S, png: atlas.cv.toDataURL('image/png')
+    }));
+    return {
+      state: { scene: scenes[cur].dataset.id, cur, step, simScene, simN, T0, T0r, NOW, UA, LAYOUT, MOTION, SCALE, DPR, SEED },
+      viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
+      look: { theme: root.dataset.theme || 'dark', tone: root.dataset.tone || 'midnight', bodyClass: document.body.className },
+      userAgent: navigator.userAgent,
+      fonts: { status: document.fonts.status, faces: [...document.fonts].map(f => ({ family: f.family, weight: f.weight, style: f.style, status: f.status })),
+        probes: ['500 11px "JetBrains Mono"', '500 15px "JetBrains Mono"', '300 76px Raleway', '400 16px Inter'].map(font => ({ font, loaded: document.fonts.check(font) })) },
+      animations: document.getAnimations().map(a => ({ currentTime: a.currentTime, playState: a.playState, target: a.effect?.target?.className, timing: a.effect?.getComputedTiming() })),
+      sceneElements: [...scenes[cur].querySelectorAll('.rv,.glass')].map(el => { const c = getComputedStyle(el); return { className: el.className, rect: rect(el), opacity: c.opacity, transform: c.transform, filter: c.filter, backdropFilter: c.backdropFilter, background: c.background, font: c.font }; }),
+      layers, atlases
+    };
+  });
+
+const purityDiagnostics = async (scene, frame, AState, B, a, b) => {
+  const out = path.join(here, '..', 'dist', 'ci-purity', `scene-${scene}-frame-${frame}`);
+  mkdirSync(out, { recursive: true });
+  const sha = data => createHash('sha256').update(data).digest('hex');
+  const metadata = { scene, frame, fps: 6, platform: process.platform, arch: process.arch, browser: browser.version(), playwright: req('playwright/package.json').version, sourceCommit: process.env.GITHUB_SHA || null, screenshots: {} };
+  for (const [label, savedState, png] of [['sequential', AState, a], ['fresh', null, b]]) {
+    writeFileSync(path.join(out, `${label}.png`), png);
+    metadata.screenshots[label] = { sha256: sha(png), bytes: png.length };
+    const state = savedState || await collectPurityState(B);
+    for (const layer of [...state.layers, ...state.atlases]) {
+      const data = Buffer.from(layer.png.split(',')[1], 'base64'); delete layer.png;
+      layer.sha256 = sha(data); layer.file = `${label}-${layer.name}.png`;
+      writeFileSync(path.join(out, layer.file), data);
+    }
+    metadata[label] = state;
+  }
+  const difference = await B.evaluate(async ([left, right]) => {
+    const decode = async data => createImageBitmap(await (await fetch('data:image/png;base64,' + data)).blob());
+    const leftImage = await decode(left), rightImage = await decode(right), cv = document.createElement('canvas');
+    cv.width = leftImage.width; cv.height = leftImage.height;
+    const cx = cv.getContext('2d'); cx.drawImage(leftImage, 0, 0); const x = cx.getImageData(0, 0, cv.width, cv.height);
+    cx.clearRect(0, 0, cv.width, cv.height); cx.drawImage(rightImage, 0, 0); const y = cx.getImageData(0, 0, cv.width, cv.height);
+    let pixels = 0, maxChannelDelta = 0, minX = cv.width, minY = cv.height, maxX = -1, maxY = -1;
+    for (let i = 0; i < x.data.length; i += 4) {
+      let delta = 0; for (let c = 0; c < 4; c++) delta = Math.max(delta, Math.abs(x.data[i + c] - y.data[i + c]));
+      if (delta) { pixels++; const px = (i / 4) % cv.width, py = Math.floor(i / 4 / cv.width); minX = Math.min(minX, px); minY = Math.min(minY, py); maxX = Math.max(maxX, px); maxY = Math.max(maxY, py); }
+      maxChannelDelta = Math.max(maxChannelDelta, delta);
+      x.data[i] = delta ? 255 : 0; x.data[i + 1] = 0; x.data[i + 2] = delta ? 255 : 0; x.data[i + 3] = 255;
+    }
+    cx.putImageData(x, 0, 0);
+    return { pixels, maxChannelDelta, bounds: pixels ? { minX, minY, maxX, maxY } : null, png: cv.toDataURL('image/png') };
+  }, [a.toString('base64'), b.toString('base64')]);
+  writeFileSync(path.join(out, 'difference.png'), Buffer.from(difference.png.split(',')[1], 'base64')); delete difference.png;
+  metadata.difference = difference;
+  writeFileSync(path.join(out, 'metadata.json'), JSON.stringify(metadata, null, 2) + '\n');
+  console.log(`purity diagnostics: dist/ci-purity/scene-${scene}-frame-${frame}`);
+};
+
 // 4. capture purity: sequential frames with screenshots vs a fresh load at the same t
 for (const [scene, k] of [[2, 19], [14, 12], [20, 18]]) {
   const fps = 6, url = `${deck}?t=0#scene=${scene}`;
   const at = (p, t) => p.evaluate((t) => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; } window.renderAt(t); }, t);
   const A = (await page(url)).p; await A.waitForFunction(() => window.__ready === true);
   for (let i = 0; i <= k; i++) { await at(A, i / fps); await A.screenshot(); }
-  const a = await A.screenshot(); await A.close();
-  const B = (await page(url)).p; await B.waitForFunction(() => window.__ready === true); await at(B, k / fps); const b = await B.screenshot(); await B.close();
+  const a = await A.screenshot(); const AState = await collectPurityState(A); await A.close();
+  const B = (await page(url)).p; await B.waitForFunction(() => window.__ready === true); await at(B, k / fps); const b = await B.screenshot();
   const same = a.equals(b); if (!same) fails.push(`purity: scene ${scene} frame ${k} differs between paint orders`);
   console.log(`purity scene ${scene} frame ${k}: ${same ? 'identical' : 'DIFFERS'}`);
+  if (!same) { try { await purityDiagnostics(scene, k, AState, B, a, b); } catch (e) { fails.push(`purity diagnostics scene ${scene}: ${e.message}`); } }
+  await B.close();
 }
 
 // 5. still frames stay still: capture at a fixed t, and reduced motion, after waiting (P20 r1: ambient drift)
