@@ -1927,7 +1927,7 @@ SC.fanout={D:['.claude','.codebuddy','.commandcode','.continue','.cortex','.crus
 /* ── 12 · map: shared governance, sovereign products, disposable worktrees ── */
 /* one place, many repos: governance is a shared core every repo can read; the product repos orbit it, each on its own
    CI cadence; worktrees bud off a repo for one task, come back through review, merge and are swept */
-SC.map={GV:['AGENTS.md','.control/','roles/','skills/','research/','docs/'],NM:{3:'apps/holon',14:'apps/maestro-paseo',27:'skills',41:'apps/parallax',55:'core/…',61:'apps/opsis'},
+SC.map={GV:['AGENTS.md','.control/','roles/','skills/','research/','docs/'],NM:{3:'apps/holon',14:'apps/maestro-paseo',27:'apps/paseo',41:'apps/parallax',55:'core/…',61:'apps/opsis'},
  init(){this.k=0;this.hl=null;this.al={gov:new Sp(1),prod:new Sp(1),wt:new Sp(1)};this.b0=new Sp(0);this.b1=new Sp(0);this.b2=new Sp(0);this.tl=0;
   this.R=Array.from({length:66},(_,i)=>({a:-Math.PI/2+i/66*TAU+rnd(-.02,.02),rr:rnd(.96,1.04),per:rnd(2.2,7),ph:rnd(10),sp:new Sp(0)}));
   this.w=[];this.cnt=[0,0,0];this.fl=new Flow(9,()=>{const ks=Object.keys(this.NM);return{i:+ks[rnd(ks.length)|0],u:0,v:rnd(.45,.7)}},6);
@@ -1941,7 +1941,7 @@ SC.map={GV:['AGENTS.md','.control/','roles/','skills/','research/','docs/'],NM:{
  draw(t,dt){const k=this.k,tl=(this.tl+=dt),day=root.dataset.theme==='day',A={};for(const q in this.al)A[q]=this.al[q].set(!this.hl||this.hl===q?1:.2).step(dt,.4);
   const g0=this.b0.step(dt,.6)*A.gov,g1=this.b1.step(dt,.7),g2=this.b2.step(dt,.6),cx=1390,cy=610;
   if(k>=1)this.R.forEach((r,i)=>{if(tl>i*.012)r.sp.set(1)});const S=this.R.map(r=>r.sp.step(dt,.75));
-  /* nested repos: 66 sovereign beads; each pulses green on its own CI cadence, and a hairline ties it to the core */
+  /* product repos: 66 sovereign beads; each pulses green on its own CI cadence, and a hairline ties it to the core */
   if(g1>.01){const ap=A.prod;this.R.forEach((r,i)=>{const s1=S[i];if(s1<.01)return;const[x,y]=this.pos(r,s1);
     ctx.globalAlpha=ap*s1*(day?.16:.08);ctx.strokeStyle=C.blue;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(lerp(cx,x,.36),lerp(cy,y,.36));ctx.lineTo(x,y);ctx.stroke();
     const c=((t+r.ph)%r.per)/r.per,ci=c<.12?Math.sin(c/.12*Math.PI):0;ctx.globalAlpha=ap*s1;rrect(x-7,y-7,14,14,4,ci>.05?C.green:al(C.cyan,.7),al(C.surface,.7),1.2);if(ci>.05)glow(x,y,22,C.green,.55*ci)});
