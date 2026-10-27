@@ -28,7 +28,7 @@ for (const [, id, , count, label, body] of sections) {
     assert(h[1].startsWith("https://"), `${id}: non-HTTPS guide link`);
 }
 assert(
-  !/two-hop|up to four links out|66 nested repos|corpus outgrows the window/.test(
+  !/two-hop|up to four links out|66 nested repos|corpus outgrows the window/i.test(
     src + readFileSync(path.join(root, "script.md"), "utf8"),
   ),
   "stale narrative",
