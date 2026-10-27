@@ -2,6 +2,8 @@
 
 **The workspace is the product.** An offline, animated keynote with 37 scenes, speaker notes, a reading guide, presenter view and deterministic frame capture. Version 1.0.0; implementation tracking: BRO-3533.
 
+[Live presentation](https://broomva.tech/agent-workspaces) · [Reuse and attribution](ATTRIBUTION.md) · [Contributing](CONTRIBUTING.md)
+
 ## Run and check
 
 Open `deck/index.html` directly in a modern Chromium browser or Safari. All fonts are local; viewing needs no install, private workspace, account or network. Use the arrow keys to advance, `G` for the guide, `N` for notes, `L` for the ledger, `P` for presenter view, `T` for day mode, `O` for tone and `M` for still mode. Presenter synchronization uses BroadcastChannel; if your browser isolates local files, serve this directory with a local HTTP server. See [script.md](script.md) for the talk track.
@@ -55,6 +57,6 @@ Paths such as `research/entities/`, `.claude/settings.json`, `docs/knowledge-ind
 
 ## Licensing
 
-Copyright 2026 Broomva. Authored renderer and tooling (`deck/index.html` CSS/JavaScript, `deck/*.mjs`, `scripts/`, package configuration) are licensed under **Apache-2.0**, see [LICENSE-CODE](LICENSE-CODE). Authored talk text, slide prose, notes, guide prose, `script.md`, `resources.md` and documentation are licensed under **CC BY 4.0**, see [LICENSE-CONTENT](LICENSE-CONTENT). Attribute “Agent Workspaces — The workspace is the product, Broomva” and identify modifications. Exported slides/guide carry the talk's CC BY 4.0 content license. These are the owner's documented publication defaults; no applicable first-party license was found at the original deck path.
+Created by **Carlos Escobar (Broomva)**. Copyright 2026 Broomva. Authored renderer and tooling (`deck/index.html` CSS/JavaScript, `deck/*.mjs`, `scripts/`, package configuration) are licensed under **Apache-2.0**, see [LICENSE](LICENSE) (also retained as [LICENSE-CODE](LICENSE-CODE) for existing links). Authored talk text, slide prose, notes, guide prose, `script.md`, `resources.md` and documentation are licensed under **CC BY 4.0**, see [LICENSE-CONTENT](LICENSE-CONTENT). Attribute “Agent Workspaces — The workspace is the product, by Carlos Escobar (Broomva)” and identify modifications. See [ATTRIBUTION.md](ATTRIBUTION.md) for copyable credits and the requirements for each license. Exported slides/guide carry the talk's CC BY 4.0 content license. These are the owner's documented publication defaults; no applicable first-party license was found at the original deck path.
 
 Vendored fonts retain their separate SIL OFL 1.1 licenses. Third-party names, linked material and dependencies retain their owners' rights; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). License texts remain in the source package; the full code license is also embedded in an HTML comment in the distributed deck, and font notices accompany the distributed fonts. The release's `resources.md` carries content attribution and links to the code license.

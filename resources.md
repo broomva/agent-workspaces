@@ -1,6 +1,6 @@
 # Public resources and a starting path
 
-Agent Workspaces — The workspace is the product, by Broomva (2026). Authored talk, guide, script and this resource list: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Attribute the title and Broomva, link the license, and identify changes. Authored renderer/tooling: [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0). Fonts: SIL OFL 1.1; full texts accompany `deck/fonts/`. Third-party material remains under its own terms.
+Agent Workspaces — The workspace is the product, by Carlos Escobar (Broomva), © 2026 Broomva. Authored talk, guide, script and this resource list: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Credit Carlos Escobar (Broomva), retain the supplied title and notices, link the license and original work, and identify changes. Authored renderer/tooling: [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0). Fonts: SIL OFL 1.1; full texts accompany `deck/fonts/`. Third-party material remains under its own terms.
 
 The links below are public primary sources, retrieved 2026-10-27. Their contents and commands can evolve. This package does not install skills, configure hooks or supply the author's private knowledge graph. Local paths and numerical measurements in the deck/script are dated **workspace examples**, not distributed files. Commands that scaffold governance should run in a workspace you control after reading their current help.
 
