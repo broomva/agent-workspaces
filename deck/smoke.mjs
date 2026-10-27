@@ -160,11 +160,16 @@ for (const h of ['#scene=not-a-number&beat=nope', '#scene=999&beat=-4', '#scene=
 for (const scene of [6, 37]) {
   const at = (p, t) => p.evaluate((t) => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; } window.renderAt(t); }, t);
   const count = (p) => p.evaluate(() => [document.querySelectorAll('#stack .plate').length, document.querySelectorAll('#prims .prim').length]);
-  const A = (await page(`${deck}?t=0#scene=${scene}`)).p; await A.waitForFunction(() => window.__ready === true); await at(A, 1); await at(A, .5); const ca = await count(A); const sa = await A.screenshot(); await A.close();
-  const B = (await page(`${deck}?t=0#scene=${scene}`)).p; await B.waitForFunction(() => window.__ready === true); await at(B, .5); const cb = await count(B); const sb = await B.screenshot(); await B.close();
+  const A = (await page(`${deck}?t=0#scene=${scene}`)).p; await A.waitForFunction(() => window.__ready === true); await at(A, 1); await at(A, .5); const ca = await count(A); const sa = await A.screenshot(); let AState;
+  try { AState = await collectPurityState(A); }
+  catch (e) { AState = { diagnosticError: String(e), layers: [], atlases: [] }; }
+  await A.close();
+  const B = (await page(`${deck}?t=0#scene=${scene}`)).p; await B.waitForFunction(() => window.__ready === true); await at(B, .5); const cb = await count(B); const sb = await B.screenshot();
   const ok = JSON.stringify(ca) === JSON.stringify(cb) && (ca[0] === 6 || ca[1] === 20) && sa.equals(sb);
   if (!ok) fails.push(`capture DOM purity scene ${scene}: counts ${JSON.stringify(ca)} vs ${JSON.stringify(cb)}, images ${sa.equals(sb) ? 'same' : 'differ'}`);
-  console.log(`capture DOM purity scene ${scene}: [plates, prims] ${JSON.stringify(ca)}, ${sa.equals(sb) ? 'identical' : 'DIFFERS'}`); }
+  console.log(`capture DOM purity scene ${scene}: [plates, prims] ${JSON.stringify(ca)}, ${sa.equals(sb) ? 'identical' : 'DIFFERS'}`);
+  if (!ok) { try { await purityDiagnostics(scene, 3, AState, B, sa, sb); } catch (e) { fails.push(`DOM purity diagnostics scene ${scene}: ${e.message}`); } }
+  await B.close(); }
 // 13. guide mode keeps the HUD on screen and unoverlapped at laptop widths (Stratum B r3)
 for (const w of [1280, 1440, 1920]) {
   const p = (await page(deck + '#scene=12&guide', { viewport: { width: w, height: Math.round(w * 9 / 16) } })).p; await p.waitForFunction(() => typeof go === 'function' && cur >= 0 && narr === 1); await p.waitForTimeout(700);
