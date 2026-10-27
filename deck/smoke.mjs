@@ -103,7 +103,10 @@ for (const [scene, k] of [[2, 19], [14, 12], [20, 18]]) {
   const at = (p, t) => p.evaluate((t) => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; } window.renderAt(t); }, t);
   const A = (await page(url)).p; await A.waitForFunction(() => window.__ready === true);
   for (let i = 0; i <= k; i++) { await at(A, i / fps); await A.screenshot(); }
-  const a = await A.screenshot(); const AState = await collectPurityState(A); await A.close();
+  const a = await A.screenshot(); let AState;
+  try { AState = await collectPurityState(A); }
+  catch (e) { AState = { diagnosticError: String(e), layers: [], atlases: [] }; }
+  await A.close();
   const B = (await page(url)).p; await B.waitForFunction(() => window.__ready === true); await at(B, k / fps); const b = await B.screenshot();
   const same = a.equals(b); if (!same) fails.push(`purity: scene ${scene} frame ${k} differs between paint orders`);
   console.log(`purity scene ${scene} frame ${k}: ${same ? 'identical' : 'DIFFERS'}`);
