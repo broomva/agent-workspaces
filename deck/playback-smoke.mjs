@@ -51,7 +51,7 @@ try{
  await p.evaluate(()=>go(4,1));assert.equal(await p.evaluate(()=>step),1);assert.equal(await p.evaluate(()=>playback.active),false);
  console.log('playback: native play/pause, speed, captions, manual jumps, slider keyboard, exit and pause stability passed');
  // Finish and replay; opening while paused does not generate audio automatically.
- await p.evaluate(()=>{playback.open();const a=document.querySelector('audio');a.currentTime=a.duration-.15});
+ await p.evaluate(()=>{playback.open();const input=document.querySelector('#playback-seek');input.value=String(document.querySelector('audio').duration-.15);input.dispatchEvent(new Event('input'))});
  await p.waitForFunction(()=>!document.querySelector('audio').seeking);await p.click('#playback-toggle');await p.waitForFunction(()=>document.querySelector('audio').ended);
  assert.equal(await p.evaluate(()=>cur),36);assert.match(await p.$eval('#playback-status',e=>e.textContent),/complete/);
  await p.click('#playback-toggle');await p.waitForFunction(()=>cur===0&&!document.querySelector('audio').paused);await p.click('#playback-close');
