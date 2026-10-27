@@ -17,6 +17,9 @@ const git = (...args) =>
 if (git("status", "--porcelain", "--untracked-files=normal"))
   throw new Error("Commit source changes before building an immutable release");
 const sourceCommit = git("rev-parse", "HEAD");
+const version = JSON.parse(
+  readFileSync(path.join(root, "package.json"), "utf8"),
+).version;
 const dist = path.join(root, "dist");
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(path.join(dist, "deck"), { recursive: true });
@@ -25,7 +28,17 @@ cpSync(path.join(root, "deck/index.html"), path.join(dist, "deck/index.html"));
 cpSync(path.join(root, "deck/fonts"), path.join(dist, "deck/fonts"), {
   recursive: true,
 });
-for (const f of ["script.md", "resources.md"])
+cpSync(path.join(root, "deck/narration"), path.join(dist, "deck/narration"), {
+  recursive: true,
+});
+for (const f of [
+  "script.md",
+  "resources.md",
+  "NOTICE",
+  "LICENSE",
+  "LICENSE-CONTENT",
+  "ATTRIBUTION.md",
+])
   cpSync(path.join(root, f), path.join(dist, f));
 const scratch = mkdtempSync(path.join(dist, ".export-"));
 try {
@@ -66,7 +79,7 @@ const walk = (dir) => {
 walk(dist);
 writeFileSync(
   path.join(dist, "release.json"),
-  `${JSON.stringify({ version: "1.0.0", sourceCommit, upstreamCommit: "ce6f879f1045fae540e5b31ad4f5252737a83801", generatedAt: new Date().toISOString(), files }, null, 2)}\n`,
+  `${JSON.stringify({ version, sourceCommit, upstreamCommit: "ce6f879f1045fae540e5b31ad4f5252737a83801", generatedAt: new Date().toISOString(), files }, null, 2)}\n`,
 );
 execFileSync(process.execPath, [path.join(root, "scripts/verify-dist.mjs")], {
   stdio: "inherit",

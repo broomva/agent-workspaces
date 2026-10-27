@@ -50,7 +50,7 @@ const publicationDenylist = (process.env.PUBLICATION_DENYLIST || "")
   .map((term) => term.trim().toLowerCase())
   .filter(Boolean);
 for (const f of walk(root)) {
-  if (f.endsWith(".woff2")) continue;
+  if (f.endsWith(".woff2") || f.endsWith(".mp3")) continue;
   const text = readFileSync(f, "utf8");
   assert(
     !publicationDenylist.some((term) => text.toLowerCase().includes(term)),
