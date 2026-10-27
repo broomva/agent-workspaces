@@ -1,32 +1,13 @@
-# River narrated edition: credits and reuse
+# River narration credits
 
-Agent Workspaces — The workspace is the product
-Created by Carlos Escobar (Broomva). Copyright 2026 Broomva.
-https://broomva.tech/agent-workspaces
-https://github.com/broomva/agent-workspaces
+Agent Workspaces, created by Carlos Escobar (Broomva). Copyright 2026 Broomva.
 
-This narrated edition adapts the 37scenes and speaker notes of the published
-keynote, source commit 92b530604e0d40e9b0ed3af564a31bc003a2044f. Live-demo
-directions are removed. Its continuous running time does not include the
-live talk's demonstrations, discussion or pauses. Original citations remain
-in the published guide.
+This release includes a continuous 22:59 MP3 with AI-generated English narration using ElevenLabs River stock voice and Eleven v4, selected by the author. It is not a recording or clone of Carlos Escobar.
 
-Narration: AI-generated with ElevenLabs River stock voice and Eleven v4
-(model_id eleven_v4), selected by the author. Native delivery settings match
-the selected voice audition. Generated 2026-10-27 through a paid Creator
-account. This is not a recording or clone of Carlos Escobar. No voice model,
-voice recordings used for cloning, or model weights are distributed.
+The spoken adaptation of the 37 scene notes omits live-demo directions, discussion and presenter pauses. The introduction credits the author in the third person. Scene/reveal timings and generated captions are embedded in `index.html` under `narration-data`. Individual scene MP3s and the standalone transcript are available in the separate [narration supplement](https://github.com/broomva/agent-workspaces/releases/tag/v1.0.0); they are not included in this integrated deck bundle.
 
-The spoken script and Broomva's copyrightable contributions to this narrated
-edition are licensed under Creative Commons Attribution 4.0 International:
-https://creativecommons.org/licenses/by/4.0/
-Credit Carlos Escobar (Broomva), link the original and license, and identify
-your modifications. Third-party voice, model, trademark and personality
-rights are not transferred. Use of ElevenLabs services remains subject to
-their terms: https://elevenlabs.io/terms-of-use
+The script and Broomva's copyrightable contributions to the generated narration audio are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Credit Carlos Escobar (Broomva), link the license, and indicate changes. This grant does not transfer rights to the stock voice, voice model, trademarks or personality. Use of ElevenLabs services is subject to [ElevenLabs terms](https://elevenlabs.io/terms-of-use). No endorsement is implied.
 
-This is a supplemental edition. It does not replace or modify the original
-checksummed v1.0.0 HTML/PDF bundle. The manifest contains scene start times
-and durations. Subtitles use generated speech alignment; they are not a
-manually corrected accessibility transcript. Original MP3 scenes and the
-combined recording are provided for presentation and editing.
+Captions are generated from the provider's alignment, not manually corrected accessibility transcripts. The original guide retains its sources and dated example qualifications.
+
+[Source repository](https://github.com/broomva/agent-workspaces) · [Keynote and guide](https://broomva.tech/agent-workspaces)

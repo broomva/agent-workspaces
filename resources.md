@@ -53,3 +53,7 @@ The catalog selects candidate entities; the agent reads the selected bodies and 
 ## 7. Reproduce this presentation
 
 [Bun installation](https://bun.sh/docs/installation) and [Playwright browser installation](https://playwright.dev/docs/browsers) cover the package prerequisites. Use this repository's pinned lockfile and the README's check/build commands. The offline HTML is the canonical presentation; the slide PDF and reader guide are generated from its final frames.
+
+## Narration
+
+The integrated player uses AI-generated ElevenLabs River / Eleven v4 narration. Script and Broomva’s copyrightable contributions to the audio are CC BY 4.0. Voice/model rights are not transferred. See [narration credits](deck/narration/CREDITS.md) for scope, attribution and service terms.

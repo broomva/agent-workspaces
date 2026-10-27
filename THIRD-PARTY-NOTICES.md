@@ -9,3 +9,7 @@ The deck vendors Latin WOFF2 subsets downloaded from Google Fonts on 2026-10-27.
 The full font notices accompany the generated release fonts as well as the source. Font licenses do not license other presentation material.
 
 Development dependencies Playwright 1.62.0 (Apache-2.0) and Biome 2.3.8 (MIT OR Apache-2.0) are installed by Bun and are not vendored into the offline release. Their packages include their own license notices. Chromium is installed separately by Playwright and retains its own third-party notices. Linked external articles, specifications, projects and product names remain their owners' material; they are referenced rather than copied.
+
+## Narration
+
+The integrated player uses AI-generated ElevenLabs River / Eleven v4 narration. Script and Broomva’s copyrightable contributions to the audio are CC BY 4.0. Voice/model rights are not transferred. See [narration credits](deck/narration/CREDITS.md) for scope, attribution and service terms.
