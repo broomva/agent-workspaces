@@ -63,11 +63,24 @@ try{
  const layout=await p.evaluate(()=>{const r=document.querySelector('#playback').getBoundingClientRect();return {left:r.left,right:r.right,width:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth}});
  assert(layout.left>=0&&layout.right<=layout.width&&!layout.overflow,JSON.stringify(layout));
  await p.click('#playback-toggle');await p.waitForFunction(()=>document.querySelector('audio').currentTime>.1);await p.click('#playback-close');
- // A cold deep link against an HTTP host without Range support must wait for seekability.
- const source=new URL('.',import.meta.url);
- const server=createServer((req,res)=>{try{const name=decodeURIComponent(new URL(req.url,'http://local').pathname).replace(/^\//,'');const bytes=readFileSync(new URL(name||'index.html',source));res.writeHead(200,{'Content-Length':bytes.length,'Content-Type':name.endsWith('.mp3')?'audio/mpeg':name.endsWith('.html')?'text/html':'application/octet-stream'});if(name.endsWith('.mp3')){res.write(bytes.subarray(0,65536));setTimeout(()=>res.end(bytes.subarray(65536)),250)}else res.end(bytes)}catch{res.writeHead(404);res.end()}});
+ // HTTP range delivery is the deployed host contract; exercise a cold mid-deck start.
+ const source=new URL('.',import.meta.url);let ranges=true;
+ const server=createServer((req,res)=>{try{
+  const name=decodeURIComponent(new URL(req.url,'http://local').pathname).replace(/^\//,'');const bytes=readFileSync(new URL(name||'index.html',source));const headers={'Cache-Control':'no-store','Content-Type':name.endsWith('.mp3')?'audio/mpeg':name.endsWith('.html')?'text/html':'application/octet-stream'};
+  const range=ranges&&req.headers.range?.match(/bytes=(\d+)-(\d*)/);let body=bytes;
+  if(range){const start=+range[1],end=range[2]?Math.min(+range[2],bytes.length-1):bytes.length-1;body=bytes.subarray(start,end+1);headers['Content-Range']=`bytes ${start}-${end}/${bytes.length}`}
+  if(ranges)headers['Accept-Ranges']='bytes';headers['Content-Length']=body.length;res.writeHead(range?206:200,headers);
+  if(name.endsWith('.mp3')){res.write(body.subarray(0,65536));setTimeout(()=>res.end(body.subarray(65536)),250)}else res.end(body)
+ }catch{res.writeHead(404);res.end()}});
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
- try{await p.goto(`http://127.0.0.1:${server.address().port}/index.html?play#scene=16&beat=1`);assert.equal(await p.evaluate(()=>cur),15);await p.click('#playback-toggle');await p.waitForFunction(()=>document.querySelector('audio').currentTime>564&&!document.querySelector('audio').muted);assert.equal(await p.evaluate(()=>cur),15);await p.click('#playback-close')}finally{server.closeAllConnections();await new Promise(r=>server.close(r))}
- console.log('playback: cold HTTP deep link waits for seekability and starts at the requested cue');
+ try{
+  const base=`http://127.0.0.1:${server.address().port}/index.html?play`;
+  await p.goto(base+'#scene=16&beat=1');assert.equal(await p.evaluate(()=>cur),15);await p.click('#playback-toggle');
+  await p.waitForFunction(()=>document.querySelector('audio').currentTime>564&&!document.querySelector('audio').muted);assert.equal(await p.evaluate(()=>cur),15);await p.click('#playback-close');
+  ranges=false;await p.goto(base+'&no-range#scene=16&beat=1');await p.click('#playback-toggle');
+  await p.waitForFunction(()=>document.querySelector('audio').paused&&document.querySelector('#playback-status').textContent.includes('cannot seek'));
+  assert.equal(await p.evaluate(()=>cur),15);await p.click('#playback-restart');await p.waitForFunction(()=>cur===0&&!document.querySelector('audio').muted&&document.querySelector('audio').currentTime>.1);await p.click('#playback-close');
+ }finally{server.closeAllConnections();await new Promise(r=>server.close(r))}
+ console.log('playback: cold HTTP deep link starts at its cue; unsupported seeking pauses safely and Restart recovers');
  assert.deepEqual(errors,[]);console.log('playback: mobile bounds and reduced-motion audio passed; no page errors');
 }finally{await browser.close()}

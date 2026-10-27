@@ -2879,7 +2879,7 @@ function createPlayback(){
   function applyPending(){if(pending===null||!audio.readyState)return;const target=pending;
     // A server without byte ranges may expose metadata before the target is seekable.
     const available=target===0||Array.from({length:audio.seekable.length},(_,i)=>[audio.seekable.start(i),audio.seekable.end(i)]).some(([a,b])=>a<=target&&target<=b);
-    if(!available)return;try{audio.currentTime=target;if(!audio.seeking&&Math.abs(audio.currentTime-target)<.05){pending=null;audio.muted=false}}catch{}
+    if(!available){if(audio.readyState>=3){request++;audio.pause();status('This host cannot seek yet. Restart from the beginning, or download the release for offline playback.')}return}try{audio.currentTime=target;if(!audio.seeking&&Math.abs(audio.currentTime-target)<.05){pending=null;audio.muted=false}}catch{}
   }
   function setTime(t){pending=clamp(t,0,data.duration);audio.muted=true;applyPending();sync()}
   function navigate(i,beat){const ch=data.chapters[i],cue=ch.cues.find(c=>c.beat===beat);setTime(ch.startSeconds+(cue?.at||0))}
