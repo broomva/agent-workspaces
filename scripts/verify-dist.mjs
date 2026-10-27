@@ -36,6 +36,12 @@ const actual = walk(root)
 assert.deepEqual(Object.keys(manifest.files).sort(), actual);
 for (const required of [
   "deck/index.html",
+  "deck/narration/river.mp3",
+  "deck/narration/CREDITS.md",
+  "NOTICE",
+  "LICENSE",
+  "LICENSE-CONTENT",
+  "ATTRIBUTION.md",
   "script.md",
   "resources.md",
   "downloads/agent-workspaces-slides.pdf",

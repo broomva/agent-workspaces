@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
+import { createServer } from 'node:http';
 import { chromium } from 'playwright';
 const url=pathToFileURL(new URL('index.html',import.meta.url).pathname).href;
 const html=readFileSync(new URL('index.html',import.meta.url),'utf8');
@@ -62,5 +63,11 @@ try{
  const layout=await p.evaluate(()=>{const r=document.querySelector('#playback').getBoundingClientRect();return {left:r.left,right:r.right,width:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth}});
  assert(layout.left>=0&&layout.right<=layout.width&&!layout.overflow,JSON.stringify(layout));
  await p.click('#playback-toggle');await p.waitForFunction(()=>document.querySelector('audio').currentTime>.1);await p.click('#playback-close');
+ // A cold deep link against an HTTP host without Range support must wait for seekability.
+ const source=new URL('.',import.meta.url);
+ const server=createServer((req,res)=>{try{const name=decodeURIComponent(new URL(req.url,'http://local').pathname).replace(/^\//,'');const bytes=readFileSync(new URL(name||'index.html',source));res.writeHead(200,{'Content-Length':bytes.length,'Content-Type':name.endsWith('.mp3')?'audio/mpeg':name.endsWith('.html')?'text/html':'application/octet-stream'});if(name.endsWith('.mp3')){res.write(bytes.subarray(0,65536));setTimeout(()=>res.end(bytes.subarray(65536)),250)}else res.end(bytes)}catch{res.writeHead(404);res.end()}});
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ try{await p.goto(`http://127.0.0.1:${server.address().port}/index.html?play#scene=16&beat=1`);assert.equal(await p.evaluate(()=>cur),15);await p.click('#playback-toggle');await p.waitForFunction(()=>document.querySelector('audio').currentTime>564&&!document.querySelector('audio').muted);assert.equal(await p.evaluate(()=>cur),15);await p.click('#playback-close')}finally{server.closeAllConnections();await new Promise(r=>server.close(r))}
+ console.log('playback: cold HTTP deep link waits for seekability and starts at the requested cue');
  assert.deepEqual(errors,[]);console.log('playback: mobile bounds and reduced-motion audio passed; no page errors');
 }finally{await browser.close()}

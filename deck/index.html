@@ -396,7 +396,7 @@ body.capture *{box-shadow:none!important}
 .playback-head{justify-content:space-between;font:500 12px/1.3 var(--mono);letter-spacing:.04em}
 #playback .chipbtn{min-height:36px;flex-shrink:0}
 #playback #playback-close{height:28px;min-height:28px;width:28px;padding:0;justify-content:center}
-.playback-head,.playback-options{max-height:50px;opacity:1;transition:max-height .35s,opacity .25s;overflow:hidden}
+.playback-head,.playback-options{max-height:100px;opacity:1;transition:max-height .35s,opacity .25s;overflow:hidden}
 body.playback-running:not(.awake) #playback:not(:focus-within) .playback-head,body.playback-running:not(.awake) #playback:not(:focus-within) .playback-options{max-height:0;opacity:0;pointer-events:none}
 body.playback-running:not(.awake) #playback:not(:focus-within){border-radius:999px}
 body.playback-running:not(.awake):not(:has(#playback:focus-within)) #playback-caption{bottom:158px}
@@ -413,7 +413,7 @@ body.playback-running:not(.awake):not(:has(#playback:focus-within)) #playback-ca
 #playback-caption{left:50%;bottom:244px;transform:translateX(-50%);width:max-content;max-width:min(760px,calc(100vw - 32px));padding:8px 16px;border-radius:14px;background:var(--glass-heavy);color:var(--t1);font:500 clamp(14px,1.2vw,20px)/1.5 var(--sans);text-align:center;pointer-events:none;z-index:12}
 body.capture #playback,body.capture #playback-caption,body.mirror #playback,body.mirror #playback-caption,body.presenter #playback,body.presenter #playback-caption{display:none}
 body.mirror #bPlay,body.presenter #bPlay{display:none}
-@media(max-width:700px){#bPlay .lbl{display:inline}#playback{bottom:76px;padding:8px 12px}#playback-caption{bottom:250px}.playback-row{gap:6px}.playback-options{gap:6px}#playback-title{max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+@media(max-width:700px){#bPlay .lbl{display:inline}#playback{bottom:76px;padding:8px 12px}#playback-caption{bottom:290px}.playback-row{gap:6px}.playback-options{gap:6px}#playback-title{max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
 
 </style>
 </head>
@@ -2876,7 +2876,12 @@ function createPlayback(){
     const cue=cc&&!audio.ended?data.captions.find(c=>c[0]<=t&&t<c[1]):null,text=cue?cue[2]:'';
     if(text!==lastCaption){lastCaption=text;caption.textContent=text}caption.hidden=!text;
   }
-  function setTime(t){pending=clamp(t,0,data.duration);try{audio.currentTime=pending;if(audio.readyState>0)pending=null}catch{}sync()}
+  function applyPending(){if(pending===null||!audio.readyState)return;const target=pending;
+    // A server without byte ranges may expose metadata before the target is seekable.
+    const available=target===0||Array.from({length:audio.seekable.length},(_,i)=>[audio.seekable.start(i),audio.seekable.end(i)]).some(([a,b])=>a<=target&&target<=b);
+    if(!available)return;try{audio.currentTime=target;if(!audio.seeking&&Math.abs(audio.currentTime-target)<.05){pending=null;audio.muted=false}}catch{}
+  }
+  function setTime(t){pending=clamp(t,0,data.duration);audio.muted=true;applyPending();sync()}
   function navigate(i,beat){const ch=data.chapters[i],cue=ch.cues.find(c=>c.beat===beat);setTime(ch.startSeconds+(cue?.at||0))}
   function open(){if(api.active)return;api.active=true;box.hidden=false;$('#bPlay').setAttribute('aria-expanded','true');lastScene=-1;
     if(!audio.getAttribute('src'))audio.src=data.audio;
@@ -2893,7 +2898,8 @@ function createPlayback(){
   seek.oninput=()=>{setTime(Number(seek.value));wake()};
   $('#playback-rate').onchange=e=>{audio.playbackRate=Number(e.target.value)};
   $('#playback-cc').onclick=()=>{cc=!cc;$('#playback-cc').setAttribute('aria-pressed',cc);sync()};
-  audio.addEventListener('loadedmetadata',()=>{if(pending!==null)setTime(pending)});
+  for(const event of ['loadedmetadata','canplay','progress'])audio.addEventListener(event,applyPending);
+  audio.addEventListener('seeked',()=>{if(pending!==null&&Math.abs(audio.currentTime-pending)<.05){pending=null;audio.muted=false}sync()});
   for(const event of ['timeupdate','seeked','ratechange'])audio.addEventListener(event,sync);
   for(const event of ['play','pause','ended'])audio.addEventListener(event,buttons);
   audio.addEventListener('playing',()=>status(''));
