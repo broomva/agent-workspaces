@@ -48,7 +48,10 @@ try{
  await p.waitForFunction(()=>cur===1&&step===1);await p.keyboard.press('Space');
  const paused=await p.evaluate(()=>({cur,step,time:document.querySelector('audio').currentTime}));await p.waitForTimeout(300);
  const still=await p.evaluate(()=>({cur,step,time:document.querySelector('audio').currentTime}));assert.deepEqual(still,paused);
- await p.keyboard.press('Escape');assert(await p.$eval('audio',a=>a.paused));assert(await p.$eval('#playback',e=>e.hidden));
+ // Sweep Exit across every focus kind in the actual player, especially the scrubber.
+ for(const target of ['#playback-seek','#playback-rate','#playback-cc','#playback-toggle','#playback-settings']){
+  await p.evaluate(()=>playback.open());await p.focus(target);await p.keyboard.press('Escape');assert.equal(await p.evaluate(()=>playback.active),false,`Escape must exit from ${target}`);assert(await p.$eval('audio',a=>a.paused));assert(await p.$eval('#playback',e=>e.hidden));
+ }
  await p.evaluate(()=>go(4,1));assert.equal(await p.evaluate(()=>step),1);assert.equal(await p.evaluate(()=>playback.active),false);
  console.log('playback: native play/pause, speed, captions, manual jumps, slider keyboard, exit and pause stability passed');
  // Finish and replay; opening while paused does not generate audio automatically.

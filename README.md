@@ -1,6 +1,6 @@
 # Agent Workspaces
 
-**The workspace is the product.** An offline, animated keynote with 37 scenes, speaker notes, a reading guide, presenter view and deterministic frame capture. Version 1.0.0; implementation tracking: BRO-3533.
+**The workspace is the product.** An offline, animated keynote with 37 scenes, speaker notes, a reading guide, presenter view and deterministic frame capture. Version 1.1.0; implementation tracking: BRO-3533.
 
 [Live presentation](https://broomva.tech/agent-workspaces) · [Reuse and attribution](ATTRIBUTION.md) · [Contributing](CONTRIBUTING.md)
 
@@ -63,7 +63,7 @@ Vendored fonts retain their separate SIL OFL 1.1 licenses. Third-party names, li
 
 ## Narrated play mode
 
-Choose **Play keynote** (or press **A**) to hear the selected River / Eleven v4 narration and let audio time drive the scenes and reveals. Space pauses or resumes; the timeline, scene dots, ledger, arrow keys and reveal controls seek to their matching narration cue. Change speed without drifting from the visuals. **CC** toggles generated subtitles. Exit returns to manual exploration.
+Choose **Play keynote** (or press **A**) to hear the selected River / Eleven v4 narration and let audio time drive the scenes and reveals. Space pauses or resumes; the timeline, ledger, arrow keys and visible reveal controls seek to their matching narration cue. Change speed without drifting from the visuals. **CC** toggles generated subtitles. Exit returns to manual exploration.
 
 A `?play` link opens the player, with a user click required for sound. The 37-scene narrated adaptation lasts 22:59; the live talk estimate includes demonstrations and discussion. Audio and captions are bundled locally, so an extracted release works offline. Capture, PDF, mirror and presenter views do not load or play audio.
 
