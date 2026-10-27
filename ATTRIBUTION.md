@@ -46,3 +46,7 @@ and [deck/fonts/NOTICE.md](deck/fonts/NOTICE.md).
 External articles, libraries and product names retain their original terms.
 Source links are citations, not claims that those authors created or endorse
 this presentation. Contributors retain copyright in their own contributions.
+
+## Narration
+
+The integrated player uses AI-generated ElevenLabs River / Eleven v4 narration. Script and Broomva’s copyrightable contributions to the audio are CC BY 4.0. Voice/model rights are not transferred. See [narration credits](deck/narration/CREDITS.md) for scope, attribution and service terms.

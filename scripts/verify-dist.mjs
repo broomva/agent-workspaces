@@ -14,7 +14,10 @@ assert.deepEqual(Object.keys(manifest).sort(), [
   "upstreamCommit",
   "version",
 ]);
-assert.equal(manifest.version, "1.0.0");
+assert.equal(
+  manifest.version,
+  JSON.parse(readFileSync(path.join(root, "../package.json"), "utf8")).version,
+);
 assert(/^[a-f0-9]{40}$/.test(manifest.sourceCommit));
 assert.equal(
   manifest.upstreamCommit,
@@ -33,6 +36,12 @@ const actual = walk(root)
 assert.deepEqual(Object.keys(manifest.files).sort(), actual);
 for (const required of [
   "deck/index.html",
+  "deck/narration/river.mp3",
+  "deck/narration/CREDITS.md",
+  "NOTICE",
+  "LICENSE",
+  "LICENSE-CONTENT",
+  "ATTRIBUTION.md",
   "script.md",
   "resources.md",
   "downloads/agent-workspaces-slides.pdf",
@@ -41,7 +50,7 @@ for (const required of [
   assert(actual.includes(required));
 for (const f of actual) {
   assert(
-    /^(deck\/(index\.html|preview\.webp|fonts\/[^/]+)|script\.md|resources\.md|downloads\/agent-workspaces-(slides|guide)\.pdf)$/.test(
+    /^(deck\/(index\.html|preview\.webp|fonts\/[^/]+|narration\/(river\.mp3|CREDITS\.md))|script\.md|resources\.md|NOTICE|LICENSE|LICENSE-CONTENT|ATTRIBUTION\.md|downloads\/agent-workspaces-(slides|guide)\.pdf)$/.test(
       f,
     ),
     `unexpected output ${f}`,

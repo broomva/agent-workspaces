@@ -1,6 +1,6 @@
 # Agent Workspaces
 
-**The workspace is the product.** An offline, animated keynote with 37 scenes, speaker notes, a reading guide, presenter view and deterministic frame capture. Version 1.0.0; implementation tracking: BRO-3533.
+**The workspace is the product.** An offline, animated keynote with 37 scenes, speaker notes, a reading guide, presenter view and deterministic frame capture. Version 1.1.0; implementation tracking: BRO-3533.
 
 [Live presentation](https://broomva.tech/agent-workspaces) · [Reuse and attribution](ATTRIBUTION.md) · [Contributing](CONTRIBUTING.md)
 
@@ -60,3 +60,13 @@ Paths such as `research/entities/`, `.claude/settings.json`, `docs/knowledge-ind
 Created by **Carlos Escobar (Broomva)**. Copyright 2026 Broomva. Authored renderer and tooling (`deck/index.html` CSS/JavaScript, `deck/*.mjs`, `scripts/`, package configuration) are licensed under **Apache-2.0**, see [LICENSE](LICENSE) (also retained as [LICENSE-CODE](LICENSE-CODE) for existing links). Authored talk text, slide prose, notes, guide prose, `script.md`, `resources.md` and documentation are licensed under **CC BY 4.0**, see [LICENSE-CONTENT](LICENSE-CONTENT). Attribute “Agent Workspaces — The workspace is the product, by Carlos Escobar (Broomva)” and identify modifications. See [ATTRIBUTION.md](ATTRIBUTION.md) for copyable credits and the requirements for each license. Exported slides/guide carry the talk's CC BY 4.0 content license. These are the owner's documented publication defaults; no applicable first-party license was found at the original deck path.
 
 Vendored fonts retain their separate SIL OFL 1.1 licenses. Third-party names, linked material and dependencies retain their owners' rights; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). License texts remain in the source package; the full code license is also embedded in an HTML comment in the distributed deck, and font notices accompany the distributed fonts. The release's `resources.md` carries content attribution and links to the code license.
+
+## Narrated play mode
+
+Choose **Play keynote** (or press **A**) to hear the selected River / Eleven v4 narration and let audio time drive the scenes and reveals. Space pauses or resumes; the timeline, ledger, arrow keys and visible reveal controls seek to their matching narration cue. Change speed without drifting from the visuals. **CC** toggles generated subtitles. Exit returns to manual exploration.
+
+A `?play` link opens the player, with a user click required for sound. The 37-scene narrated adaptation lasts 22:59; the live talk estimate includes demonstrations and discussion. Audio and captions are bundled locally, so an extracted release works offline. Capture, PDF, mirror and presenter views do not load or play audio.
+
+Cue points use the published narration's character alignment with a 350 ms visual lead for the existing reveal springs. Some manual beats are revisited out of numerical order to follow the spoken adaptation. Media time, rather than elapsed wall time, governs navigation, including after buffering and returning from a background tab. See `deck/narration/CREDITS.md` for AI narration disclosure and attribution.
+
+Narration audio: the script and Broomva’s copyrightable contributions to `deck/narration/river.mp3` are CC BY 4.0. The River stock voice and model rights remain outside that grant; see [narration credits](deck/narration/CREDITS.md). Space also pauses while the timeline has focus. Arrow keys on a focused timeline retain native seeking; outside it they navigate deck beats. Playback settings (⋯) expose speed, captions, restart and exit; Escape exits directly.
