@@ -11,7 +11,7 @@ const here = path.dirname(fileURLToPath(import.meta.url)), FPS = 30;
 const OUT = mkdtempSync(path.join(os.tmpdir(), 'aw-video-smoke-'));
 const fail = m => { console.error(m); console.error(`(output kept in ${OUT})`); process.exit(1) };
 for (const [aspect, w, h] of [['16x9', 1920, 1080], ['9x16', 1080, 1920]]) {
-  const r = spawnSync('bun', [path.join(here, 'video.mjs'), '--smoke', '--workers', '1', '--aspect', aspect, '--out', OUT], { stdio: 'inherit' });
+  const r = spawnSync('bun', [path.join(here, 'video.mjs'), '--smoke', '--workers', '1', '--aspect', aspect, '--captions', 'plain', '--out', OUT], { stdio: 'inherit' });
   if (r.status !== 0) fail(`renderer failed (${aspect})`);
   const data = JSON.parse(readFileSync(path.join(OUT, 'narration.json'), 'utf8'));
   const i = data.chapters.findIndex(c => c.scene === 4), ch = data.chapters[i];
