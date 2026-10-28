@@ -57,7 +57,8 @@ if (SCENES) {
   queue = [ch.find(c => c.scene === 4) || ch[0]];
 }
 
-queue = queue.filter(c => !existsSync(path.join(OUT, 'scenes', `s${String(c.scene).padStart(2, '0')}-${c.id}.mp4`)));
+const SFX = ASPECT === '16x9' ? '' : `-${ASPECT}`;
+queue = queue.filter(c => !existsSync(path.join(OUT, 'scenes', `s${String(c.scene).padStart(2, '0')}-${c.id}${SFX}.mp4`)));
 const t0 = Date.now();
 
 async function work() {
@@ -80,24 +81,32 @@ async function work() {
       }
     }, c.cues);
     const sn = String(c.scene).padStart(2, '0');
-    const silent = path.join(OUT, 'scenes', `s${sn}-${c.id}-silent.mp4`), pSil = silent.replace('.mp4', '.part.mp4');
+    const sfx = ASPECT === '16x9' ? '' : `-${ASPECT}`;
+    const silent = path.join(OUT, 'scenes', `s${sn}-${c.id}${sfx}-silent.mp4`), pSil = silent.replace('.mp4', '.part.mp4');
     
+    // vertical/feed: the 16:9 frame full-width on a blurred Midnight fill, kicker + title above, captions below
     const vf = [];
     if (ASPECT !== '16x9') {
-      const W = 1080, H = ASPECT === '9x16' ? 1920 : 1350;
-      const sCaptions = data.captions.filter(cap => cap[1] > c.start && cap[0] < c.end).map((cap, i) => 
-        `${i + 1}\n${ts(Math.max(0, cap[0] - c.start))} --> ${ts(Math.min(c.end - c.start, cap[1] - c.start))}\n${cap[2]}\n`).join('\n');
-      const srtP = path.join(OUT, 'scenes', `s${sn}-${c.id}.srt`);
-      writeFileSync(srtP, sCaptions + '\n');
-      const esc = s => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/:/g, '\\:');
-      vf.push(`split=2[bg][fg]`);
-      vf.push(`[bg]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=black@0.6:t=fill[bg2]`);
-      vf.push(`[fg]scale=${W}:${H}:force_original_aspect_ratio=decrease[fg2]`);
-      vf.push(`[bg2][fg2]overlay=(W-w)/2:(H-h)/2[comp]`);
-      const fontFile = path.join(here, 'fonts', 'Raleway-300.woff2').replace(/\\/g, '/');
-      vf.push(`[comp]drawtext=fontfile='${fontFile}':text='${esc(c.title)}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=120[comp2]`);
-      const fontsDir = path.join(here, 'fonts').replace(/\\/g, '/');
-      vf.push(`[comp2]subtitles=filename='${srtP.replace(/\\/g, '/')}':fontsdir='${fontsDir}':force_style='Fontname=Inter\\,Fontsize=26\\,Alignment=2\\,MarginV=120'`);
+      const W = 1080, H = ASPECT === '9x16' ? 1920 : 1350, tall = ASPECT === '9x16';
+      const FH = Math.round(W * 9 / 16), FY = tall ? 600 : 300, CAP = FY + FH + (tall ? 70 : 40);
+      const assT = s => { const ms = Math.max(0, Math.round(s * 100)); return `${Math.floor(ms / 360000)}:${String(Math.floor(ms / 6000) % 60).padStart(2, '0')}:${String(Math.floor(ms / 100) % 60).padStart(2, '0')}.${String(ms % 100).padStart(2, '0')}` };
+      const lines = data.captions.filter(cap => cap[1] > c.start && cap[0] < c.end).map(cap =>
+        `Dialogue: 0,${assT(cap[0] - c.start)},${assT(Math.min(c.end, cap[1]) - c.start)},Cap,,0,0,0,,${cap[2].replace(/[{}\\]/g, '').replace(/\n/g, ' ')}`);
+      const assP = path.join(OUT, 'scenes', `s${sn}-${c.id}-${ASPECT}.ass`);
+      writeFileSync(assP, `[Script Info]\nScriptType: v4.00+\nPlayResX: ${W}\nPlayResY: ${H}\nWrapStyle: 0\n\n[V4+ Styles]\n` +
+        'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n' +
+        `Style: Cap,Inter,${tall ? 60 : 46},&H00FFFFFF,&H00FFFFFF,&H00180B05,&H00000000,0,0,0,0,100,100,0,0,1,2,0,8,80,80,${CAP},1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n${lines.join('\n')}\n`);
+      const esc = s => s.replace(/\\/g, '\\\\').replace(/'/g, "\u2019").replace(/:/g, '\\:').replace(/%/g, '\\%');
+      const font = f => path.join(here, 'fonts', f).replace(/\\/g, '/');
+      const kicker = `AGENT WORKSPACES  ·  PART ${c.scene}/${data.chapters.length}`;
+      vf.push('split=2[bg][fg]');
+      vf.push(`[bg]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=0x050B1A@0.72:t=fill[bg2]`);
+      vf.push(`[fg]scale=${W}:${FH}[fg2]`);
+      vf.push(`[bg2][fg2]overlay=0:${FY}[comp]`);
+      vf.push(`[comp]drawtext=fontfile='${font('JetBrainsMono-400.woff2')}':text='${esc(kicker)}':fontcolor=0x5AA0FF:fontsize=${tall ? 30 : 24}:x=(w-text_w)/2:y=${FY - (tall ? 210 : 150)},` +
+        `drawtext=fontfile='${font('Raleway-300.woff2')}':text='${esc(c.title)}':fontcolor=white:fontsize=${tall ? 64 : 50}:x=max(40\\,(w-text_w)/2):y=${FY - (tall ? 150 : 105)},` +
+        `drawtext=fontfile='${font('JetBrainsMono-400.woff2')}':text='broomva.tech/agent-workspaces':fontcolor=0x8FA3C7:fontsize=${tall ? 30 : 24}:x=(w-text_w)/2:y=${H - (tall ? 150 : 70)}[comp2]`);
+      vf.push(`[comp2]ass=filename='${assP.replace(/\\/g, '/')}':fontsdir='${path.join(here, 'fonts').replace(/\\/g, '/')}'`);
     }
 
     const args = ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-'];
@@ -114,9 +123,9 @@ async function work() {
     ff.stdin.end(); await done;
     renameSync(pSil, silent);
 
-    const final = path.join(OUT, 'scenes', `s${sn}-${c.id}.mp4`), pFin = final.replace('.mp4', '.part.mp4');
+    const final = path.join(OUT, 'scenes', `s${sn}-${c.id}${sfx}.mp4`), pFin = final.replace('.mp4', '.part.mp4');
     const aArgs = ['-y', '-loglevel', 'error', '-i', silent, '-ss', String(c.start), '-t', String(c.end - c.start), 
-      '-i', path.join(here, data.audio), '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', pFin];
+      '-i', path.join(here, data.audio), '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', pFin];
     const fa = spawn('ffmpeg', aArgs, { stdio: ['ignore', 'inherit', 'inherit'] });
     await new Promise((ok, ko) => fa.on('close', code => code ? ko(new Error('ffmpeg a ' + code)) : ok()));
     renameSync(pFin, final);
@@ -128,15 +137,15 @@ async function work() {
 await Promise.all(Array.from({ length: WORKERS }, work));
 await b.close();
 
-if (!NO_MASTER && !SCENES && !SMOKE) {
+if (!NO_MASTER && !SCENES && !SMOKE && ASPECT === '16x9') {
   if (ch.every(c => existsSync(path.join(OUT, 'scenes', `s${String(c.scene).padStart(2, '0')}-${c.id}-silent.mp4`)))) {
     const list = path.join(OUT, 'concat.txt');
     writeFileSync(list, ch.map(c => `file 'scenes/s${String(c.scene).padStart(2, '0')}-${c.id}-silent.mp4'\n`).join(''));
     const mast = path.join(OUT, 'agent-workspaces-keynote.mp4'), pMast = mast.replace('.mp4', '.part.mp4');
     const mArgs = ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-i', path.join(here, data.audio),
       '-i', path.join(OUT, 'chapters.txt'), '-i', path.join(OUT, 'agent-workspaces-keynote.srt'),
-      '-map_metadata', '2', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-c:s', 'mov_text',
-      '-metadata', 'title=Agent Workspaces', '-metadata', `comment=${data.disclosure}`, '-movflags', '+faststart', pMast];
+      '-map', '0:v', '-map', '1:a', '-map', '3:s', '-map_metadata', '2', '-map_chapters', '2', '-metadata:s:s:0', 'language=eng', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-c:s', 'mov_text',
+      '-metadata', 'title=Agent Workspaces — The workspace is the product', '-metadata', `comment=${data.disclosure}`, '-movflags', '+faststart', pMast];
     const fm = spawn('ffmpeg', mArgs, { stdio: ['ignore', 'inherit', 'inherit'] });
     await new Promise((ok, ko) => fm.on('close', code => code ? ko(new Error('ffmpeg m ' + code)) : ok()));
     renameSync(pMast, mast);
