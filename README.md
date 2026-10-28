@@ -19,6 +19,19 @@ bun run smoke
 
 Playwright is pinned to **1.62.0**. Linux may also require `bunx playwright install-deps chromium`. Browser smoke covers all scenes/beats, reduced motion, capture purity, navigation, presenter synchronization, guide layout and rendering fallbacks. Performance results depend on the host. `check` is static and standalone: it never reads private workspace files, installed skills or a knowledge graph. Publication reviewers can supply private scan terms via the comma-separated `PUBLICATION_DENYLIST` environment variable; the repository stores no private denylist. General secret/path scanning always runs. Biome checks the package tooling; the inherited renderer is intentionally kept in its original style.
 
+## Render the video
+
+`deck/video.mjs` renders the narrated keynote offline from capture mode. Each 30 fps frame is a pure function of its time, and beats switch at the narration's cue times. It needs `ffmpeg`/`ffprobe` with `libass` and `libx264` on the path.
+
+```sh
+bun run video --out out                        # every scene + the master (about 40 min with 7 workers)
+bun run video --out out --scenes 5-9 --aspect 9x16 --workers 4
+```
+
+`scenes/sNN-<id>.mp4` is one scene with its slice of the narration. `-silent.mp4` is the same clip without audio. Vertical (`9x16`, 1080×1920) and feed (`4x5`, 1080×1350) variants add an `-<aspect>` suffix: the 16:9 frame sits full width on a blurred Midnight fill, with the part number and title above it, burned-in captions below it, and the site URL at the foot. When every 16:9 scene exists, `agent-workspaces-keynote.mp4` is muxed with the AAC narration, mov_text captions, 37 chapters and the AI-narration disclosure. The `.srt`, `chapters.txt` and `youtube-chapters.txt` are written next to it. Runs resume: finished scenes are skipped.
+
+`bun run smoke:video` renders scene 4 at 16:9 and 9:16 into a temp dir and checks frame count against the chapter length, A/V length and resolution (about a minute). It sits outside `bun run smoke` because CI does not provide ffmpeg.
+
 ## Build an immutable release
 
 Commit the source first, then run:
