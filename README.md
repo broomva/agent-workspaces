@@ -19,6 +19,16 @@ bun run smoke
 
 Playwright is pinned to **1.62.0**. Linux may also require `bunx playwright install-deps chromium`. Browser smoke covers all scenes/beats, reduced motion, capture purity, navigation, presenter synchronization, guide layout and rendering fallbacks. Performance results depend on the host. `check` is static and standalone: it never reads private workspace files, installed skills or a knowledge graph. Publication reviewers can supply private scan terms via the comma-separated `PUBLICATION_DENYLIST` environment variable; the repository stores no private denylist. General secret/path scanning always runs. Biome checks the package tooling; the inherited renderer is intentionally kept in its original style.
 
+## Render the video
+
+The offline video renderer produces per-chapter clips and a concatenated master with embedded chapters, subtitles, and audio. It captures the deck exactly as it appears in the browser, driven by narration cues. The renderer requires `ffmpeg` (with `libass` and `libx264`) available on the system path.
+
+```sh
+bun run video --out out [--aspect 16x9|9x16|4x5] [--scenes 1,5-9] [--workers 4] [--fps 30] [--no-master]
+```
+
+Outputs will be saved in the specified `--out` directory, including the final `agent-workspaces-keynote.mp4`, `agent-workspaces-keynote.srt`, YouTube chapter markers, and individual scenes in the `scenes/` subdirectory. Vertical aspects (`9x16` and `4x5`) produce blurred backgrounds, burned-in subtitles, and a centered 16:9 inner frame.
+
 ## Build an immutable release
 
 Commit the source first, then run:
