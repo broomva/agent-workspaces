@@ -57,8 +57,10 @@ if (SCENES) {
   queue = [ch.find(c => c.scene === 4) || ch[0]];
 }
 
-const SFX = ASPECT === '16x9' ? '' : `-${ASPECT}`;
-queue = queue.filter(c => !existsSync(path.join(OUT, 'scenes', `s${String(c.scene).padStart(2, '0')}-${c.id}${SFX}.mp4`)));
+// render settings are part of a clip's name, so a run with other settings never reuses stale clips
+const SFX = (ASPECT === '16x9' ? '' : `-${ASPECT}`) + (FPS === 30 ? '' : `-${FPS}fps`);
+const clip = (c, tail = '') => path.join(OUT, 'scenes', `s${String(c.scene).padStart(2, '0')}-${c.id}${SFX}${tail}.mp4`);
+queue = queue.filter(c => !existsSync(clip(c)));
 const t0 = Date.now();
 
 async function work() {
@@ -81,8 +83,7 @@ async function work() {
       }
     }, c.cues);
     const sn = String(c.scene).padStart(2, '0');
-    const sfx = ASPECT === '16x9' ? '' : `-${ASPECT}`;
-    const silent = path.join(OUT, 'scenes', `s${sn}-${c.id}${sfx}-silent.mp4`), pSil = silent.replace('.mp4', '.part.mp4');
+    const silent = clip(c, '-silent'), pSil = silent.replace('.mp4', '.part.mp4');
     
     // vertical/feed: the 16:9 frame full-width on a blurred Midnight fill, kicker + title above, captions below
     const vf = [];
@@ -123,7 +124,7 @@ async function work() {
     ff.stdin.end(); await done;
     renameSync(pSil, silent);
 
-    const final = path.join(OUT, 'scenes', `s${sn}-${c.id}${sfx}.mp4`), pFin = final.replace('.mp4', '.part.mp4');
+    const final = clip(c), pFin = final.replace('.mp4', '.part.mp4');
     const aArgs = ['-y', '-loglevel', 'error', '-i', silent, '-ss', String(c.start), '-t', String(c.end - c.start), 
       '-i', path.join(here, data.audio), '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', pFin];
     const fa = spawn('ffmpeg', aArgs, { stdio: ['ignore', 'inherit', 'inherit'] });
@@ -138,9 +139,9 @@ await Promise.all(Array.from({ length: WORKERS }, work));
 await b.close();
 
 if (!NO_MASTER && !SCENES && !SMOKE && ASPECT === '16x9') {
-  if (ch.every(c => existsSync(path.join(OUT, 'scenes', `s${String(c.scene).padStart(2, '0')}-${c.id}-silent.mp4`)))) {
+  if (ch.every(c => existsSync(clip(c, '-silent')))) {
     const list = path.join(OUT, 'concat.txt');
-    writeFileSync(list, ch.map(c => `file 'scenes/s${String(c.scene).padStart(2, '0')}-${c.id}-silent.mp4'\n`).join(''));
+    writeFileSync(list, ch.map(c => `file '${clip(c, '-silent')}'\n`).join(''));
     const mast = path.join(OUT, 'agent-workspaces-keynote.mp4'), pMast = mast.replace('.mp4', '.part.mp4');
     const mArgs = ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-i', path.join(here, data.audio),
       '-i', path.join(OUT, 'chapters.txt'), '-i', path.join(OUT, 'agent-workspaces-keynote.srt'),
