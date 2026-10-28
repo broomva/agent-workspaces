@@ -28,7 +28,9 @@ bun run video --out out                        # every scene + the master (about
 bun run video --out out --scenes 5-9 --aspect 9x16 --workers 4
 ```
 
-`scenes/sNN-<id>.mp4` is one scene with its slice of the narration. `-silent.mp4` is the same clip without audio. Vertical (`9x16`, 1080×1920) and feed (`4x5`, 1080×1350) variants add an `-<aspect>` suffix: the 16:9 frame sits full width on a blurred Midnight fill, with the part number and title above it, burned-in captions below it, and the site URL at the foot. When every 16:9 scene exists, `agent-workspaces-keynote.mp4` is muxed with the AAC narration, mov_text captions, 37 chapters and the AI-narration disclosure. The `.srt`, `chapters.txt` and `youtube-chapters.txt` are written next to it. Runs resume: finished scenes are skipped.
+`scenes/sNN-<id>.mp4` is one scene with its slice of the narration. `-silent.mp4` is the same clip without audio. Vertical (`9x16`, 1080×1920) and feed (`4x5`, 1080×1350) variants add an `-<aspect>` suffix: rather than a flat scaled frame, the layout composites the visual and text elements vertically. The animation sits on top, the text cards sit below, and OpenCaptions CWI captions (by default) sit in the bottom safe area. A part number badge sits in the top corner. When every 16:9 scene exists, `agent-workspaces-keynote.mp4` is muxed with the AAC narration, mov_text captions, 37 chapters and the AI-narration disclosure. The `.srt`, `chapters.txt` and `youtube-chapters.txt` are written next to it. Runs resume: finished scenes are skipped.
+
+You can preview the vertical crop layouts for all scenes without full rendering by using the `--proof` flag (e.g. `bun run video --proof --aspect 9x16`). CWI captions require the `opencaptions` CLI; the renderer falls back to plain ASS captions if it is unavailable (or if `--captions plain` is passed).
 
 `bun run smoke:video` renders scene 4 at 16:9 and 9:16 into a temp dir and checks frame count against the chapter length, A/V length and resolution (about a minute). It sits outside `bun run smoke` because CI does not provide ffmpeg.
 

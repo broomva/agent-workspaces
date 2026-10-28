@@ -5,8 +5,8 @@
 
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { mkdirSync, existsSync, writeFileSync, renameSync } from 'node:fs';
-import { spawn } from 'node:child_process';
+import { mkdirSync, existsSync, writeFileSync, readFileSync, renameSync } from 'node:fs';
+import { spawn, spawnSync } from 'node:child_process';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -17,7 +17,21 @@ const argv = process.argv.slice(2), arg = (k, def) => { const i = argv.indexOf(k
 const OUT = path.resolve(arg('--out', 'out')), WORKERS = +arg('--workers', '4'), FPS = +arg('--fps', '30');
 const ASPECT = arg('--aspect', '16x9'), SCENES = arg('--scenes', ''), SMOKE = argv.includes('--smoke');
 const NO_MASTER = argv.includes('--no-master');
+const PROOF = argv.includes('--proof');
+const CAPTIONS = arg('--captions', ASPECT === '16x9' ? 'none' : 'cwi');
 mkdirSync(path.join(OUT, 'scenes'), { recursive: true });
+
+const SAFE = {
+  // 9x16 (1080x1920) for IG Reels/TikTok: top 250 px, bottom 480 px, left 64 px, right 150 px (right action rail)
+  '9x16': { t: 250, b: 480, l: 64, r: 150 },
+  // 4x5 (1080x1350) for feeds: 60 px on every side
+  '4x5': { t: 60, b: 60, l: 60, r: 60 }
+};
+
+let manifest = { "default": { "mode": "full" } };
+if (existsSync(path.join(here, 'vertical.json'))) {
+  manifest = JSON.parse(readFileSync(path.join(here, 'vertical.json'), 'utf8'));
+}
 
 const deck = pathToFileURL(path.join(here, 'index.html')).href;
 const b = await chromium.launch({ args: ['--disable-gpu-vsync'] });
@@ -85,33 +99,160 @@ async function work() {
     const sn = String(c.scene).padStart(2, '0');
     const silent = clip(c, '-silent'), pSil = silent.replace('.mp4', '.part.mp4');
     
-    // vertical/feed: the 16:9 frame full-width on a blurred Midnight fill, kicker + title above, captions below
     const vf = [];
+    let assP = null;
     if (ASPECT !== '16x9') {
       const W = 1080, H = ASPECT === '9x16' ? 1920 : 1350, tall = ASPECT === '9x16';
-      const FH = Math.round(W * 9 / 16), FY = tall ? 600 : 300, CAP = FY + FH + (tall ? 70 : 40);
-      const assT = s => { const ms = Math.max(0, Math.round(s * 100)); return `${Math.floor(ms / 360000)}:${String(Math.floor(ms / 6000) % 60).padStart(2, '0')}:${String(Math.floor(ms / 100) % 60).padStart(2, '0')}.${String(ms % 100).padStart(2, '0')}` };
-      const lines = data.captions.filter(cap => cap[1] > c.start && cap[0] < c.end).map(cap =>
-        `Dialogue: 0,${assT(cap[0] - c.start)},${assT(Math.min(c.end, cap[1]) - c.start)},Cap,,0,0,0,,${cap[2].replace(/[{}\\]/g, '').replace(/\n/g, ' ')}`);
-      const assP = path.join(OUT, 'scenes', `s${sn}-${c.id}-${ASPECT}.ass`);
-      writeFileSync(assP, `[Script Info]\nScriptType: v4.00+\nPlayResX: ${W}\nPlayResY: ${H}\nWrapStyle: 0\n\n[V4+ Styles]\n` +
-        'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n' +
-        `Style: Cap,Inter,${tall ? 60 : 46},&H00FFFFFF,&H00FFFFFF,&H00180B05,&H00000000,0,0,0,0,100,100,0,0,1,2,0,8,80,80,${CAP},1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n${lines.join('\n')}\n`);
+      const S = SAFE[ASPECT];
+      const SW = W - S.l - S.r;
+      const SH = H - S.t - S.b;
+      const CAP_H = tall ? 230 : 150;
+      const SLOTS_H = SH - CAP_H;
+      const SLOTS_Y = S.t;
+
+      const layout = manifest[c.id] || manifest['default'];
       const esc = s => s.replace(/\\/g, '\\\\').replace(/'/g, "\u2019").replace(/:/g, '\\:').replace(/%/g, '\\%');
       const font = f => path.join(here, 'fonts', f).replace(/\\/g, '/');
-      const kicker = `AGENT WORKSPACES  ·  PART ${c.scene}/${data.chapters.length}`;
-      vf.push('split=2[bg][fg]');
-      vf.push(`[bg]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=0x050B1A@0.72:t=fill[bg2]`);
-      vf.push(`[fg]scale=${W}:${FH}[fg2]`);
-      vf.push(`[bg2][fg2]overlay=0:${FY}[comp]`);
-      vf.push(`[comp]drawtext=fontfile='${font('JetBrainsMono-400.woff2')}':text='${esc(kicker)}':fontcolor=0x5AA0FF:fontsize=${tall ? 30 : 24}:x=(w-text_w)/2:y=${FY - (tall ? 210 : 150)},` +
-        `drawtext=fontfile='${font('Raleway-300.woff2')}':text='${esc(c.title)}':fontcolor=white:fontsize=${tall ? 64 : 50}:x=max(40\\,(w-text_w)/2):y=${FY - (tall ? 150 : 105)},` +
-        `drawtext=fontfile='${font('JetBrainsMono-400.woff2')}':text='broomva.tech/agent-workspaces':fontcolor=0x8FA3C7:fontsize=${tall ? 30 : 24}:x=(w-text_w)/2:y=${H - (tall ? 150 : 70)}[comp2]`);
-      vf.push(`[comp2]ass=filename='${assP.replace(/\\/g, '/')}':fontsdir='${path.join(here, 'fonts').replace(/\\/g, '/')}'`);
+      const nText = `${String(c.scene).padStart(2, '0')}/${data.chapters.length}`;
+      const drawN = `drawtext=fontfile='${font('JetBrainsMono-400.woff2')}':text='${esc(nText)}':fontcolor=0x5AA0FF:fontsize=${tall ? 30 : 24}:x=${S.l}:y=${S.t}:box=1:boxcolor=0x050B1A@0.8:boxborderw=10`;
+      let overlayGraph = '';
+      let seamBottom = H - S.b; // fallback
+      
+      if (layout.mode === 'full') {
+        const SLOTS_H = SH - CAP_H;
+        const SLOTS_Y = S.t;
+        const scale = Math.min(SW / 1920, SLOTS_H / 1080);
+        const outW = Math.round(1920 * scale);
+        const outH = Math.round(1080 * scale);
+        const outX = S.l + Math.round((SW - outW) / 2);
+        const outY = SLOTS_Y + Math.round((SLOTS_H - outH) / 2);
+        vf.push(`[0:v]split=2[bg_in][v_in]`);
+        vf.push(`[bg_in]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=0x050B1A@0.72:t=fill[bg]`);
+        vf.push(`[v_in]scale=${outW}:${outH}[v_scaled]`);
+        overlayGraph = `[bg][v_scaled]overlay=${outX}:${outY}[comp]`;
+        seamBottom = outY + outH;
+      } else {
+        const [vx, vy, vw, vh] = layout.visual;
+        const [tx, ty, tw, th] = layout.text;
+        
+        const visY = tall ? 140 : 40;
+        const textBottom = H - S.b;
+        const minVisSlotH = tall ? 520 : 360;
+        const maxTextW = W - S.l - S.r; // 866 for 9x16
+        
+        const sW = maxTextW / tw;
+        let visSlotH = textBottom - (th * sW) - visY;
+        visSlotH = Math.max(minVisSlotH, visSlotH);
+        
+        const visBottom = visY + visSlotH;
+        const textSlotH = textBottom - visBottom;
+        
+        const tScale = Math.min(maxTextW / tw, textSlotH / th);
+        if (tScale < 0.8) {
+           console.log(`[info] scene ${sn}-${c.id} text scale is ${tScale.toFixed(2)} (below 0.8)`);
+        }
+        
+        const vScale = Math.min(W / vw, visSlotH / vh);
+        const vOutW = Math.round(vw * vScale) || 2;
+        const vOutH = Math.round(vh * vScale) || 2;
+        const vOutX = Math.round((W - vOutW) / 2);
+        const vOutY = visY + Math.round((visSlotH - vOutH) / 2);
+        
+        const tOutW = Math.round(tw * tScale) || 2;
+        const tOutH = Math.round(th * tScale) || 2;
+        const tOutX = S.l + Math.round((maxTextW - tOutW) / 2);
+        const tOutY = visBottom;
+        
+        seamBottom = visBottom;
+        
+        vf.push(`[0:v]split=3[bg_in][v_in][t_in]`);
+        vf.push(`[bg_in]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=0x050B1A@0.72:t=fill[bg]`);
+        vf.push(`[v_in]crop=${vw}:${vh}:${vx}:${vy},scale=${vOutW}:${vOutH}[v_scaled]`);
+        vf.push(`[t_in]crop=${tw}:${th}:${tx}:${ty},scale=${tOutW}:${tOutH}[t_scaled]`);
+        vf.push(`[bg][v_scaled]overlay=${vOutX}:${vOutY}[bg_v]`);
+        overlayGraph = `[bg_v][t_scaled]overlay=${tOutX}:${tOutY}[comp]`;
+      }
+
+            let cwiSuccess = false;
+      if (CAPTIONS !== 'none') {
+        assP = path.join(OUT, 'scenes', `s${sn}-${c.id}-${ASPECT}.ass`);
+        if (CAPTIONS === 'cwi') {
+          const cwiJson = path.join(OUT, 'scenes', `s${sn}-${c.id}.cwi.json`);
+          const audioFile = path.join(here, data.audio);
+          const refTextFile = path.join(OUT, 'scenes', `s${sn}-${c.id}.ref.txt`);
+          
+          const refLines = data.captions.filter(cap => cap[1] > c.start && cap[0] < c.end).map(cap => cap[2]);
+          writeFileSync(refTextFile, refLines.join(' '));
+          
+          const aSlice = path.join(OUT, 'scenes', `s${sn}-${c.id}.mp3`);
+          if (!existsSync(aSlice)) {
+            spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', audioFile, '-ss', String(c.start), '-t', String(c.end - c.start), '-c:a', 'copy', aSlice]);
+          }
+          
+          const ocDir = process.env.OPENCAPTIONS_DIR || path.join(here, '..', '..', 'apps', 'opencaptions');
+          const ocBin = existsSync(path.join(ocDir, 'packages/cli/src/index.ts')) 
+            ? ['bun', 'run', path.join(ocDir, 'packages/cli/src/index.ts')] 
+            : ['opencaptions'];
+
+          try {
+            if (!existsSync(cwiJson)) {
+              const rGen = spawnSync(ocBin[0], [...ocBin.slice(1), 'generate', aSlice, '--reference-text', refTextFile, '--output', cwiJson]);
+              if (rGen.status !== 0) throw new Error('cwi generate failed');
+            }
+            const rExp = spawnSync(ocBin[0], [...ocBin.slice(1), 'export', cwiJson, '--format', 'ass', '--width', String(W), '--height', String(H), '--font', 'Roboto Flex', '--font-size', '62', '--margin-l', String(S.l), '--margin-r', String(S.r), '--margin-v', String(H - seamBottom), '--max-chars', '22', '--box', '--output', assP]);
+            if (rExp.status !== 0) throw new Error('cwi export failed');
+            cwiSuccess = true;
+          } catch (e) {
+            console.warn(`[warning] cwi captions failed for scene ${c.id}, falling back to plain ASS`);
+          }
+        }
+        
+        if (!cwiSuccess) {
+          const assT = s => { const ms = Math.max(0, Math.round(s * 100)); return `${Math.floor(ms / 360000)}:${String(Math.floor(ms / 6000) % 60).padStart(2, '0')}:${String(Math.floor(ms / 100) % 60).padStart(2, '0')}.${String(ms % 100).padStart(2, '0')}` };
+          const lines = data.captions.filter(cap => cap[1] > c.start && cap[0] < c.end).map(cap =>
+            `Dialogue: 0,${assT(Math.max(0, cap[0] - c.start))},${assT(Math.min(c.end, cap[1]) - c.start)},Cap,,0,0,0,,${cap[2].replace(/[{}\\]/g, '').replace(/\n/g, ' ')}`);
+          writeFileSync(assP, `[Script Info]\nScriptType: v4.00+\nPlayResX: ${W}\nPlayResY: ${H}\nWrapStyle: 0\n\n[V4+ Styles]\n` +
+            'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n' +
+            `Style: Cap,Inter,${tall ? 60 : 46},&H00FFFFFF,&H00FFFFFF,&H00180B05,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,${S.l},${S.r},${H - seamBottom},1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n${lines.join('\n')}\n`);
+        }
+      }
+
+      let nextStep = '[comp]';
+      vf.push(overlayGraph);
+      if (PROOF) {
+         vf.push(`[comp]drawbox=x=0:y=0:w=${W}:h=${S.t}:color=red@0.3:t=fill,drawbox=x=0:y=${H-S.b}:w=${W}:h=${S.b}:color=red@0.3:t=fill,drawbox=x=0:y=${S.t}:w=${S.l}:h=${SH}:color=red@0.3:t=fill,drawbox=x=${W-S.r}:y=${S.t}:w=${S.r}:h=${SH}:color=red@0.3:t=fill[comp_proof]`);
+         nextStep = '[comp_proof]';
+      }
+      
+      vf.push(`${nextStep}${drawN}[comp2]`);
+      if (assP && !PROOF) {
+        vf.push(`[comp2]ass=filename='${assP.replace(/\\/g, '/')}':fontsdir='${path.join(here, 'fonts').replace(/\\/g, '/')}'[comp3]`);
+      }
+    }
+
+    if (PROOF) {
+      const proofImg = clip(c, '-proof').replace('.mp4', '.png');
+      const args = ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-'];
+      if (vf.length) {
+         args.push('-filter_complex', vf.join(';'));
+         args.push('-map', '[comp2]');
+      }
+      args.push('-frames:v', '1', proofImg);
+      const ff = spawn('ffmpeg', args, { stdio: ['pipe', 'inherit', 'inherit'] });
+      const done = new Promise((ok, ko) => ff.on('close', code => code ? ko(new Error('ffmpeg ' + code)) : ok()));
+      await page.evaluate(t => window.__adv(t), (f1 - f0) / FPS);
+      const buf = await page.screenshot({ type: 'jpeg', quality: 93 });
+      ff.stdin.write(buf);
+      ff.stdin.end(); await done;
+      console.log(`Proof s${sn}-${c.id} generated at ${((Date.now() - t0) / 1000).toFixed(0)}s`);
+      continue;
     }
 
     const args = ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-'];
-    if (vf.length) args.push('-vf', vf.join(';'));
+    if (vf.length) {
+       args.push('-filter_complex', vf.join(';'));
+       args.push('-map', assP && !PROOF ? '[comp3]' : '[comp2]');
+    }
     args.push('-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(FPS), pSil);
     
     const ff = spawn('ffmpeg', args, { stdio: ['pipe', 'inherit', 'inherit'] });
@@ -137,6 +278,20 @@ async function work() {
 
 await Promise.all(Array.from({ length: WORKERS }, work));
 await b.close();
+
+if (PROOF && ASPECT === '9x16') {
+  const proofs = ch.map(c => clip(c, '-proof').replace('.mp4', '.png')).filter(existsSync);
+  if (proofs.length) {
+    const listPath = path.join(OUT, 'proofs.txt');
+    writeFileSync(listPath, proofs.map(p => `file '${p}'\n`).join(''));
+    const csPath = path.join(OUT, 'contact-sheet.png');
+    // tile=8x5 layout
+    const args = ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', listPath, '-vf', 'tile=8x5', csPath];
+    const fp = spawnSync('ffmpeg', args);
+    if (fp.status === 0) console.log(`Contact sheet generated at ${csPath}`);
+    else console.error('Failed to generate contact sheet', fp.stderr?.toString());
+  }
+}
 
 if (!NO_MASTER && !SCENES && !SMOKE && ASPECT === '16x9') {
   if (ch.every(c => existsSync(clip(c, '-silent')))) {
