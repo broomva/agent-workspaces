@@ -109,7 +109,71 @@ async function work() {
       const CAP_H = tall ? 230 : 150;
       const SLOTS_H = SH - CAP_H;
       const SLOTS_Y = S.t;
-      let cwiSuccess = false;
+
+      const layout = manifest[c.id] || manifest['default'];
+      const esc = s => s.replace(/\\/g, '\\\\').replace(/'/g, "\u2019").replace(/:/g, '\\:').replace(/%/g, '\\%');
+      const font = f => path.join(here, 'fonts', f).replace(/\\/g, '/');
+      const nText = `${String(c.scene).padStart(2, '0')}/${data.chapters.length}`;
+      const drawN = `drawtext=fontfile='${font('JetBrainsMono-400.woff2')}':text='${esc(nText)}':fontcolor=0x5AA0FF:fontsize=${tall ? 30 : 24}:x=${S.l}:y=${S.t}:box=1:boxcolor=0x050B1A@0.8:boxborderw=10`;
+      let overlayGraph = '';
+      let seamBottom = H - S.b; // fallback
+      
+      if (layout.mode === 'full') {
+        const SLOTS_H = SH - CAP_H;
+        const SLOTS_Y = S.t;
+        const scale = Math.min(SW / 1920, SLOTS_H / 1080);
+        const outW = Math.round(1920 * scale);
+        const outH = Math.round(1080 * scale);
+        const outX = S.l + Math.round((SW - outW) / 2);
+        const outY = SLOTS_Y + Math.round((SLOTS_H - outH) / 2);
+        vf.push(`[0:v]split=2[bg_in][v_in]`);
+        vf.push(`[bg_in]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=0x050B1A@0.72:t=fill[bg]`);
+        vf.push(`[v_in]scale=${outW}:${outH}[v_scaled]`);
+        overlayGraph = `[bg][v_scaled]overlay=${outX}:${outY}[comp]`;
+        seamBottom = outY + outH;
+      } else {
+        const [vx, vy, vw, vh] = layout.visual;
+        const [tx, ty, tw, th] = layout.text;
+        
+        const visY = tall ? 140 : 40;
+        const textBottom = H - S.b;
+        const minVisSlotH = tall ? 520 : 360;
+        const maxTextW = W - S.l - S.r; // 866 for 9x16
+        
+        const sW = maxTextW / tw;
+        let visSlotH = textBottom - (th * sW) - visY;
+        visSlotH = Math.max(minVisSlotH, visSlotH);
+        
+        const visBottom = visY + visSlotH;
+        const textSlotH = textBottom - visBottom;
+        
+        const tScale = Math.min(maxTextW / tw, textSlotH / th);
+        if (tScale < 0.8) {
+           console.log(`[info] scene ${sn}-${c.id} text scale is ${tScale.toFixed(2)} (below 0.8)`);
+        }
+        
+        const vScale = Math.min(W / vw, visSlotH / vh);
+        const vOutW = Math.round(vw * vScale) || 2;
+        const vOutH = Math.round(vh * vScale) || 2;
+        const vOutX = Math.round((W - vOutW) / 2);
+        const vOutY = visY + Math.round((visSlotH - vOutH) / 2);
+        
+        const tOutW = Math.round(tw * tScale) || 2;
+        const tOutH = Math.round(th * tScale) || 2;
+        const tOutX = S.l + Math.round((maxTextW - tOutW) / 2);
+        const tOutY = visBottom;
+        
+        seamBottom = visBottom;
+        
+        vf.push(`[0:v]split=3[bg_in][v_in][t_in]`);
+        vf.push(`[bg_in]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=0x050B1A@0.72:t=fill[bg]`);
+        vf.push(`[v_in]crop=${vw}:${vh}:${vx}:${vy},scale=${vOutW}:${vOutH}[v_scaled]`);
+        vf.push(`[t_in]crop=${tw}:${th}:${tx}:${ty},scale=${tOutW}:${tOutH}[t_scaled]`);
+        vf.push(`[bg][v_scaled]overlay=${vOutX}:${vOutY}[bg_v]`);
+        overlayGraph = `[bg_v][t_scaled]overlay=${tOutX}:${tOutY}[comp]`;
+      }
+
+            let cwiSuccess = false;
       if (CAPTIONS !== 'none') {
         assP = path.join(OUT, 'scenes', `s${sn}-${c.id}-${ASPECT}.ass`);
         if (CAPTIONS === 'cwi') {
@@ -120,7 +184,7 @@ async function work() {
           const refLines = data.captions.filter(cap => cap[1] > c.start && cap[0] < c.end).map(cap => cap[2]);
           writeFileSync(refTextFile, refLines.join(' '));
           
-          const aSlice = path.join(OUT, 'scenes', `s${sn}-${c.id}.m4a`);
+          const aSlice = path.join(OUT, 'scenes', `s${sn}-${c.id}.mp3`);
           if (!existsSync(aSlice)) {
             spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', audioFile, '-ss', String(c.start), '-t', String(c.end - c.start), '-c:a', 'copy', aSlice]);
           }
@@ -135,7 +199,7 @@ async function work() {
               const rGen = spawnSync(ocBin[0], [...ocBin.slice(1), 'generate', aSlice, '--reference-text', refTextFile, '--output', cwiJson]);
               if (rGen.status !== 0) throw new Error('cwi generate failed');
             }
-            const rExp = spawnSync(ocBin[0], [...ocBin.slice(1), 'export', cwiJson, '--format', 'ass', '--width', String(W), '--height', String(H), '--font', 'Roboto Flex', '--font-size', '46', '--margin-l', String(S.l), '--margin-r', String(S.r), '--margin-v', String(S.b + 10), '--max-chars', '24', '--output', assP]);
+            const rExp = spawnSync(ocBin[0], [...ocBin.slice(1), 'export', cwiJson, '--format', 'ass', '--width', String(W), '--height', String(H), '--font', 'Roboto Flex', '--font-size', '62', '--margin-l', String(S.l), '--margin-r', String(S.r), '--margin-v', String(H - seamBottom), '--max-chars', '22', '--box', '--output', assP]);
             if (rExp.status !== 0) throw new Error('cwi export failed');
             cwiSuccess = true;
           } catch (e) {
@@ -149,68 +213,12 @@ async function work() {
             `Dialogue: 0,${assT(Math.max(0, cap[0] - c.start))},${assT(Math.min(c.end, cap[1]) - c.start)},Cap,,0,0,0,,${cap[2].replace(/[{}\\]/g, '').replace(/\n/g, ' ')}`);
           writeFileSync(assP, `[Script Info]\nScriptType: v4.00+\nPlayResX: ${W}\nPlayResY: ${H}\nWrapStyle: 0\n\n[V4+ Styles]\n` +
             'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n' +
-            `Style: Cap,Inter,${tall ? 60 : 46},&H00FFFFFF,&H00FFFFFF,&H00180B05,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,${S.l},${S.r},${S.b + 10},1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n${lines.join('\n')}\n`);
+            `Style: Cap,Inter,${tall ? 60 : 46},&H00FFFFFF,&H00FFFFFF,&H00180B05,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,${S.l},${S.r},${H - seamBottom},1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n${lines.join('\n')}\n`);
         }
       }
 
-      const layout = manifest[c.id] || manifest['default'];
-      const esc = s => s.replace(/\\/g, '\\\\').replace(/'/g, "\u2019").replace(/:/g, '\\:').replace(/%/g, '\\%');
-      const font = f => path.join(here, 'fonts', f).replace(/\\/g, '/');
-      const nText = `${String(c.scene).padStart(2, '0')}/${data.chapters.length}`;
-      const drawN = `drawtext=fontfile='${font('JetBrainsMono-400.woff2')}':text='${esc(nText)}':fontcolor=0x5AA0FF:fontsize=${tall ? 30 : 24}:x=${S.l}:y=${S.t}:box=1:boxcolor=0x050B1A@0.8:boxborderw=10`;
-
-      vf.push(`[0:v]split=${layout.mode === 'full' ? 2 : 3}[bg_in]` + (layout.mode === 'full' ? '[v_in]' : '[v_in][t_in]'));
-      vf.push(`[bg_in]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=0x050B1A@0.72:t=fill[bg]`);
-      
-      let overlayGraph = '';
-      if (layout.mode === 'full') {
-        const scale = Math.min(SW / 1920, SLOTS_H / 1080);
-        const outW = Math.round(1920 * scale);
-        const outH = Math.round(1080 * scale);
-        const outX = S.l + Math.round((SW - outW) / 2);
-        const outY = SLOTS_Y + Math.round((SLOTS_H - outH) / 2);
-        vf.push(`[v_in]scale=${outW}:${outH}[v_scaled]`);
-        overlayGraph = `[bg][v_scaled]overlay=${outX}:${outY}[comp]`;
-      } else {
-        const [vx, vy, vw, vh] = layout.visual;
-        const [tx, ty, tw, th] = layout.text;
-        
-        const natVisH = vw > 0 ? (vh / vw) * W : 0;
-        const natTextH = tw > 0 ? (th / tw) * SW : 0;
-        
-        let visSlotH = SLOTS_H / 2;
-        if (natVisH + natTextH > 0) {
-           visSlotH = Math.round(SLOTS_H * (natVisH / (natVisH + natTextH)));
-           if (vw > 0 && tw > 0) {
-             visSlotH = Math.max(Math.round(SLOTS_H * 0.25), Math.min(Math.round(SLOTS_H * 0.75), visSlotH));
-           } else if (vw === 0) {
-             visSlotH = 0;
-           } else {
-             visSlotH = SLOTS_H;
-           }
-        }
-        const textSlotH = SLOTS_H - visSlotH;
-        
-        const vScale = Math.min(W / vw, visSlotH / vh);
-        const vOutW = Math.round(vw * vScale) || 2;
-        const vOutH = Math.round(vh * vScale) || 2;
-        const vOutX = Math.round((W - vOutW) / 2);
-        const vOutY = SLOTS_Y + Math.round((visSlotH - vOutH) / 2);
-        
-        const tScale = Math.min(SW / tw, textSlotH / th);
-        const tOutW = Math.round(tw * tScale) || 2;
-        const tOutH = Math.round(th * tScale) || 2;
-        const tOutX = S.l + Math.round((SW - tOutW) / 2);
-        const tOutY = SLOTS_Y + visSlotH + Math.round((textSlotH - tOutH) / 2);
-        
-        vf.push(`[v_in]crop=${vw}:${vh}:${vx}:${vy},scale=${vOutW}:${vOutH}[v_scaled]`);
-        vf.push(`[t_in]crop=${tw}:${th}:${tx}:${ty},scale=${tOutW}:${tOutH}[t_scaled]`);
-        vf.push(`[bg][v_scaled]overlay=${vOutX}:${vOutY}[bg_v]`);
-        overlayGraph = `[bg_v][t_scaled]overlay=${tOutX}:${tOutY}[comp]`;
-      }
-      
-      vf.push(overlayGraph);
       let nextStep = '[comp]';
+      vf.push(overlayGraph);
       if (PROOF) {
          vf.push(`[comp]drawbox=x=0:y=0:w=${W}:h=${S.t}:color=red@0.3:t=fill,drawbox=x=0:y=${H-S.b}:w=${W}:h=${S.b}:color=red@0.3:t=fill,drawbox=x=0:y=${S.t}:w=${S.l}:h=${SH}:color=red@0.3:t=fill,drawbox=x=${W-S.r}:y=${S.t}:w=${S.r}:h=${SH}:color=red@0.3:t=fill[comp_proof]`);
          nextStep = '[comp_proof]';
