@@ -2,7 +2,7 @@
 // clip against the narration timing: frames = chapter length × fps (±1), audio slice = video length (±0.05 s).
 // Needs ffmpeg/ffprobe with libass and libx264. Usage: bun deck/video-smoke.mjs
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,13 +10,17 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url)), FPS = 30;
 const OUT = mkdtempSync(path.join(os.tmpdir(), 'aw-video-smoke-'));
 const fail = m => { console.error(m); console.error(`(output kept in ${OUT})`); process.exit(1) };
+const pr = spawnSync('bun', [path.join(here, 'video.mjs'), '--smoke', '--proof', '--workers', '1', '--aspect', '9x16', '--out', OUT], { stdio: 'inherit' });
+if (pr.status !== 0) fail('renderer failed (9x16 proof)');
+if (!existsSync(path.join(OUT, 'scenes', 's04-brk1-9x16-proof.png'))) fail('9x16 proof: missing proof PNG');
+if (existsSync(path.join(OUT, 'scenes', 's04-brk1-9x16.ass')) || existsSync(path.join(OUT, 'scenes', 's04-brk1.mp3'))) fail('9x16 proof: unexpected caption/audio artifacts');
 for (const [aspect, w, h] of [['16x9', 1920, 1080], ['9x16', 1080, 1920]]) {
   const r = spawnSync('bun', [path.join(here, 'video.mjs'), '--smoke', '--workers', '1', '--aspect', aspect, '--captions', 'plain', '--out', OUT], { stdio: 'inherit' });
   if (r.status !== 0) fail(`renderer failed (${aspect})`);
   const data = JSON.parse(readFileSync(path.join(OUT, 'narration.json'), 'utf8'));
   const i = data.chapters.findIndex(c => c.scene === 4), ch = data.chapters[i];
   const want = Math.round(data.chapters[i + 1].startSeconds * FPS) - Math.round(ch.startSeconds * FPS);
-  const file = path.join(OUT, 'scenes', `s04-${ch.id}${aspect === '16x9' ? '' : `-${aspect}`}.mp4`);
+  const file = path.join(OUT, 'scenes', `s04-${ch.id}${aspect === '16x9' ? '' : `-${aspect}-plain`}.mp4`);
   const p = spawnSync('ffprobe', ['-v', 'error', '-count_frames', '-show_entries', 'stream=codec_type,width,height,nb_read_frames,duration', '-of', 'json', file]);
   if (p.status !== 0) fail(`ffprobe failed on ${file}`);
   const s = JSON.parse(p.stdout.toString()).streams, v = s.find(x => x.codec_type === 'video'), a = s.find(x => x.codec_type === 'audio');

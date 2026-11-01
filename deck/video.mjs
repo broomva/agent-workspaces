@@ -72,9 +72,11 @@ if (SCENES) {
 }
 
 // render settings are part of a clip's name, so a run with other settings never reuses stale clips
-const SFX = (ASPECT === '16x9' ? '' : `-${ASPECT}`) + (FPS === 30 ? '' : `-${FPS}fps`);
+const CAP_SFX = ASPECT === '16x9' || PROOF || CAPTIONS === 'cwi' ? '' : `-${CAPTIONS}`;
+const SFX = (ASPECT === '16x9' ? '' : `-${ASPECT}`) + CAP_SFX + (FPS === 30 ? '' : `-${FPS}fps`);
 const clip = (c, tail = '') => path.join(OUT, 'scenes', `s${String(c.scene).padStart(2, '0')}-${c.id}${SFX}${tail}.mp4`);
-queue = queue.filter(c => !existsSync(clip(c)));
+const proof = c => clip(c, '-proof').replace('.mp4', '.png');
+queue = queue.filter(c => !existsSync(PROOF ? proof(c) : clip(c)));
 const t0 = Date.now();
 
 async function work() {
@@ -173,9 +175,9 @@ async function work() {
         overlayGraph = `[bg_v][t_scaled]overlay=${tOutX}:${tOutY}[comp]`;
       }
 
-            let cwiSuccess = false;
-      if (CAPTIONS !== 'none') {
-        assP = path.join(OUT, 'scenes', `s${sn}-${c.id}-${ASPECT}.ass`);
+      let cwiSuccess = false;
+      if (!PROOF && CAPTIONS !== 'none') {
+        assP = path.join(OUT, 'scenes', `s${sn}-${c.id}${SFX}.ass`);
         if (CAPTIONS === 'cwi') {
           const cwiJson = path.join(OUT, 'scenes', `s${sn}-${c.id}.cwi.json`);
           const audioFile = path.join(here, data.audio);
@@ -231,7 +233,7 @@ async function work() {
     }
 
     if (PROOF) {
-      const proofImg = clip(c, '-proof').replace('.mp4', '.png');
+      const proofImg = proof(c);
       const args = ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-'];
       if (vf.length) {
          args.push('-filter_complex', vf.join(';'));
@@ -280,7 +282,7 @@ await Promise.all(Array.from({ length: WORKERS }, work));
 await b.close();
 
 if (PROOF && ASPECT === '9x16') {
-  const proofs = ch.map(c => clip(c, '-proof').replace('.mp4', '.png')).filter(existsSync);
+  const proofs = ch.map(proof).filter(existsSync);
   if (proofs.length) {
     const listPath = path.join(OUT, 'proofs.txt');
     writeFileSync(listPath, proofs.map(p => `file '${p}'\n`).join(''));
