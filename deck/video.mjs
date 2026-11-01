@@ -103,6 +103,7 @@ async function work() {
     
     const vf = [];
     let assP = null;
+    let proofBounds = '';
     if (ASPECT !== '16x9') {
       const W = 1080, H = ASPECT === '9x16' ? 1920 : 1350, tall = ASPECT === '9x16';
       const S = SAFE[ASPECT];
@@ -118,11 +119,9 @@ async function work() {
       const nText = `${String(c.scene).padStart(2, '0')}/${data.chapters.length}`;
       const drawN = `drawtext=fontfile='${font('JetBrainsMono-400.woff2')}':text='${esc(nText)}':fontcolor=0x5AA0FF:fontsize=${tall ? 30 : 24}:x=${S.l}:y=${S.t}:box=1:boxcolor=0x050B1A@0.8:boxborderw=10`;
       let overlayGraph = '';
-      let seamBottom = H - S.b; // fallback
+      const marginV = S.b + 10;
       
       if (layout.mode === 'full') {
-        const SLOTS_H = SH - CAP_H;
-        const SLOTS_Y = S.t;
         const scale = Math.min(SW / 1920, SLOTS_H / 1080);
         const outW = Math.round(1920 * scale);
         const outH = Math.round(1080 * scale);
@@ -132,40 +131,40 @@ async function work() {
         vf.push(`[bg_in]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=0x050B1A@0.72:t=fill[bg]`);
         vf.push(`[v_in]scale=${outW}:${outH}[v_scaled]`);
         overlayGraph = `[bg][v_scaled]overlay=${outX}:${outY}[comp]`;
-        seamBottom = outY + outH;
+        proofBounds = `full:${outX},${outY},${outW},${outH} cap:${S.l},${SLOTS_Y + SLOTS_H},${SW},${CAP_H}`;
       } else {
         const [vx, vy, vw, vh] = layout.visual;
         const [tx, ty, tw, th] = layout.text;
         
-        const visY = tall ? 140 : 40;
-        const textBottom = H - S.b;
-        const minVisSlotH = tall ? 520 : 360;
-        const maxTextW = W - S.l - S.r; // 866 for 9x16
+        const visY = SLOTS_Y;
+        const textBottom = SLOTS_Y + SLOTS_H;
+        const minVisSlotH = tall ? 400 : 360;
+        const maxTextW = SW; // 866 for 9x16
         
         const sW = maxTextW / tw;
-        let visSlotH = textBottom - (th * sW) - visY;
-        visSlotH = Math.max(minVisSlotH, visSlotH);
+        let visSlotH = Math.round(textBottom - (th * sW) - visY);
+        visSlotH = Math.max(minVisSlotH, Math.min(SLOTS_H, visSlotH));
         
         const visBottom = visY + visSlotH;
-        const textSlotH = textBottom - visBottom;
+        const textSlotH = Math.max(1, textBottom - visBottom);
         
         const tScale = Math.min(maxTextW / tw, textSlotH / th);
         if (tScale < 0.8) {
            console.log(`[info] scene ${sn}-${c.id} text scale is ${tScale.toFixed(2)} (below 0.8)`);
         }
         
-        const vScale = Math.min(W / vw, visSlotH / vh);
+        const vScale = Math.min(SW / vw, visSlotH / vh);
         const vOutW = Math.round(vw * vScale) || 2;
         const vOutH = Math.round(vh * vScale) || 2;
-        const vOutX = Math.round((W - vOutW) / 2);
+        const vOutX = S.l + Math.round((SW - vOutW) / 2);
         const vOutY = visY + Math.round((visSlotH - vOutH) / 2);
         
         const tOutW = Math.round(tw * tScale) || 2;
         const tOutH = Math.round(th * tScale) || 2;
         const tOutX = S.l + Math.round((maxTextW - tOutW) / 2);
-        const tOutY = visBottom;
+        const tOutY = visBottom + Math.round((textSlotH - tOutH) / 2);
         
-        seamBottom = visBottom;
+        proofBounds = `vis:${vOutX},${vOutY},${vOutW},${vOutH} text:${tOutX},${tOutY},${tOutW},${tOutH} cap:${S.l},${SLOTS_Y + SLOTS_H},${SW},${CAP_H}`;
         
         vf.push(`[0:v]split=3[bg_in][v_in][t_in]`);
         vf.push(`[bg_in]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=40:10,drawbox=x=0:y=0:w=${W}:h=${H}:color=0x050B1A@0.72:t=fill[bg]`);
@@ -201,7 +200,7 @@ async function work() {
               const rGen = spawnSync(ocBin[0], [...ocBin.slice(1), 'generate', aSlice, '--reference-text', refTextFile, '--output', cwiJson]);
               if (rGen.status !== 0) throw new Error('cwi generate failed');
             }
-            const rExp = spawnSync(ocBin[0], [...ocBin.slice(1), 'export', cwiJson, '--format', 'ass', '--width', String(W), '--height', String(H), '--font', 'Roboto Flex', '--font-size', '62', '--margin-l', String(S.l), '--margin-r', String(S.r), '--margin-v', String(H - seamBottom), '--max-chars', '22', '--box', '--output', assP]);
+            const rExp = spawnSync(ocBin[0], [...ocBin.slice(1), 'export', cwiJson, '--format', 'ass', '--width', String(W), '--height', String(H), '--font', 'Roboto Flex', '--font-size', '62', '--margin-l', String(S.l), '--margin-r', String(S.r), '--margin-v', String(marginV), '--max-chars', '22', '--box', '--output', assP]);
             if (rExp.status !== 0) throw new Error('cwi export failed');
             cwiSuccess = true;
           } catch (e) {
@@ -215,7 +214,7 @@ async function work() {
             `Dialogue: 0,${assT(Math.max(0, cap[0] - c.start))},${assT(Math.min(c.end, cap[1]) - c.start)},Cap,,0,0,0,,${cap[2].replace(/[{}\\]/g, '').replace(/\n/g, ' ')}`);
           writeFileSync(assP, `[Script Info]\nScriptType: v4.00+\nPlayResX: ${W}\nPlayResY: ${H}\nWrapStyle: 0\n\n[V4+ Styles]\n` +
             'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n' +
-            `Style: Cap,Inter,${tall ? 60 : 46},&H00FFFFFF,&H00FFFFFF,&H00180B05,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,${S.l},${S.r},${H - seamBottom},1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n${lines.join('\n')}\n`);
+            `Style: Cap,Inter,${tall ? 60 : 46},&H00FFFFFF,&H00FFFFFF,&H00180B05,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,${S.l},${S.r},${marginV},1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n${lines.join('\n')}\n`);
         }
       }
 
@@ -246,7 +245,7 @@ async function work() {
       const buf = await page.screenshot({ type: 'jpeg', quality: 93 });
       ff.stdin.write(buf);
       ff.stdin.end(); await done;
-      console.log(`Proof s${sn}-${c.id} generated at ${((Date.now() - t0) / 1000).toFixed(0)}s`);
+      console.log(`Proof s${sn}-${c.id} generated at ${((Date.now() - t0) / 1000).toFixed(0)}s${proofBounds ? ` [${proofBounds}]` : ''}`);
       continue;
     }
 
