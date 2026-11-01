@@ -75,10 +75,21 @@ const chapters = data.chapters.map((c, i) => ({
   endSeconds: i + 1 < data.chapters.length ? data.chapters[i+1].startSeconds : data.duration
 }));
 
+const OVERRIDES = {
+  lanes: { visual: [0, 400, 1920, 680], text: [87, 96, 893, 250] },
+  spawn: { visual: [800, 0, 1120, 1080], text: [87, 96, 713, 200] },
+  gov: { visual: [0, 300, 1920, 780], text: [87, 96, 893, 200] },
+  close: { visual: [0, 300, 1920, 780], text: [87, 96, 893, 200] },
+};
+
 for (const c of chapters) {
   const isFull = ['title', 'agenda', 'brk1', 'brk2', 'brk3', 'brk4', 'brk5', 'brk6', 'brk7'].includes(c.id);
   if (isFull) {
     manifest[c.id] = { mode: 'full' };
+    continue;
+  }
+  if (OVERRIDES[c.id]) {
+    manifest[c.id] = OVERRIDES[c.id];
     continue;
   }
   
@@ -93,13 +104,13 @@ for (const c of chapters) {
     window.__cues = cues; simReset(captureScene());
     window.__adv = function(t) {
       const i = simScene, n = Math.max(0, Math.round(t * 60));
-      while (window.simN < n) {
-        const lt = window.simN / 60; let bt = 0;
+      while (simN < n) {
+        const lt = simN / 60; let bt = 0;
         for (const q of window.__cues) if (q.at <= lt + 1e-4) bt = q.beat;
         if (bt !== step) go(i, bt, true);
-        window.T0 += 1 / 60; window.NOW += 1 / 60; domFrame(1 / 60); paint(1 / 60); window.simN++;
+        T0 += 1 / 60; NOW += 1 / 60; domFrame(1 / 60); paint(1 / 60); simN++;
       }
-      bgDraw(window.T0); rebuild();
+      bgDraw(T0); rebuild();
     }
   }, {cues: c.cues});
 
@@ -123,7 +134,7 @@ for (const c of chapters) {
   const textInfo = await p0.evaluate((id) => {
     const scene = document.querySelector(`.scene[data-id="${id}"]`);
     if (!scene) return null;
-    const els = scene.querySelectorAll('.kick, h1, h2, h3, .lede, .glass, .card');
+    const els = scene.querySelectorAll('.kick, h1, h2, h3, .lede, .glass, .card, .foot');
     let minX = 1920, minY = 1080, maxX = 0, maxY = 0;
     let found = false;
     for (const el of els) {
