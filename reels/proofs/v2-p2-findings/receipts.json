@@ -1,0 +1,47 @@
+{
+  "reel": "v2-p2-findings",
+  "part": 2,
+  "script_sha256": "sha256:0ba0542f63b170be587dfbae7890545498c4a72ce13b1e4743f5d876cd322a6c",
+  "river_take": {
+    "receipt": "reels/audio/v2/v2-p2-findings.receipt.json",
+    "request_id": "hcIP7KDONwv6TQ3Fdxkd",
+    "characters": 288,
+    "estimate_credits": 130,
+    "cap_credits": 135,
+    "billed_credits": 127,
+    "audio_sha256": "sha256:4ed86d18df4cc2035643a6f1991255427f23b93d2579e15c219eefd8928a7a23"
+  },
+  "gapped_take": {
+    "receipt": "reels/audio/v2/v2-p2-findings.gapped.receipt.json",
+    "gaps": 5,
+    "gap_seconds": 0.35,
+    "credits": 0,
+    "audio_sha256": "sha256:4851132af746a55b835db07ab57c95bb9fd4a95ec461d08cfa4b91810e17f5d3"
+  },
+  "shared_cta": {
+    "receipt": "reels/audio/v2/v2-cta.receipt.json",
+    "reused": true,
+    "credits_this_part": 0
+  },
+  "outputs": {
+    "narrate": {
+      "asset": "accounts/broomva.tech/runs/2026-11-17-act1-v2/p2-findings/asset.json",
+      "asset_sha256": "sha256:947a678ed30717f385fb6d01992198542f08f142a5020d204a82427e53ec073a",
+      "script_sha256": "sha256:0ba0542f63b170be587dfbae7890545498c4a72ce13b1e4743f5d876cd322a6c"
+    },
+    "render": {
+      "render": "accounts/broomva.tech/runs/2026-11-17-act1-v2/p2-findings/render.json",
+      "render_sha256": "sha256:a082e4591fea05117e79d349da8806f0bebe9341cf01b6cad888f5416fe2e8cf",
+      "narration_sha256": "sha256:947a678ed30717f385fb6d01992198542f08f142a5020d204a82427e53ec073a",
+      "video_sha256": "sha256:d1a55047fb0824d6e4adb5fa9501d129ca6f1f28b68cab8b7238b1e540d376fa"
+    },
+    "card": {
+      "card": "accounts/broomva.tech/runs/2026-11-17-act1-v2/p2-findings/post_card.json",
+      "card_sha256": "sha256:d699b8e351cadda39711b133c71275722c6c591a10f8311a0ababc175c47c4c9",
+      "render_sha256": "sha256:a082e4591fea05117e79d349da8806f0bebe9341cf01b6cad888f5416fe2e8cf",
+      "video_sha256": "sha256:d1a55047fb0824d6e4adb5fa9501d129ca6f1f28b68cab8b7238b1e540d376fa",
+      "card_file_sha256": "sha256:914a8957a9ce6cbaf2d3d171de39c86814b737553905d706c4b2126a8a5f24df"
+    }
+  },
+  "gates": "gates/*.json: spec, layout, first_change, dead_stretch, hook_frame0, readability (content-flow gates/produce efd4cd7); asset, render (efd4cd7); post_card and card (gates/judgment2 4ce11be, extra self-check)"
+}
