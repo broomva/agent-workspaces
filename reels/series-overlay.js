@@ -15,7 +15,6 @@
 
   const css = `
 #sx{position:absolute;inset:0;z-index:40;pointer-events:none;color:oklch(0.975 0.004 250);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
-.kick{z-index:45}
 .sx-scrim{position:absolute;inset:0;background:radial-gradient(110% 70% at 50% 38%,oklch(0.2 0.032 248 / .8),oklch(0.135 0.028 250 / .93));
   -webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%)}
 /* each phase is centred in the band between the safe-zone top and the caption band (y 300-1270) */
@@ -81,7 +80,7 @@
   const $ = id => document.getElementById(id), scrim = root.firstElementChild, open = $('sx-open'), end = $('sx-end'), say = $('sx-say');
   const hookW = [...open.querySelectorAll('.sx-hook .w')], sayW = [...say.children], chips = [...open.querySelectorAll('.sx-chip')];
   const mark = end.querySelector('mark'), next = end.querySelector('.sx-next'), ctaBox = end.querySelector('.sx-cta');
-  const cap = document.getElementById('cap') || document.querySelector('.cap');
+  const cap = document.getElementById('cap') || document.querySelector('.cap'), kick = document.querySelector('.kick');
   const clampN = (x, a, b) => Math.min(b, Math.max(a, x));
   const ease = x => { x = clampN(x, 0, 1); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 };
   const ramp = (t, a, d) => ease((t - a) / d);
@@ -107,6 +106,9 @@
     // cold open: full from frame 0 (H1), out across the gap into the body
     const kOpen = 1 - ramp(t, S.body.at - .3, .35), kEnd = ramp(t, S.cta.at - .12, .4);
     scrim.style.opacity = String(Math.max(kOpen, kEnd));
+    // the AI-voice label rides above a panel only while one shows: a permanent z-index re-layers its text and shifts
+    // 17 antialiased pixels in body frames, which must stay identical to the plain reel
+    if (kick) kick.style.zIndex = kOpen > 0 || kEnd > 0 ? '45' : '';
     open.style.visibility = kOpen > 0 ? '' : 'hidden'; open.style.opacity = kOpen >= 1 ? '' : String(kOpen);
     if (kOpen > 0) {
       reveal(hookW, S.hook.words, t, .36, null, null);
