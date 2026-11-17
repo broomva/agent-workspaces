@@ -7,7 +7,7 @@
 //
 // Every frame stays a pure function of t. The reel keeps its visuals and captions; this file only maps time, hides the
 // body caption outside the body, and draws the two series panels in the deck's look, inside the IG safe zone
-// (x 143-938, y 277-1643; nothing right of x 872 below y 922). The reel's "AI voice" label stays on top.
+// (x 143-938, y 277-1643; nothing right of x 872 below y 922). The reel's kicker row stays on top.
 (() => {
   const S = window.SERIES;
   if (!S || window.SERIES_OVERLAY) return;
@@ -106,7 +106,7 @@
     // cold open: full from frame 0 (H1), out across the gap into the body
     const kOpen = 1 - ramp(t, S.body.at - .3, .35), kEnd = ramp(t, S.cta.at - .12, .4);
     scrim.style.opacity = String(Math.max(kOpen, kEnd));
-    // the AI-voice label rides above a panel only while one shows: a permanent z-index re-layers its text and shifts
+    // the kicker row rides above a panel only while one shows: a permanent z-index re-layers its text and shifts
     // 17 antialiased pixels in body frames, which must stay identical to the plain reel
     if (kick) kick.style.zIndex = kOpen > 0 || kEnd > 0 ? '45' : '';
     open.style.visibility = kOpen > 0 ? '' : 'hidden'; open.style.opacity = kOpen >= 1 ? '' : String(kOpen);

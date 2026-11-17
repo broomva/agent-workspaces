@@ -75,7 +75,6 @@
   "postCopy": {
     "firstLine": "{spokenHook}",
     "body": "Part {part}/5 of Agent Workspaces, Act I. {cardCta}.\nFull keynote and field guide: broomva.tech/agent-workspaces",
-    "disclosure": "AI voice (ElevenLabs River stock voice), not a clone of the author.",
     "hashtags": ["#AIAgents", "#AgenticAI", "#ClaudeCode", "#DevTools", "#AgentWorkspaces"]
   }
 }
