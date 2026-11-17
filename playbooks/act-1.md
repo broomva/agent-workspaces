@@ -104,7 +104,7 @@ Read primer, policy and procedures before acting. Write knowledge, records and p
   for h in '## Philosophy' '## Non-negotiable boundaries' '## When / read' '## Completion checks'; do
     grep -Fxq "$h" AGENTS.md || { echo "missing heading in AGENTS.md: $h"; exit 1; }
   done
-  grep -q '](' AGENTS.md || { echo "AGENTS.md routes nowhere: no Markdown links"; exit 1; }
+  grep -o '](\([^)#]*\)' AGENTS.md | sed 's/^](//' | grep -v '://' | grep -v '^$' | grep -q . || { echo "AGENTS.md has no local route"; exit 1; }
   grep -o '](\([^)#]*\)' AGENTS.md | sed 's/^](//' | grep -v '://' | grep -v '^$' | while read -r p; do
     test -e "$p" || { echo "broken route in AGENTS.md: $p"; exit 1; }
   done || exit 1
@@ -158,7 +158,7 @@ Review the design, then give the implement prompt.
 
 **Implement prompt:**
 
-> Create bronze/, silver/ and gold/, each with a one-line README.md stating its rule (bronze: inputs as received, sha256 recorded on arrival; silver: typed records citing file, page and span in bronze; gold: accepted decisions and definitions). Save the design to docs/medallion.md with exactly these headings, each on its own line: "## Bronze", "## Silver", "## Gold", "## Ledger". Under "## Ledger", give the table schema for activities, approvals and gold definitions and name the code component that writes each row; the model never writes ledger rows directly. End with what is designed but not yet implemented.
+> Create bronze/, silver/ and gold/, each with a one-line README.md stating its rule (bronze: inputs as received, sha256 recorded on arrival; silver: typed records citing file, page and span in bronze; gold: accepted decisions and definitions). Save the design to docs/medallion.md with exactly these headings, each on its own line: "## Bronze", "## Silver", "## Gold", "## Ledger". Under "## Ledger", give the table schema for activities, approvals and gold definitions and name the code component that writes each row; the model never writes ledger rows directly. So the trace can be checked even in an empty repository, add one small sample input to bronze/ with its sha256 recorded, and one silver record that cites it by file, page and span. End with what is designed but not yet implemented.
 
 **Check:**
 
@@ -167,6 +167,9 @@ Review the design, then give the implement prompt.
   for f in bronze/README.md silver/README.md gold/README.md docs/medallion.md; do
     test -s "$f" || { echo "missing: $f"; exit 1; }
   done
+  for d in bronze silver; do
+    ls "$d" | grep -v '^README.md$' | grep -q . || { echo "no sample file in $d/ besides README.md"; exit 1; }
+  done
   for h in '## Bronze' '## Silver' '## Gold' '## Ledger'; do
     grep -Fxq "$h" docs/medallion.md || { echo "missing heading in docs/medallion.md: $h"; exit 1; }
   done
@@ -174,7 +177,7 @@ Review the design, then give the implement prompt.
 ) && echo "step 5: ok"
 ```
 
-Trace a proposed silver value back to its bronze file, page and span. Name the code writer for each ledger row type. Do not report append-only storage, hashing or a ledger write as working until you have exercised it.
+Trace the sample silver record back to its bronze file, page and span, and check the recorded sha256 against the file. Name the code writer for each ledger row type. Do not report append-only storage, hashing or a ledger write as working until you have exercised it.
 
 Source: `medallion` guide (deck scene 8), [script scene 8](../script.md). The guide's private workspace references are examples, not prerequisites.
 
@@ -195,7 +198,7 @@ The quote verifier and its tests need neither subagents nor a ledger, so build a
   for f in skills/review/SKILL.md docs/review-verification.md; do
     test -s "$f" || { echo "missing: $f"; exit 1; }
   done
-  grep -q '^TEST: ' docs/review-verification.md || { echo "no TEST: line in docs/review-verification.md"; exit 1; }
+  grep -q '^TEST: *[^[:space:]]' docs/review-verification.md || { echo "no TEST: line with a command in docs/review-verification.md"; exit 1; }
   grep -m1 '^TEST: ' docs/review-verification.md | sed 's/^TEST: /running: /'
   grep -m1 '^TEST: ' docs/review-verification.md | sed 's/^TEST: //' | sh || { echo "the recorded verifier tests failed"; exit 1; }
 ) && echo "step 6: ok"
