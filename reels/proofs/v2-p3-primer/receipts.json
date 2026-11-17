@@ -1,0 +1,24 @@
+{
+  "reel": "v2-p3-primer",
+  "outputs": {
+    "narrate": {
+      "asset": "accounts/broomva.tech/runs/2026-11-17-act1-v2/p3-primer/asset.json",
+      "asset_sha256": "sha256:2ae27dcb7a69cac67267208738156c7a3b97026600b481daf938653791e451f2",
+      "script_sha256": "sha256:31dd15c65c4cc9c62d131d54bcce272f6d4f3d509e6acc4c49f3f9b51e14c51f"
+    },
+    "render": {
+      "render": "accounts/broomva.tech/runs/2026-11-17-act1-v2/p3-primer/render.json",
+      "render_sha256": "sha256:601a12ee51a3191c3b95b97ce6ac918cbabf87bd41e7b5995dfef2a72d565862",
+      "narration_sha256": "sha256:2ae27dcb7a69cac67267208738156c7a3b97026600b481daf938653791e451f2",
+      "video_sha256": "sha256:fe0e365541ee0672ef1f459363b272d3aa3a1201a3cb4ca358c2ff83c4c6625e"
+    },
+    "card": {
+      "card": "accounts/broomva.tech/runs/2026-11-17-act1-v2/p3-primer/post_card.json",
+      "card_sha256": "sha256:fe7670ff3e655269dbe54ca966e5fb72988eedd5a62b4e7505998c0f659fac66",
+      "render_sha256": "sha256:601a12ee51a3191c3b95b97ce6ac918cbabf87bd41e7b5995dfef2a72d565862",
+      "video_sha256": "sha256:fe0e365541ee0672ef1f459363b272d3aa3a1201a3cb4ca358c2ff83c4c6625e",
+      "card_file_sha256": "sha256:ed414e42302c4c0280dc2d8829d62797399c42f31152d031e582f0b9b662a954"
+    }
+  },
+  "gates": "gates/*.json: spec, layout, first_change from content-flow gates/produce 5f4da2c; dead_stretch, hook_frame0, readability from gates/bro3824 fd8e319; asset and render from gates/produce 5f4da2c"
+}
