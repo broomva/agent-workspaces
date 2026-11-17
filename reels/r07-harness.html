@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agent Workspaces · Reel 07 · Sandbox, harness, wire</title>
+<meta name="viewport" content="width=1080">
+<!-- Vertical-native reel (1080x1920) on the keynote's render kit (reels/engine.js, extracted from deck/index.html).
+     Every frame is a pure function of time: window.renderAt(t). Open without ?t= to preview in real time. -->
+<style>
+@font-face{font-family:'Inter';font-weight:300 700;src:url(../deck/fonts/Inter-400.woff2) format('woff2')}
+@font-face{font-family:'Raleway';font-weight:200 600;src:url(../deck/fonts/Raleway-300.woff2) format('woff2')}
+/* Roboto Flex at the nine CWI weights (pitch → weight), static instances of the variable font */
+@font-face{font-family:'Roboto Flex';font-weight:100;src:url(../deck/fonts/RobotoFlex-Thin.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:200;src:url(../deck/fonts/RobotoFlex-ExtraLight.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:300;src:url(../deck/fonts/RobotoFlex-Light.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:400;src:url(../deck/fonts/RobotoFlex-Regular.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:500;src:url(../deck/fonts/RobotoFlex-Medium.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:600;src:url(../deck/fonts/RobotoFlex-SemiBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:700;src:url(../deck/fonts/RobotoFlex-Bold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:800;src:url(../deck/fonts/RobotoFlex-ExtraBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:900;src:url(../deck/fonts/RobotoFlex-Black.ttf) format('truetype')}
+@font-face{font-family:'JetBrains Mono';font-weight:300 700;src:url(../deck/fonts/JetBrainsMono-400.woff2) format('woff2')}
+:root{
+  --deep:oklch(0.155 0.028 250);--surface:oklch(0.205 0.03 245);--elev:oklch(0.245 0.03 245);
+  --t1:oklch(0.975 0.004 250);--t2:oklch(0.83 0.015 248);--t3:oklch(0.65 0.022 248);
+  --line:oklch(0.78 0.03 245 / .12);--line2:oklch(0.78 0.03 245 / .24);
+  --ai:oklch(0.62 0.19 256);--blue:oklch(0.71 0.15 252);--violet:oklch(0.79 0.035 235);
+  --cyan:oklch(0.81 0.12 225);--green:oklch(0.76 0.19 148);--warm:oklch(0.79 0.16 65);--coral:oklch(0.67 0.21 28);--gold:oklch(0.86 0.12 88);
+  --display:'Raleway',sans-serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+  /* 9:16 geometry from the content-engine layout contract (skills: video/content-engine/layout/vertical-9x16.json,
+     profile reels-organic, measured from a real Reel): safe zone x 143-938 y 277-1643, title band y 121-436,
+     caption band x 220-860 y 1288-1463, right action rail x > 872 below y 922 */
+  --sl:143px;--sw:795px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--deep);color:var(--t1)}
+body{position:relative;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+/* ambient light, moved from renderAt (no wall-clock CSS animation, so frames stay pure) */
+.ambient{position:absolute;inset:-20%;pointer-events:none;filter:blur(90px);opacity:.55}
+.ambient i{position:absolute;width:62vmax;height:62vmax;border-radius:50%}
+.ambient i:nth-child(1){left:-12%;top:8%;background:radial-gradient(circle,color-mix(in oklab,var(--blue) 45%,transparent),transparent 62%)}
+.ambient i:nth-child(2){right:-18%;top:34%;background:radial-gradient(circle,color-mix(in oklab,var(--violet) 32%,transparent),transparent 60%)}
+.ambient i:nth-child(3){left:18%;bottom:-6%;background:radial-gradient(circle,color-mix(in oklab,var(--ai) 34%,transparent),transparent 60%)}
+canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.kick{position:absolute;left:var(--sl);top:140px;width:var(--sw);display:flex;justify-content:space-between;align-items:center;
+  font:500 21px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+.kick b{font-weight:500;display:flex;align-items:center;gap:16px}
+.kick b::before{content:"";width:40px;height:1.5px;background:currentColor;opacity:.7}
+.kick span{font-size:16px;color:var(--t3);letter-spacing:.14em}
+h1{position:absolute;left:calc(var(--sl) + 8px);top:172px;width:var(--sw);font:300 100px/1.02 var(--display);letter-spacing:-.034em;
+  text-shadow:0 2px 30px oklch(0.155 0.028 250 / .6)}
+h1 em{font-style:normal;font-weight:400;color:var(--blue)}
+
+/* liquid glass cards (deck): thin tint so the live field reads through a light blur, vertical thickness gradient,
+   bright top edge, cyan caustic along the bottom, and a travelling liquid-metal rim (--ua advanced per frame) */
+.glass{position:absolute;isolation:isolate;border-radius:24px;
+  background:linear-gradient(180deg,oklch(0.36 0.03 248 / .3),oklch(0.2 0.03 250 / .26) 55%,oklch(0.17 0.03 250 / .34));
+  -webkit-backdrop-filter:blur(9px) saturate(220%) brightness(1.12);backdrop-filter:blur(9px) saturate(220%) brightness(1.12);
+  box-shadow:0 30px 80px -30px oklch(0.04 0.02 250 / .85),0 8px 22px -12px oklch(0.04 0.02 250 / .6),inset 0 1px 0 oklch(1 0 0 / .2),
+    inset 0 14px 28px -18px oklch(1 0 0 / .1),inset 0 -22px 34px -26px oklch(0.8 0.12 222 / .22),inset 0 0 0 1px oklch(1 0 0 / .045)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;pointer-events:none;opacity:.75;
+  background:conic-gradient(from var(--ua,0deg),
+  oklch(0.4 0.012 250 / .5) 0deg,oklch(0.62 0.014 245 / .6) 48deg,oklch(0.97 0.01 240 / .92) 70deg,oklch(0.82 0.12 215 / .8) 77deg,oklch(0.62 0.014 245 / .55) 98deg,
+  oklch(0.32 0.01 250 / .4) 168deg,oklch(0.56 0.014 245 / .55) 228deg,oklch(0.92 0.01 240 / .82) 250deg,oklch(0.86 0.1 85 / .55) 256deg,oklch(0.5 0.014 245 / .5) 278deg,oklch(0.4 0.012 250 / .5) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+/* liquid glass capsule (deck .seg): dark thick glass, lit top edge, raised chip thumb */
+.seg{position:absolute;left:var(--sl);top:420px;display:flex;padding:7px;border-radius:999px;isolation:isolate;
+  background:linear-gradient(180deg,oklch(0.29 0.022 250 / .66),oklch(0.185 0.024 250 / .74));
+  -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+  box-shadow:0 22px 60px -20px oklch(0.03 0.02 250 / .92),0 3px 8px -3px oklch(0 0 0 / .55),inset 0 1px 0 oklch(1 0 0 / .16),inset 0 -1px 0 oklch(0 0 0 / .4)}
+.seg::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.2px;pointer-events:none;opacity:.9;
+  background:conic-gradient(from var(--ua,0deg),oklch(0.4 0.012 250 / .55) 0deg,oklch(0.6 0.014 245 / .6) 48deg,oklch(0.97 0.01 240 / .95) 70deg,oklch(0.82 0.12 215 / .85) 76deg,oklch(0.78 0.13 250 / .7) 80deg,oklch(0.62 0.014 245 / .55) 98deg,
+  oklch(0.32 0.01 250 / .45) 168deg,oklch(0.55 0.014 245 / .55) 228deg,oklch(0.92 0.01 240 / .85) 250deg,oklch(0.86 0.1 85 / .65) 256deg,oklch(0.5 0.014 245 / .5) 278deg,oklch(0.4 0.012 250 / .55) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.seg span{position:relative;z-index:1;padding:15px 26px;font:500 24px/1 var(--sans);color:var(--t3);white-space:nowrap}
+.seg span.on{color:var(--t1)}
+.seg .thumb{position:absolute;top:7px;bottom:7px;border-radius:999px;
+  background:linear-gradient(180deg,oklch(0.42 0.03 248 / .75),oklch(0.28 0.03 250 / .7));
+  box-shadow:inset 0 1px 0 oklch(1 0 0 / .28),inset 0 -1px 0 oklch(0 0 0 / .3),0 6px 16px -6px oklch(0.03 0.02 250 / .8)}
+.chip{top:420px;padding:16px 22px;font:400 25px/1 var(--sans);color:var(--t1);white-space:nowrap;border-radius:999px}
+.chip i{font-style:normal;color:var(--blue)}
+/* Caption with Intention, drawn in the page (content-engine opencaptions skill, CWI-Remotion bridge):
+   one caption event at a time on a liquid-glass card in the 9:16 caption band (content-engine
+   layout/vertical-9x16.json, reels-organic: y 0.671-0.762), words styled per CWI word. */
+.cap{position:absolute;left:540px;bottom:460px;transform:translateX(-50%);max-width:640px;width:max-content;
+  padding:12px 28px 14px;border-radius:30px;text-align:center;font-size:50px;font-family:'Roboto Flex',var(--sans);line-height:1.12;letter-spacing:-.01em;text-wrap:balance}
+.cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
+/* emphasised words get side room equal to the 15% bounce overhang (7.5% of their width each side), set when the caption is built */
+.ctr{top:1150px;padding:18px 26px;display:flex;align-items:baseline;gap:16px}
+.ctr small{font:500 16px/1 var(--mono);letter-spacing:.18em;color:var(--t3)}
+.ctr b{font:500 38px/1 var(--mono);letter-spacing:.04em}
+/* Reel 07: the three runtime layers are glass bands stacked top-down (wire, harness, sandbox); the drawings sit on
+   their own canvas above the glass so the backdrop blur never softens them. Everything stays in the safe zone. */
+h1{top:296px;font-size:70px;line-height:1.04}
+.band{left:var(--sl);width:var(--sw);border-radius:28px}
+#fg{z-index:1}
+h1,.ctr,.cap,.kick{z-index:2}
+.ctr.k{top:836px;padding:12px 20px;gap:12px;border-radius:20px}
+.ctr.k small{font-size:14px}
+.ctr.k b{font-size:30px}
+.ctr.ok b{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="ambient"><i></i><i></i><i></i></div>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<div class="glass band" id="bWire"></div>
+<div class="glass band" id="bHarness"></div>
+<div class="glass band" id="bRail"></div>
+<div class="glass band" id="bSandbox"></div>
+<canvas id="fg" width="1080" height="1920"></canvas>
+<div class="kick"><b>04 · Harness</b></div>
+<h1 id="h"></h1>
+<div class="glass cap" id="cap"></div>
+<div class="glass ctr k" id="kS" style="left:162px"><small>SWAPS</small><b id="cS">000</b></div>
+<div class="glass ctr k ok" id="kR" style="right:150px"><small>REBUILT</small><b id="cR">000</b></div>
+
+<script id="reel-data" type="application/json">{
+  "id": "r07-harness",
+  "title": "Sandbox, harness, wire",
+  "audio": { "src": "../deck/narration/river.mp3", "start": 225.2, "end": 258.44 },
+  "disclosure": "AI-generated narration using ElevenLabs River stock voice, selected by the author; not a recording or clone of Carlos Escobar.",
+  "captions": { "font": "Roboto Flex", "size": 64, "maxChars": 22, "marginL": 220, "marginR": 220, "marginV": 457,
+    "baseSize": 50, "maxEventChars": 42, "speakerColor": { "S0": "oklch(0.8 0.12 245)" } }
+}</script>
+<script src="engine.js"></script>
+<script src="captions/r07-harness.cwi.js"></script>
+<script>
+// Timeline in seconds from the start of the keynote slice (225.20 s), keyed to the narration's word timings
+// (captions/r07-harness.cwi.json): "Separate the runtime into sandbox@1.34, harness@2.32, and wire@3.02" …
+const TL = {
+  split: { sandbox: 1.3, harness: 2.28, wire: 2.98 },
+  sandbox: 4.1, env: 4.96, cells: [6.88, 7.62, 8.28, 9.34],          // filesystem, tools, network access, isolation
+  harness: 10.6, loop: 11.4, stations: [12.34, 13.02, 14.0, 14.88],   // request, model calls, tool calls, decisions
+  wire: 16.04, connects: 16.32, person: 17.76, system: 18.38,
+  rates: 19.84, chips: 22.4, behind: 23.34, cli: 23.86, mcp: 25.48, boundary: 27.54,
+  swaps: [28.74, 29.76, 30.74], counters: 28.4, rebuilt: 31.2, capability: 32.2, end: 33.24
+};
+const ease = x => { x = clamp(x, 0, 1); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 };
+const ramp = (t, a, d) => ease((t - a) / d);
+const bgc = document.getElementById('bg').getContext('2d'), fgc = document.getElementById('fg').getContext('2d');
+const amb = [...document.querySelectorAll('.ambient i')];
+
+// Geometry: x 143-938 is the safe zone; the bands stop at y 1210 so the caption band (y 1288-1463) stays clear.
+// The SWAPS / REBUILT counters take the harness band's lower corners, free once the chips have moved to the rail.
+const BAND = { wire: [460, 150], harness: [630, 270], rail: [918, 64], sandbox: [1000, 210] };
+const O = [540, 772], RING = 90, L = 172, RX = 908;   // orb centre, loop radius, band text left / right edges
+const DEG = Math.PI / 180;
+const ST = [['request', -150], ['model calls', -30], ['tool calls', 30], ['decisions', 150]];
+const LAP = 2.6, W = 360 / LAP;                        // after the first narrated pass the loop keeps a steady lap
+const HARNESSES = ['Claude Code', 'Codex', 'Gemini CLI', 'your own loop'];
+const RATE = { wire: 1.5, harness: 4, sandbox: .35 };  // "these layers change at different rates": changes per second
+
+// background: the deck's liquid-metal ASCII flow, as in reel 01
+function background(t) {
+  setCtx(bgc); bgc.clearRect(0, 0, 1080, 1920);
+  const A = atlas(13, 'oklch(0.78 0.06 245)'); bgc.globalAlpha = .2;
+  asciiField(0, 0, 1080, 1920, 17, A, (X, Y) => {
+    const f = Math.sin(X * .011 + Math.sin(Y * .008 + t * .19) * 1.7 + t * .13) * .5 + .5,
+      g = Math.sin(Y * .015 - t * .11 + Math.sin(X * .005 + t * .07) * 2.2) * .5 + .5;
+    return Math.min(.72, Math.pow(f * g, 2.2) * 1.25);
+  });
+  bgc.globalAlpha = 1;
+  amb.forEach((el, i) => el.style.transform = `translate(${Math.sin(t * .05 + i * 2) * 60}px,${Math.cos(t * .04 + i) * 80}px) scale(${1 + .05 * Math.sin(t * .07 + i)})`);
+}
+
+// ── small canvas kit (the deck's T / pill / ribbon, reduced to what this scene uses) ──
+function T(s, x, y, o = {}) {
+  const ctx = getCtx(), a = o.a ?? 1; if (a <= .01) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.font = `${o.w || 500} ${o.s || 16}px ${o.f || FONT.m}`; ctx.letterSpacing = `${o.ls || 0}px`;
+  ctx.fillStyle = o.c || C.t2; ctx.textAlign = o.al || 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y); ctx.restore();
+}
+function rr(x, y, w, h, r, stroke, a = 1, fill = null, lw = 1.4) {
+  const ctx = getCtx(); if (a <= .01) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
+  if (fill) { ctx.fillStyle = fill; ctx.fill() }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke() }
+  ctx.restore();
+}
+const qb = (p, u) => [0, 1].map(i => (1 - u) * (1 - u) * p[0][i] + 2 * (1 - u) * u * p[1][i] + u * u * p[2][i]);
+function curve(p, c, a, lw = 1.4, dash = null) {
+  if (a <= .01) return;
+  const ctx = getCtx(); ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = c; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(...p[0]); ctx.quadraticCurveTo(...p[1], ...p[2]); ctx.stroke(); ctx.restore();
+}
+// a travelling pulse with a short glyph-free trail, u in [0,1] along a quadratic path
+function pulse(p, u, c, a = 1) {
+  if (u <= 0 || u >= 1 || a <= .01) return;
+  const ctx = getCtx(), fade = Math.min(1, u / .12, (1 - u) / .12);
+  for (let k = 5; k >= 1; k--) { const q = qb(p, clamp(u - k * .03, 0, 1)); ctx.globalAlpha = a * fade * (1 - k / 6) * .5; dot(q[0], q[1], 2.2, c) }
+  ctx.globalAlpha = a * fade; const q = qb(p, u); dot(q[0], q[1], 3.2, c, 4); ctx.globalAlpha = 1;
+}
+
+// ── the bands: one runtime block that separates into sandbox, harness and wire ──
+const bands = { wire: 'bWire', harness: 'bHarness', rail: 'bRail', sandbox: 'bSandbox' };
+for (const n in bands) bands[n] = document.getElementById(bands[n]);
+function bandAt(name, t) {
+  const [top, h] = BAND[name];
+  if (name === 'harness') return { top, h, k: 1 };
+  if (name === 'rail') return { top, h, k: ramp(t, TL.behind - .1, .6) };
+  const k = ramp(t, TL.split[name] - .1, .9), [t0, h0] = BAND.harness;
+  return { top: lerp(t0, top, k), h: lerp(h0, h, k), k };
+}
+function placeBand(el, b) {
+  el.style.top = `${b.top.toFixed(2)}px`; el.style.height = `${b.h.toFixed(2)}px`;
+  el.style.visibility = b.k > .005 ? '' : 'hidden'; el.style.opacity = b.k >= 1 ? '' : String(b.k);
+}
+// which band the narration is on: the others dim so the eye follows the voice
+function focus(name, t) {
+  const on = t < TL.sandbox ? null : t < TL.harness - .1 ? 'sandbox' : t < TL.wire - .15 ? 'harness' : t < TL.rates - .2 ? 'wire'
+    : t < TL.chips - .3 ? 'all' : 'harness';
+  if (on === null || on === 'all') return 1;
+  if (on === 'harness' && name === 'rail') return 1;
+  return name === on ? 1 : .42;
+}
+function header(name, sub, y, t, at, f) {
+  const k = ramp(t, at - .1, .45); if (k <= .01) return;
+  const lit = t >= at && t < at + 1.4;
+  T(name, L, y, { f: FONT.d, s: 42, w: 400, ls: -.6, c: lit ? C.blue : C.t1, a: k * f });
+  const ctx = getCtx(); ctx.font = `400 42px ${FONT.d}`; ctx.letterSpacing = '-0.6px';
+  const w = ctx.measureText(name).width; ctx.letterSpacing = '0px';
+  T(sub[0], L + w + 20, y + 3, { s: 19, c: C.t3, a: ramp(t, sub[1], .5) * f, ls: 1 });
+}
+// "these layers change at different rates": each header gets a change track and a counter running at its own rate
+function rateTrack(name, y, t, f) {
+  const k = ramp(t, TL.rates, .6); if (k <= .01) return;
+  const ctx = getCtx(), r = RATE[name], x0 = 680, x1 = 836, step = 14, off = ((t * r * 22) % step + step) % step;
+  ctx.save(); ctx.globalAlpha = k * f; ctx.strokeStyle = al(C.t3, .6); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0, y + 9); ctx.lineTo(x1, y + 9); ctx.stroke();
+  ctx.beginPath(); ctx.rect(x0, y - 14, x1 - x0, 28); ctx.clip();
+  for (let x = x1 + step - off; x > x0 - step; x -= step) { const e = (x - x0) / (x1 - x0); ctx.globalAlpha = k * f * clamp(e, .15, 1); ctx.fillStyle = C.cyan; ctx.fillRect(x, y - 4, 2, 13) }
+  ctx.restore();
+  const n = Math.max(0, Math.floor((t - TL.rates) * r));
+  T('Δ', 852, y + 2, { s: 19, c: C.t3, a: k * f }); T(String(n).padStart(3, '0'), RX, y + 2, { s: 23, w: 500, c: C.cyan, al: 'right', a: k * f, ls: 1 });
+}
+
+// ── icons ──
+function scaled(icon, x, y, c, a, s = 1.2) { const ctx = getCtx(); ctx.save(); ctx.translate(x, y); ctx.scale(s, s); icon(0, 0, c, a); ctx.restore() }
+function phone(x, y, c, a) { rr(x - 16, y - 28, 32, 56, 8, c, a); rr(x - 5, y + 19, 10, 2.5, 1.2, null, a, c) }
+function system(x, y, c, a) { rr(x - 38, y - 24, 76, 48, 8, c, a); for (let i = 0; i < 3; i++) rr(x - 26, y - 13 + i * 11, 34 - i * 6, 3, 1.5, null, a * .8, c); rr(x + 18, y - 13, 7, 7, 3.5, null, a, C.green) }
+function folderIcon(x, y, c, a) {
+  const ctx = getCtx(); if (a <= .01) return; ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = c; ctx.lineWidth = 1.5;
+  const X = x - 34, Y = y - 24; ctx.beginPath(); ctx.moveTo(X, Y + 8); ctx.lineTo(X, Y + 48); ctx.lineTo(X + 68, Y + 48); ctx.lineTo(X + 68, Y + 8); ctx.lineTo(X + 32, Y + 8); ctx.lineTo(X + 26, Y); ctx.lineTo(X + 3, Y); ctx.closePath(); ctx.stroke();
+  ctx.fillStyle = c; ctx.globalAlpha *= .7; for (let k = 0; k < 3; k++) ctx.fillRect(X + 11, Y + 19 + k * 9, 40 - k * 9, 2.5); ctx.restore();
+}
+function terminal(x, y, c, a) { rr(x - 36, y - 24, 72, 48, 8, c, a); T('>_', x - 22, y + 2, { s: 20, w: 600, c, a }) }
+function network(x, y, c, a) {
+  const P = [[x, y - 20], [x - 28, y + 18], [x + 28, y + 18]], ctx = getCtx(); if (a <= .01) return;
+  ctx.save(); ctx.globalAlpha *= a * .7; ctx.strokeStyle = c; ctx.lineWidth = 1.3; ctx.beginPath(); P.forEach((p, i) => { const q = P[(i + 1) % 3]; ctx.moveTo(...p); ctx.lineTo(...q) }); ctx.stroke(); ctx.restore();
+  P.forEach(p => { ctx.globalAlpha = a; dot(p[0], p[1], 5, c, 2.4) }); ctx.globalAlpha = 1;
+}
+function lock(x, y, c, a) {
+  const ctx = getCtx(); if (a <= .01) return; ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = c; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x, y - 6, 12, Math.PI, 0); ctx.lineTo(x + 12, y + 2); ctx.moveTo(x - 12, y + 2); ctx.lineTo(x - 12, y - 6); ctx.stroke(); ctx.restore();
+  rr(x - 19, y, 38, 26, 6, c, a, al(c, .16), 1.6); dot(x, y + 12, 3, c);
+}
+
+// ── wire: the connection from the agent to a person or another system ──
+const PERSON = [470, 556], SYSTEM = [628, 556], TOP = [O[0], O[1] - RING];
+const toPerson = [TOP, [O[0] - 20, 620], [PERSON[0], PERSON[1] + 34]], toSystem = [TOP, [O[0] + 20, 620], [SYSTEM[0], SYSTEM[1] + 28]];
+function wire(t, f) {
+  const b = bandAt('wire', t); if (b.k <= .01) return;
+  const y = b.top + 32; header('Wire', ['connects the agent', TL.connects], y, t, TL.split.wire, f * b.k); rateTrack('wire', y, t, f);
+  if (b.k < 1) return;
+  const kp = ramp(t, TL.person - .2, .45), ks = ramp(t, TL.system - .2, .45);
+  curve(toPerson, C.warm, kp * f * .7, 1.4, [3, 6]); curve(toSystem, C.warm, ks * f * .7, 1.4, [3, 6]);
+  scaled(phone, PERSON[0], PERSON[1], t >= TL.person && t < TL.person + 1.2 ? C.warm : C.t2, kp * f); T('person', PERSON[0] - 38, PERSON[1], { s: 21, al: 'right', c: C.t2, a: kp * f });
+  scaled(system, SYSTEM[0], SYSTEM[1], t >= TL.system && t < TL.system + 1.2 ? C.warm : C.t2, ks * f); T('another system', SYSTEM[0] + 56, SYSTEM[1], { s: 21, c: C.t2, a: ks * f });
+  // a decision leaves the loop for the wire on every lap; the first two are the narrated ones
+  const sends = [[TL.person - .55, 0], [TL.system - .55, 1]];
+  for (let n = 1; n < 8; n++) { const tp = TL.stations[3] + n * LAP; if (tp > TL.system + .4) sends.push([tp, n % 2]) }
+  for (const [tp, w] of sends) pulse(w ? toSystem : toPerson, (t - tp) / .7, C.warm, (w ? ks : kp) * f);
+}
+
+// ── harness: the loop that turns a request into model calls, tool calls and decisions ──
+function loopAngle(t) {                                  // the pulse goes round the loop, station by station
+  const S = TL.stations, A = ST.map(s => s[1]);
+  if (t < S[0]) return null;
+  for (let i = 0; i < 3; i++) if (t < S[i + 1]) return lerp(A[i], A[i + 1], (t - S[i]) / (S[i + 1] - S[i]));
+  return A[3] + (t - S[3]) * W;
+}
+const stationPos = (deg, r = RING) => [O[0] + Math.cos(deg * DEG) * r, O[1] + Math.sin(deg * DEG) * r];
+function harnessName(t) {                                // which harness runs the loop, and how far through a swap
+  let i = 0; for (let k = 0; k < TL.swaps.length; k++) if (t >= TL.swaps[k]) i = k + 1;
+  return { i, k: i ? ramp(t, TL.swaps[i - 1], .45) : 1 };
+}
+const ORBC = () => [C.act, C.cyan, C.violet, C.warm];
+function harness(t, f) {
+  const b = bandAt('harness', t), y = b.top + 32;
+  const kRun = 1 - ramp(t, TL.split.sandbox - .2, .6);   // before the split the whole block is "the runtime"
+  T('RUNTIME', O[0], O[1] + 118, { s: 21, w: 600, ls: 5, al: 'center', c: C.t2, a: kRun });
+  header('Harness', ['the loop', TL.loop], y, t, TL.split.harness, f); rateTrack('harness', y, t, f);
+  const { i, k } = harnessName(t), cols = ORBC();
+  const kr = ramp(t, TL.loop - .2, .7);
+  if (kr > .01) {
+    const flash = i ? Math.max(0, 1 - (t - TL.swaps[i - 1]) / .9) : 0;
+    metalRing(O[0], O[1], RING, t * 1.4, 1.6 + flash * 1.6, kr * f * (.65 + .35 * flash), RING, 1.1);
+  }
+  // the orb is the harness; a swap crossfades it to the next harness's colour
+  if (i && k < 1) orb(O[0], O[1], 70, cols[i - 1], t * 1.2, f * (1 - k));
+  orb(O[0], O[1], 70, cols[i], t * 1.2, f * (i ? k : 1));
+  const a = loopAngle(t);
+  ST.forEach(([s, deg], j) => {
+    const ks = ramp(t, TL.stations[j] - .15, .4); if (ks <= .01) return;
+    let d = a === null ? 999 : Math.abs((((a - deg) % 360) + 540) % 360 - 180); const lit = d < 16 ? 1 - d / 16 : 0;
+    const [x, yy] = stationPos(deg), c = j === 2 ? C.cyan : j === 3 ? C.warm : C.blue;
+    dot(x, yy, 4 + lit * 2.5, lit > .2 ? c : C.t2, 2 + lit * 3);
+    const right = Math.cos(deg * DEG) > 0;
+    T(s, x + (right ? 22 : -22), yy, { s: 21, al: right ? 'left' : 'right', c: lit > .3 ? c : C.t2, a: ks * f });
+  });
+  if (a !== null) { const p = stationPos(a); getCtx().globalAlpha = f; dot(p[0], p[1], 3.6, C.t1, 5); getCtx().globalAlpha = 1 }
+  // the name of the harness running the loop, under the orb; it changes, the rail below does not
+  const kn = ramp(t, TL.harness - .1, .5);
+  if (kn > .01) {
+    if (i && k < 1) T(HARNESSES[i - 1], O[0], O[1] + 113 - k * 10, { f: FONT.d, s: 29, w: 500, al: 'center', c: C.t2, a: (1 - k) * kn * f, ls: -.3 });
+    T(HARNESSES[i], O[0], O[1] + 113 + (1 - k) * 12, { f: FONT.d, s: 29, w: 500, al: 'center', c: i ? cols[i] : C.t2, a: (i ? k : 1) * kn * f, ls: -.3 });
+  }
+}
+
+// ── durable integrations: wired into the harness at first, then moved behind a CLI / MCP server boundary ──
+const CHIP_IN = [[255, 752], [255, 818], [832, 868]], CHIP_RAIL = [[662, 950], [762, 950], [862, 950]];
+function integrations(t, f) {
+  const r = bandAt('rail', t), ry = 950;
+  if (r.k > .01) {
+    T('CLI', L + 4, ry, { s: 23, w: 600, ls: 3, c: C.cyan, a: ramp(t, TL.cli - .1, .4) });
+    T('·', L + 74, ry, { s: 23, c: C.t3, a: ramp(t, TL.mcp - .1, .4) });
+    T('MCP SERVER', L + 100, ry, { s: 23, w: 600, ls: 3, c: C.cyan, a: ramp(t, TL.mcp - .1, .4) });
+    const kb = ramp(t, TL.boundary - .1, .5);         // "where that boundary makes sense": the rail edge lights up
+    if (kb > .01) { const g = Math.max(0, 1 - (t - TL.boundary) / 2.2); rr(147, r.top + 4, 787, r.h - 8, 26, C.cyan, kb * (.35 + .55 * g), null, 1.6 + g) }
+  }
+  const kc = ramp(t, TL.chips - .15, .45); if (kc <= .01) return;
+  const kept = ramp(t, TL.rebuilt, .5), flare = t > TL.capability ? Math.max(0, 1 - (t - TL.capability) / 1.2) : 0;
+  T('durable integrations', 262, 702, { s: 18, al: 'center', c: C.t3, a: kc * (1 - ramp(t, TL.behind, .5)) * f });
+  CHIP_IN.forEach((p0, j) => {
+    const m = ramp(t, TL.behind + j * .16, .85), p = [lerp(p0[0], CHIP_RAIL[j][0], m), lerp(p0[1], CHIP_RAIL[j][1], m)];
+    // before the move each one is wired straight into the harness internals: a tangle of direct links
+    curve([p, [lerp(p[0], O[0], .5), p[1] + (j - 1) * 40], O], C.warm, kc * (1 - m) * .55 * f, 1.2, [2, 5]);
+    const c = kept > .01 ? C.green : C.cyan, fa = m > .5 ? 1 : f;
+    rr(p[0] - 43, p[1] - 19, 86, 38, 19, c, kc * fa, al(C.deep, .7), 1.4 + kept * .6);
+    if (kept > .01 || flare) { getCtx().globalAlpha = 1; glow(p[0], p[1], 50 + flare * 30, C.green, (.15 * kept + .5 * flare) * kc) }
+    T(`CAP ${String(j + 1).padStart(2, '0')}`, p[0], p[1] + 1, { s: 16, w: 600, ls: 1.2, al: 'center', c: kept > .5 ? C.green : C.t1, a: kc * fa });
+  });
+}
+
+// ── the link the loop uses to act: tool calls go down to the sandbox (through the rail once it exists) ──
+const TOOL = stationPos(30), toSandbox = [TOOL, [596, 900], [O[0], 1046]];
+function link(t, f) {
+  const k = ramp(t, TL.stations[2] - .2, .5); if (k <= .01) return;
+  const r = bandAt('rail', t).k;
+  curve(toSandbox, C.cyan, k * .45 * Math.max(f, .7), 1.3, [2, 6]);
+  if (r > .01) { rr(O[0] - 34, 932, 68, 36, 18, C.cyan, r, al(C.deep, .6), 1.4); T('⇅', O[0], 951, { s: 18, al: 'center', c: C.cyan, a: r }) }
+  const passes = [TL.stations[2]]; for (let n = 0; n < 9; n++) passes.push(TL.stations[3] + (240 + 360 * n) / W);
+  for (const tp of passes) pulse(toSandbox, (t - tp) / .8, C.cyan, k);
+}
+
+// ── sandbox: the execution environment, with its filesystem, tools, network access and isolation ──
+const CELLS = [['filesystem', folderIcon], ['tools', terminal], ['network', network], ['isolation', lock]];
+function sandbox(t, f) {
+  const b = bandAt('sandbox', t); if (b.k <= .01) return;
+  const y = b.top + 32; header('Sandbox', ['execution environment', TL.env], y, t, TL.split.sandbox, f * b.k); rateTrack('sandbox', y, t, f);
+  if (b.k < 1) return;
+  CELLS.forEach(([n, icon], j) => {
+    const at = TL.cells[j], k = ramp(t, at - .15, .45); if (k <= .01) return;
+    const x = 257 + j * 188.7, lit = t >= at && t < at + 1.3, c = lit ? C.green : C.t2;
+    if (lit) { getCtx().globalAlpha = f; glow(x, 1100, 80, C.green, .25 * (1 - (t - at) / 1.3)); getCtx().globalAlpha = 1 }
+    { const ctx = getCtx(); ctx.save(); ctx.translate(x, 1100); ctx.scale(1.3, 1.3); icon(0, 0, c, k * f); ctx.restore() }
+    T(n, x, 1172, { s: 21, al: 'center', c: lit ? C.green : C.t2, a: k * f });
+  });
+  // isolation: the sandbox's own boundary closes around everything inside it
+  const ki = ramp(t, TL.cells[3] - .1, .7);
+  if (ki > .01) { const g = Math.max(0, 1 - (t - TL.cells[3]) / 1.6); rr(151, b.top + 8, 779, b.h - 16, 22, C.green, ki * f * (.3 + .6 * g), null, 1.4 + g * 1.2) }
+}
+
+const H0 = 'Sandbox, harness,<br><em>wire.</em>', H1 = 'Swap the harness.<br><em>Keep the capabilities.</em>';
+const h = document.getElementById('h'), kS = document.getElementById('kS'), kR = document.getElementById('kR');
+const cS = document.getElementById('cS'), cR = document.getElementById('cR');
+// An element at rest carries no filter, transform or opacity (see reel 01): a settled frame must be plain.
+function settle(el, k, transform, blur) {
+  if (k >= 1) { el.style.opacity = ''; el.style.filter = ''; el.style.transform = ''; el.style.visibility = ''; return }
+  el.style.visibility = k > 0 ? '' : 'hidden';
+  el.style.opacity = k; el.style.filter = k > 0 ? `blur(${(1 - k) * blur}px)` : ''; el.style.transform = transform(k);
+}
+
+// ── Caption with Intention: word-level CWI from OpenCaptions, rendered as a pure function of t ──
+const REEL = JSON.parse(document.getElementById('reel-data').textContent), CAPCFG = REEL.captions;
+const capEl = document.getElementById('cap');
+// FCC: at most 42 characters per caption; split long events at word boundaries, preferring punctuation.
+const FUNC = /^(a|an|the|of|to|in|on|and|or|but|for|with|by|its|it|is|be|can|that)$/i;
+function chunkEvents(doc) {
+  const out = [];
+  for (const e of doc.captions) {
+    let cur = [];
+    const len = ws => ws.map(w => w.text).join(' ').length;
+    for (const w of e.words) {
+      if (cur.length && len([...cur, w]) > CAPCFG.maxEventChars) {
+        let cut = cur.length;                                   // break after the last punctuation if it is not too early
+        for (let i = cur.length - 1; i >= Math.ceil(cur.length / 2); i--) if (/[.,;:?!]$/.test(cur[i].text)) { cut = i + 1; break }
+        while (cut > 1 && FUNC.test(cur[cut - 1].text)) cut--;  // never end a caption on "the", "a", "of", "and" …
+        out.push({ speaker: e.speaker_id, words: cur.slice(0, cut) }); cur = cur.slice(cut);
+      }
+      cur.push(w);
+    }
+    if (cur.length) out.push({ speaker: e.speaker_id, words: cur });
+  }
+  out.forEach((ev, i) => { ev.start = ev.words[0].start; ev.until = i + 1 < out.length ? out[i + 1].words[0].start : ev.words.at(-1).end + .6 });
+  // back-to-back captions share one card: the text swaps, the card does not fade out and in (no blank frame)
+  out.forEach((ev, i) => { ev.chainOut = i + 1 < out.length && out[i + 1].start - ev.words.at(-1).end < .5; ev.chainIn = i > 0 && out[i - 1].chainOut });
+  return out;
+}
+const CAPS = window.CWI && !new URLSearchParams(location.search).has('captions') ? chunkEvents(window.CWI) : [];
+const spk = id => CAPCFG.speakerColor?.[id] || window.CWI?.cast.find(c => c.id === id)?.color || '#fff';
+let capShown = -1;
+function captions(t) {
+  if (!CAPS.length) { capEl.style.display = 'none'; return }
+  let i = -1; for (let k = 0; k < CAPS.length; k++) if (t >= CAPS[k].start - .12) i = k;
+  const ev = CAPS[i];
+  if (!ev || t > ev.until) { capEl.style.opacity = '0'; capShown = -1; return }
+  if (capShown !== i) {                                         // rebuild only when the event changes; style is set from t below
+    capEl.innerHTML = ev.words.map(w => `<span class="w${w.emphasis ? ' em' : ''}">${w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join(' ');
+    capShown = i;
+    ev.words.forEach((w, j) => {                               // measure at the word's own weight and size, then reserve the overhang
+      if (!w.emphasis) return;
+      const el = capEl.children[j];
+      el.style.fontWeight = String(Math.round(w.weight / 100) * 100); el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+      el.style.margin = `0 ${Math.ceil(el.getBoundingClientRect().width * .08)}px`;
+    });
+  }
+  const inK = ev.chainIn ? 1 : ramp(t, ev.start - .12, .18), outK = ev.chainOut ? 1 : 1 - ramp(t, ev.until - .14, .14), k = Math.min(inK, outK);
+  capEl.style.opacity = k >= 1 ? '' : String(k);
+  const col = spk(ev.speaker), spans = capEl.children;
+  ev.words.forEach((w, j) => {
+    const el = spans[j], a = w.animation || {}, d = (a.delay_ms ?? 100) / 1000, dur = (a.duration_ms ?? 600) / 1000;
+    const p = ease((t - w.start - d) / dur);                  // CWI: white → speaker colour, 600 ms ease after 100 ms
+    const rise = ease((t - w.start + .05) / .22);              // entrance: the word lifts into place as it is spoken
+    const bump = w.emphasis ? Math.sin(Math.PI * clamp((t - w.start) / .45, 0, 1)) : 0;  // 15% bounce on emphasis
+    el.style.fontWeight = String(Math.round(w.weight / 100) * 100);
+    el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+    el.style.color = p >= 1 ? col : p <= 0 ? '#fff' : `color-mix(in oklab, ${col} ${(p * 100).toFixed(1)}%, #fff)`;
+    el.style.opacity = rise >= 1 ? '' : (.38 + .62 * rise).toFixed(3);
+    el.style.transform = bump > 0 ? `scale(${(1 + .15 * bump).toFixed(4)})` : rise >= 1 ? '' : `translateY(${((1 - rise) * 10).toFixed(2)}px)`;
+    el.style.textShadow = (w.emphasis && t >= w.start) ? `0 0 ${(20 * Math.max(bump, .35)).toFixed(1)}px ${col}, 0 0 40px color-mix(in oklab, ${col} 25%, transparent)` : '';
+  });
+}
+
+
+window.renderAt = function (t) {
+  document.documentElement.style.setProperty('--ua', ((t * 40) % 360).toFixed(1) + 'deg');
+  captions(t);
+  background(t);
+  for (const n in bands) placeBand(bands[n], bandAt(n, t));
+  setCtx(fgc); fgc.clearRect(0, 0, 1080, 1920);
+  const f = n => focus(n, t);
+  link(t, f('harness'));
+  wire(t, f('wire'));
+  sandbox(t, f('sandbox'));
+  harness(t, f('harness'));
+  integrations(t, f('harness'));
+  // the headline swaps when the narration turns to changing harnesses; the counters keep score of the swap
+  const sw = ramp(t, TL.swaps[0] - .35, .7), html = sw < .5 ? H0 : H1;
+  if (h.innerHTML !== html) h.innerHTML = html;
+  settle(h, sw < .5 ? 1 - sw * 2 : (sw - .5) * 2, k => `translateY(${(1 - k) * (sw < .5 ? -16 : 16)}px)`, 10);
+  const { i } = harnessName(t);
+  settle(kS, ramp(t, TL.counters, .5), k => `translateY(${(1 - k) * 20}px)`, 8);
+  settle(kR, ramp(t, TL.rebuilt - .15, .5), k => `translateY(${(1 - k) * 20}px)`, 8);
+  cS.textContent = String(i).padStart(3, '0');
+};
+
+const Q = new URLSearchParams(location.search);
+FONTS_READY.then(() => Promise.all([...[100, 200, 300, 400, 500, 600, 700, 800, 900].map(w => `${w} 54px "Roboto Flex"`),
+  '400 36px Raleway', '500 25px Raleway', '600 20px "JetBrains Mono"'].map(s => document.fonts.load(s)))).then(() => document.fonts.ready).then(() => {
+  window.renderAt(+(Q.get('t') || 0));
+  window.__ready = true;
+  if (!Q.has('t')) {
+    const t0 = performance.now();
+    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % (window.SERIES?.total_dur || TL.end)); requestAnimationFrame(loop) };
+    requestAnimationFrame(loop);
+  }
+});
+</script>
+<!-- Series Part 4/5 (BRO-3817): the River hook, the end card and the series timeline. Without the generated
+     audio/r07-harness.series.js the overlay does nothing and the reel plays as the plain keynote slice. -->
+<script src="audio/r07-harness.series.js" onerror="this.remove()"></script>
+<script src="series-overlay.js"></script>
+</body>
+</html>
