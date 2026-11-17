@@ -238,7 +238,7 @@ function workspace(t, a) {
 function terminal(t, a) {
   if (a <= .01) return;
   const ctx = getCtx(); ctx.globalAlpha = a; gpanel(TM.x, TM.y, TM.w, TM.h, 22);
-  T('bash', TM.x + TM.w - 24, TM.y + 30, { s: 20, al: 'right', c: C.t3, ls: 2 });
+  T('bash', TM.x + TM.w - 70, TM.y + 30, { s: 20, al: 'right', c: C.t3, ls: 2 });
   const c = [...CMDS].reverse().find(x => t >= x.at);
   const y0 = TM.y + 46;
   if (!c) { T('$', TM.x + 26, y0, { s: 24, w: 600, c: C.green }); if (Math.sin(t * 8) > 0) T('▍', TM.x + 52, y0, { s: 24 }); ctx.globalAlpha = 1; return }

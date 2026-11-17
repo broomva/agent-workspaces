@@ -34,12 +34,16 @@ const htmlPath = path.join(here, `${ID}.html`);
 const reel = JSON.parse(readFileSync(htmlPath, 'utf8').match(/<script id="reel-data"[^>]*>([\s\S]*?)<\/script>/)[1]);
 const { start, end } = reel.audio, dur = end - start;
 const seriesJson = path.join(here, 'audio', `${ID}.series.json`), SERIES = existsSync(seriesJson) ? JSON.parse(readFileSync(seriesJson, 'utf8')) : null;
+// A part of the series must render in series mode: its page loads the overlay on its own, so a plain render would play
+// the keynote audio under the cold open. Only a reel that is not a part may render plain.
+const PART = JSON.parse(readFileSync(path.join(here, 'series.json'), 'utf8')).parts.find(p => p.reel === ID);
+if (PART && !SERIES) throw new Error(`${ID} is Part ${PART.part} in series.json but audio/${ID}.series.json is missing; run bun reels/tts.mjs --reel ${ID}`);
 if (SERIES && (Math.abs(SERIES.body.start - start) > 1e-3 || Math.abs(SERIES.body.end - end) > 1e-3))
   throw new Error(`${ID}: series body ${SERIES.body.start}-${SERIES.body.end} differs from the reel's audio ${start}-${end}; rerun bun reels/tts.mjs --reel ${ID}`);
 // The generated timeline has to match the canonical series.json and the .series.js the page loads; otherwise the
 // soundtrack (from .series.json) and the visuals (from .series.js) could disagree without any error.
 if (SERIES) {
-  const part = JSON.parse(readFileSync(path.join(here, 'series.json'), 'utf8')).parts.find(p => p.reel === ID);
+  const part = PART;
   const js = readFileSync(path.join(here, 'audio', `${ID}.series.js`), 'utf8').replace(/^[\s\S]*?window\.SERIES=/, '').replace(/;\s*$/, '');
   const same = (x, y) => JSON.stringify(x) === JSON.stringify(y);
   const why = !part ? 'it is not a part in series.json'
