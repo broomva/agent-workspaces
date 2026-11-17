@@ -8,7 +8,7 @@
 // and .series.js) from series.json and the cached River lines with `tts.mjs --offline`, so there is no generated copy
 // to go stale; it fails if a line needs new audio. The page gets window.SERIES before it loads, and
 // reels/series-overlay.js draws the cold open and the end card and maps the reel's own renderAt to body time.
-// A reel that is not a part renders exactly as before.
+// A reel that is not a part renders exactly as before. A v2 part (series.json `v2.parts`) renders through reels/render-v2.mjs.
 // Frames are window.renderAt(t) screenshots. Narration is a slice of the keynote audio. Captions are
 // OpenCaptions (Caption with Intention) documents: generated once, stored in reels/captions/ (json + a
 // script the page loads), and drawn by the page itself, word by word (content-engine opencaptions skill,
@@ -32,6 +32,17 @@ const OUT = path.resolve(arg('--out', path.join('out', 'reels'))), FPS = +arg('-
 const STILL = argv.includes('--still') ? +arg('--still', '0') : null, SAFE = argv.includes('--safe'), ASS = argv.includes('--ass');
 mkdirSync(OUT, { recursive: true });
 const run = (cmd, args) => { const r = spawnSync(cmd, args, { encoding: 'utf8' }); if (r.status) throw new Error(`${cmd} failed: ${r.stderr || r.stdout}`); return r.stdout };
+
+// v2 mode (Act I v2, BRO-3825): a reel listed in series.json `v2.parts` with spoken lines renders as one River take +
+// excerpt hold + shared CTA + end hold, with captions from the alignment (reels/render-v2.mjs). Everything below is v1.
+const V2PART = JSON.parse(readFileSync(path.join(here, 'series.json'), 'utf8')).v2?.parts.find(p => p.reel === ID && p.spoken);
+if (V2PART) {
+  const safeCss = 'body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;' +
+    'border-style:solid;border-color:rgba(255,40,40,.32);border-width:277px 142px 277px 143px}';
+  const { renderV2 } = await import('./render-v2.mjs');
+  await renderV2({ id: ID, here, OUT, FPS, STILL, SAFE, safeCss, chromium, run });
+  process.exit(0);
+}
 
 const htmlPath = path.join(here, `${ID}.html`);
 const reel = JSON.parse(readFileSync(htmlPath, 'utf8').match(/<script id="reel-data"[^>]*>([\s\S]*?)<\/script>/)[1]);

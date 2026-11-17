@@ -1,0 +1,21 @@
+{
+  "line": "cta",
+  "field": "v2.cta.spoken",
+  "shared": "every v2 part",
+  "voice_id": "SAz9YHcvj6GT2YYXdXww",
+  "model_id": "eleven_v4",
+  "endpoint": "with-timestamps",
+  "outputFormat": "mp3_44100_128",
+  "requestSha256": "cc4245bf227d6dc16cd8dc0bf32d673cbf1bc82103b6fbb9cc860fb3a2fb4bc2",
+  "audioSha256": "da03186fe752e82f9033fe372985c26ec9c9678aaa825b6bf1e1179f9487d434",
+  "alignmentSha256": "bfc7cc13feacd5345073ec2c2a5936f9625957419e5cc6d35afd846cf96e0f38",
+  "characters": 80,
+  "estimateCredits": 36,
+  "capCredits": 40,
+  "creditsPerCharacter": 0.45,
+  "generatedAt": "2026-11-17T15:39:33.815Z",
+  "response": {
+    "request-id": "N89HcAnxojIcZYx9dmyW",
+    "character-cost": "35"
+  }
+}

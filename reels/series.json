@@ -76,5 +76,56 @@
     "firstLine": "{spokenHook}",
     "body": "Part {part}/5 of Agent Workspaces, Act I. {cardCta}.\nFull keynote and field guide: broomva.tech/agent-workspaces",
     "hashtags": ["#AIAgents", "#AgenticAI", "#ClaudeCode", "#DevTools", "#AgentWorkspaces"]
+  },
+  "v2": {
+    "$comment": "Act I v2 (BRO-3825): re-scripted through content-flow; the keynote-slice rule is lifted by owner decision (2026-11-17). Everything above this key is v1 and still renders as before. reels/tts.mjs --v2 and reels/render.mjs read this key; SERIES.md explains the shape.",
+    "scriptsFrom": "broomva/content-flow accounts/broomva.tech/runs/2026-11-17-act1-v2/<part>/script.json (cf-script@1, reviewed by a provider other than the writer)",
+    "voice": { "voiceId": "SAz9YHcvj6GT2YYXdXww", "modelId": "eleven_v4", "endpoint": "with-timestamps" },
+    "budget": {
+      "$comment": "Owner decision 2026-11-17: the CTA is recorded once and reused; each part voices only its hook and body. River bills about 0.44 credits per character (character-cost in every receipt, 0.434-0.448 so far); the estimate uses the highest observed rate rounded up. A line whose estimate exceeds its cap stops before any request.",
+      "creditsPerCharacter": 0.45,
+      "ctaCapCredits": 40,
+      "partCapCredits": 135
+    },
+    "cta": {
+      "asset": "v2-cta",
+      "spoken": "Comment WORKSPACE for the agent-workspace setup prompts and verification checks.",
+      "keyword": "WORKSPACE",
+      "endCard": "Build your layout · route AGENTS.md · check what survives",
+      "gets": "the Act I playbook: five copy-paste agent prompts, each with a verification check (playbooks/act-1.md)"
+    },
+    "excerptHold": { "$comment": "read at 4 words/s, at least 2.5 s, rounded up to a tenth", "wordsPerSecond": 4, "minSeconds": 2.5 },
+    "endHoldSeconds": 2.5,
+    "parts": [
+      { "part": 1, "key": "folder", "reel": "v2-p1-folder", "script": "p1-folder/script.json", "scriptSha256": null, "status": "script in cf-script review" },
+      {
+        "part": 2,
+        "key": "findings",
+        "reel": "v2-p2-findings",
+        "title": "Can your next agent check what this one found?",
+        "script": "p2-findings/script.json",
+        "scriptSha256": "sha256:0ba0542f63b170be587dfbae7890545498c4a72ce13b1e4743f5d876cd322a6c",
+        "headline": "The chat closes. The evidence stays.",
+        "spoken": [
+          "Can your next agent check what this one found?",
+          "Findings can get buried in chat history.",
+          "Give it a filesystem and a shell.",
+          "Now it can open the file, run the test, and leave a record.",
+          "A claim can point to a file. A fix, to a test and its result.",
+          "So the next agent can find it, and check it."
+        ],
+        "emphasis": ["check", "found", "buried", "filesystem", "shell", "file", "test", "record", "claim", "fix", "result", "find"],
+        "excerpt": { "text": "Cite each claim as path:line or as the command you ran.", "source": "playbooks/act-1.md:41" },
+        "next": "Next: where does your agent look before it touches a file?"
+      },
+      { "part": 3, "key": "primer", "reel": "v2-p3-primer", "script": "p3-primer/script.json", "scriptSha256": null, "status": "script in cf-script review" },
+      { "part": 4, "key": "harness", "reel": "v2-p4-harness", "script": "p4-harness/script.json", "scriptSha256": null, "status": "script in cf-script review" },
+      { "part": 5, "key": "provenance", "reel": "v2-p5-provenance", "script": "p5-provenance/script.json", "scriptSha256": null, "status": "script in cf-script review" }
+    ],
+    "postCopy": {
+      "firstLine": "{title}",
+      "body": "Part {part}/5 of Agent Workspaces, Act I. Comment WORKSPACE → get the agent-workspace setup prompts and verification checks.\nbroomva.tech/agent-workspaces",
+      "hashtags": ["#AIAgents", "#AgenticAI", "#ClaudeCode", "#DevTools", "#AgentWorkspaces"]
+    }
   }
 }

@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agent Workspaces · Act I v2 · Part 2 · Can your next agent check what this one found?</title>
+<meta name="viewport" content="width=1080">
+<!-- Act I v2, Part 2 (BRO-3825), storyboarded from the script card's scene notes (content-flow
+     accounts/broomva.tech/runs/2026-11-17-act1-v2/p2-findings/script.json). Vertical-native 1080x1920.
+     window.REEL_V2 (reels/audio/v2/v2-p2-findings.timeline.js, written by `bun reels/tts.mjs --v2`) carries the River
+     line and word timings; every beat below is keyed to them. Every frame is a pure function of t: window.renderAt(t).
+     Geometry: the content-engine 9:16 contract (reels-organic): title band y 121-436, caption band x 220-860 y 1288-1463,
+     action rail x > 872 below y 922 kept empty; the stage (y 460-1270) never holds still for 3 s. One readable element at
+     a time in the stage; all meaningful text is at least 40 px. -->
+<style>
+@font-face{font-family:'Inter';font-weight:300 700;src:url(../deck/fonts/Inter-400.woff2) format('woff2')}
+@font-face{font-family:'Raleway';font-weight:200 600;src:url(../deck/fonts/Raleway-300.woff2) format('woff2')}
+@font-face{font-family:'Roboto Flex';font-weight:400;src:url(../deck/fonts/RobotoFlex-Regular.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:700;src:url(../deck/fonts/RobotoFlex-Bold.ttf) format('truetype')}
+@font-face{font-family:'JetBrains Mono';font-weight:300 700;src:url(../deck/fonts/JetBrainsMono-400.woff2) format('woff2')}
+:root{
+  --deep:oklch(0.155 0.028 250);--t1:oklch(0.975 0.004 250);--t2:oklch(0.83 0.015 248);--t3:oklch(0.65 0.022 248);
+  --blue:oklch(0.71 0.15 252);--green:oklch(0.76 0.19 148);--amber:oklch(0.82 0.15 75);--violet:oklch(0.79 0.035 235);
+  --bar:oklch(0.78 0.03 245 / .28);--bar2:oklch(0.78 0.03 245 / .5);
+  --display:'Raleway',sans-serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--deep);color:var(--t1)}
+body{position:relative;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.abs{position:absolute}
+.glass{position:absolute;border-radius:28px;
+  background:linear-gradient(180deg,oklch(0.36 0.03 248 / .5),oklch(0.22 0.03 250 / .55) 55%,oklch(0.19 0.03 250 / .62));
+  box-shadow:0 30px 80px -30px oklch(0.04 0.02 250 / .85),inset 0 1px 0 oklch(1 0 0 / .2),inset 0 0 0 1.5px oklch(1 0 0 / .07)}
+.barr{height:22px;border-radius:11px;background:var(--bar)}
+/* headline: complete and at full brightness from frame 0, inside the title band (y 121-436) */
+#h{position:absolute;left:151px;top:190px;width:780px;font:300 84px/1.06 var(--display);letter-spacing:-.03em;color:var(--t1)}
+#h em{font-style:normal;font-weight:400;color:var(--blue)}
+/* chat window (cold open) */
+#chat{left:175px;top:500px;width:690px;height:720px;overflow:hidden;background:linear-gradient(180deg,oklch(0.42 0.035 248 / .8),oklch(0.3 0.035 250 / .82))}
+#chat .top{position:absolute;left:0;right:0;top:0;height:74px;border-bottom:1.5px solid oklch(1 0 0 / .08)}
+#chat .top i{position:absolute;top:28px;width:18px;height:18px;border-radius:50%;background:oklch(0.78 0.03 245 / .35)}
+.bub{position:absolute;height:64px;border-radius:24px;background:oklch(0.78 0.03 245 / .16)}
+.bub.me{background:oklch(0.62 0.12 252 / .38)}
+.bub.find{background:oklch(0.82 0.15 75 / .2);box-shadow:inset 0 0 0 2px oklch(0.82 0.15 75 / .7)}
+/* the stream that buries the finding */
+#sclip{left:175px;top:460px;width:690px;height:810px;overflow:hidden;z-index:3}
+#stream{position:absolute;left:0;top:0;width:690px;height:1px}
+#stream .bub{height:72px}
+/* finding card */
+#find{left:200px;top:700px;width:640px;height:300px;z-index:2}
+#find .ic{position:absolute;left:44px;top:46px;width:64px;height:80px;border-radius:10px;border:3px solid var(--amber)}
+#find .ic::after{content:"";position:absolute;right:-3px;top:-3px;width:22px;height:22px;background:var(--deep);border-left:3px solid var(--amber);border-bottom:3px solid var(--amber);border-radius:0 0 0 6px}
+#find .l1{position:absolute;left:140px;top:56px;width:300px}
+#find .l2{position:absolute;left:140px;top:98px;width:220px}
+#fline{position:absolute;left:44px;top:150px;width:560px;font:500 50px/1.1 var(--mono);letter-spacing:-.02em;color:var(--t1);white-space:nowrap}
+#badge{position:absolute;right:40px;top:40px;height:96px;width:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font:600 64px/1 var(--sans);color:var(--deep);background:var(--amber)}
+/* filesystem + shell */
+#tree{left:160px;top:560px;width:340px;height:560px}
+#tree .row{position:absolute;left:30px;height:56px;width:280px;border-radius:14px}
+#tree .row i{position:absolute;left:12px;top:14px;width:30px;height:28px;border-radius:6px;background:oklch(0.71 0.15 252 / .55)}
+#tree .row i.f{width:24px;background:oklch(0.78 0.03 245 / .45)}
+#tree .row b{position:absolute;left:58px;top:17px;height:22px;border-radius:11px;background:var(--bar)}
+#code{position:absolute;inset:0}
+#code .ln{position:absolute;left:30px;height:20px;border-radius:10px;background:var(--bar)}
+#term{left:520px;top:560px;width:340px;height:560px;background:linear-gradient(180deg,oklch(0.15 0.02 250 / .85),oklch(0.12 0.02 250 / .9))}
+#prompt{position:absolute;left:34px;top:40px;font:500 56px/1 var(--mono);color:var(--green)}
+#cursor{position:absolute;left:92px;top:42px;width:30px;height:54px;background:var(--t2)}
+#prog{position:absolute;left:34px;top:140px;width:272px;height:16px;border-radius:8px;background:oklch(0.78 0.03 245 / .14);overflow:hidden}
+#prog i{position:absolute;left:0;top:0;bottom:0;background:var(--green)}
+#pass{position:absolute;left:34px;top:200px;padding:14px 26px;border-radius:18px;font:600 56px/1 var(--mono);letter-spacing:.04em;
+  color:var(--green);background:oklch(0.76 0.19 148 / .14);box-shadow:inset 0 0 0 2px oklch(0.76 0.19 148 / .6)}
+#rec{position:absolute;width:150px;height:30px;border-radius:15px;background:var(--green)}
+#lab{position:absolute;left:160px;top:1160px;width:700px;text-align:center;font:500 48px/1 var(--mono);color:var(--t1)}
+/* the next session */
+#orb{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,oklch(0.95 0.05 250),oklch(0.71 0.15 252) 45%,oklch(0.45 0.15 260));
+  box-shadow:0 0 50px oklch(0.71 0.15 252 / .7)}
+/* playbook excerpt, alone */
+#ex{left:170px;top:640px;width:700px;height:440px;padding:56px 54px}
+#ex p{font:400 58px/1.22 var(--display);letter-spacing:-.015em;color:var(--t1)}
+#ex .rule{position:absolute;left:54px;bottom:52px;height:6px;border-radius:3px;background:var(--amber)}
+/* end card: one line at a time */
+.endl{left:170px;top:660px;width:700px;height:400px;padding:60px 54px;display:flex;align-items:center}
+.endl p{font:300 64px/1.18 var(--display);letter-spacing:-.02em;color:var(--t1)}
+.endl p b{font-weight:400;color:var(--blue)}
+/* Caption with Intention, in the caption band: one event at a time, word by word from the River alignment */
+#cap{position:absolute;left:540px;bottom:482px;transform:translateX(-50%);max-width:640px;width:max-content;padding:12px 28px 14px;
+  border-radius:30px;text-align:center;font:400 50px/1.12 'Roboto Flex',var(--sans);letter-spacing:-.01em;text-wrap:balance;
+  background:linear-gradient(180deg,oklch(0.3 0.03 248 / .62),oklch(0.18 0.03 250 / .7));box-shadow:inset 0 1px 0 oklch(1 0 0 / .18)}
+#cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
+</style>
+</head>
+<body>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<h1 id="h">The chat closes.<br><em>The evidence stays.</em></h1>
+
+<div class="glass" id="chat"><div class="top"><i style="left:30px"></i><i style="left:60px"></i><i style="left:90px"></i></div></div>
+<div class="abs" id="sclip"><div id="stream"></div></div>
+
+<div class="glass" id="tree"><div id="rows"></div><div id="code"></div></div>
+<div class="glass" id="term"><div id="prompt">$</div><div id="cursor"></div><div id="prog"><i></i></div><div id="pass">PASS</div></div>
+<div id="rec"></div>
+<div id="lab">notes/FINDINGS.md</div>
+
+<div class="glass" id="find"><div class="ic"></div><div class="barr l1"></div><div class="barr l2"></div><div id="fline"></div><div id="badge">?</div></div>
+<div id="orb"></div>
+
+<div class="glass" id="ex"><p></p><i class="rule"></i></div>
+<div class="glass endl" id="endA"><p></p></div>
+<div class="glass endl" id="endB"><p></p></div>
+
+<div id="cap"></div>
+
+<script>
+const S = window.REEL_V2;
+if (!S) throw new Error('window.REEL_V2 is missing: run bun reels/tts.mjs --v2 --reel v2-p2-findings, or render with reels/render.mjs');
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k, TAU = Math.PI * 2;
+const ease = x => { x = clamp(x, 0, 1); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 };
+const ramp = (t, a, d) => ease((t - a) / d);
+const win = (t, a, b, fi = .3, fo = .3) => Math.min(ramp(t, a, fi), 1 - ramp(t, b - fo, fo));   // in at a, out by b
+// a word's start time, by line and word index, from the alignment
+const L = S.take.lines, W = S.take.words;
+const nth = (text, n) => W.filter(w => w.text.replace(/[^\w-]/g, '').toLowerCase() === text)[n];
+const TL = {
+  close: 0.5,                                    // the chat window closes (script card: cold_open.event_at_s)
+  buried: L[1].start, bury: nth('buried', 0).start,
+  fs: L[2].start, filesystem: nth('filesystem', 0).start, shell: nth('shell', 0).start,
+  open: L[3].start, file: nth('file', 0).start, test: nth('test', 0).start, record: nth('record', 0).start,
+  claim: L[4].start, fix: nth('fix', 0).start, result: nth('result', 0).start,
+  next: L[5].start, find: nth('find', 0).start, check: W.at(-2).start, takeEnd: S.take.dur,
+  ex: S.excerpt.at, exEnd: S.excerpt.at + S.excerpt.hold, cta: S.cta.at, endSwap: S.cta.at + 2.4, total: S.total_dur,
+};
+window.__TL = TL;
+
+// ── background: two soft lights orbit the stage, so the stage is never still (dead_stretch), and a faint grid ──
+const bg = $('bg').getContext('2d');
+function background(t) {
+  bg.clearRect(0, 0, 1080, 1920);
+  bg.fillStyle = 'oklch(0.155 0.028 250)'; bg.fillRect(0, 0, 1080, 1920);
+  const lights = [[0.62, 0, 'oklch(0.55 0.16 252 / .55)', 470], [-0.47, 2.4, 'oklch(0.5 0.12 300 / .42)', 420], [0.31, 4.1, 'oklch(0.6 0.12 200 / .3)', 380]];
+  for (const [w, ph, c, r] of lights) {
+    const x = 540 + Math.cos(t * w + ph) * 250, y = 860 + Math.sin(t * w * 1.3 + ph) * 290;
+    const g = bg.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, c); g.addColorStop(1, 'oklch(0.155 0.028 250 / 0)');
+    bg.fillStyle = g; bg.fillRect(0, 0, 1080, 1920);
+  }
+  bg.fillStyle = 'oklch(0.78 0.03 245 / .07)';               // a dot grid drifting up, a slow sense of time
+  const off = (t * 22) % 60;
+  for (let y = 470 - off; y < 1290; y += 60) for (let x = 170; x < 870; x += 60) { bg.beginPath(); bg.arc(x, y, 2.4, 0, TAU); bg.fill() }
+}
+
+// ── static structure, built once (styles below are all set from t) ──
+const chat = $('chat'), stream = $('stream'), find = $('find'), fline = $('fline'), badge = $('badge');
+const CHAT = [[0, 100, 380], [1, 180, 300], [2, 270, 400], [1, 500, 260], [0, 580, 360]];   // [who, top, width]; 2 = the finding's slot
+const chatB = CHAT.map(([who, top, w]) => {
+  const b = document.createElement('div'); b.className = `bub${who === 1 ? ' me' : who === 2 ? ' find' : ''}`;
+  b.style.top = `${top}px`; b.style.width = `${w}px`; b.style[who === 1 ? 'right' : 'left'] = '30px'; chat.appendChild(b); return b;
+});
+chatB[2].style.visibility = 'hidden';                        // the finding is the separate #find card, placed over this slot
+const STREAM = Array.from({ length: 16 }, (_, i) => [i % 3 === 1 ? 1 : 0, i * 96, 260 + ((i * 137) % 260)]);
+const streamB = STREAM.map(([who, top, w]) => {
+  const b = document.createElement('div'); b.className = `bub${who ? ' me' : ''}`;
+  b.style.top = `${top}px`; b.style.width = `${w}px`; b.style[who ? 'right' : 'left'] = '30px'; stream.appendChild(b); return b;
+});
+const ROWS = [['d', 120], ['f', 170], ['f', 200], ['d', 110], ['f', 150], ['d', 100], ['f', 190]];   // notes/FINDINGS.md is the last row
+const rows = ROWS.map(([k, w], i) => {
+  const r = document.createElement('div'); r.className = 'row'; r.style.top = `${40 + i * 70}px`;
+  r.innerHTML = `<i class="${k}"></i><b style="width:${w}px"></b>`; $('rows').appendChild(r); return r;
+});
+rows.forEach((r, i) => { if (ROWS[i][0] === 'f' && i !== 2 && i !== 6) r.style.marginLeft = '36px' });
+const codeLines = Array.from({ length: 11 }, (_, i) => {
+  const l = document.createElement('i'); l.className = 'ln'; l.style.top = `${44 + i * 44}px`; l.style.width = `${120 + ((i * 89) % 160)}px`;
+  if (i % 3 === 1) l.style.marginLeft = '30px'; $('code').appendChild(l); return l;
+});
+$('ex').querySelector('p').textContent = S.excerpt.text;
+$('endA').querySelector('p').textContent = S.end.card[0];
+$('endB').querySelector('p').innerHTML = S.end.card[1].replace(/^(Next:)/, '<b>$1</b>');
+
+// An element at rest carries no transform, filter or opacity (a leftover blur(0) composites differently).
+function show(el, k, tf = () => '', blur = 0) {
+  el.style.visibility = k > 0.001 ? '' : 'hidden';
+  el.style.opacity = k >= 1 ? '' : String(clamp(k, 0, 1));
+  const f = tf(k); el.style.transform = f || '';
+  el.style.filter = blur > 0 ? `blur(${blur.toFixed(2)}px)` : '';
+}
+
+// ── captions: CWI-shaped events from the River alignment, drawn word by word (CWI style, as in the v1 reels) ──
+const capEl = $('cap'), CAPS = S.captions.captions, COL = 'oklch(0.8 0.12 245)', KW = 'oklch(0.86 0.12 88)';
+CAPS.forEach((ev, i) => {
+  ev.until = i + 1 < CAPS.length && CAPS[i + 1].start - ev.end < 1 ? CAPS[i + 1].start : ev.end + .5;
+  ev.chainOut = i + 1 < CAPS.length && CAPS[i + 1].start - ev.end < .5; ev.chainIn = i > 0 && CAPS[i - 1].chainOut;
+});
+let capShown = -1;
+function captions(t) {
+  let i = -1; for (let k = 0; k < CAPS.length; k++) if (t >= CAPS[k].start - .12) i = k;
+  const ev = CAPS[i];
+  // the playbook excerpt holds alone: no caption from the end of the take to the CTA's first word
+  if (!ev || t > ev.until || (t >= S.excerpt.at && t < S.cta.at)) { capEl.style.visibility = 'hidden'; return }
+  capEl.style.visibility = '';
+  if (capShown !== i) {
+    capEl.innerHTML = ev.words.map(w => `<span class="w">${w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join(' ');
+    capShown = i;
+    ev.words.forEach((w, j) => { if (w.emphasis) capEl.children[j].style.margin = `0 ${Math.ceil(capEl.children[j].getBoundingClientRect().width * .08)}px` });
+  }
+  const inK = ev.chainIn ? 1 : ramp(t, ev.start - .12, .18), outK = ev.chainOut ? 1 : 1 - ramp(t, ev.until - .14, .14), k = Math.min(inK, outK);
+  capEl.style.opacity = k >= 1 ? '' : String(k);
+  ev.words.forEach((w, j) => {
+    const el = capEl.children[j], col = w.text.includes(S.cta.keyword) ? KW : COL;
+    const p = ease((t - w.start - .1) / .6);                   // CWI: white → speaker colour, 600 ms ease after 100 ms
+    const rise = ease((t - w.start + .05) / .22);               // the word lifts into place as it is spoken
+    const bump = w.emphasis ? Math.sin(Math.PI * clamp((t - w.start) / .45, 0, 1)) : 0;   // 15 % bounce on emphasis
+    el.style.fontWeight = String(w.weight); el.style.fontSize = `${(50 * w.size).toFixed(1)}px`;
+    el.style.color = p >= 1 ? col : p <= 0 ? '#fff' : `color-mix(in oklab, ${col} ${(p * 100).toFixed(1)}%, #fff)`;
+    el.style.opacity = rise >= 1 ? '' : (.38 + .62 * rise).toFixed(3);
+    el.style.transform = bump > 0 ? `scale(${(1 + .15 * bump).toFixed(4)})` : rise >= 1 ? '' : `translateY(${((1 - rise) * 10).toFixed(2)}px)`;
+    el.style.textShadow = w.emphasis && t >= w.start ? `0 0 ${(20 * Math.max(bump, .35)).toFixed(1)}px ${col}` : '';
+  });
+}
+
+window.renderAt = function (t) {
+  background(t);
+  captions(t);
+  // headline: full from frame 0, leaves as the transcript buries the finding
+  show($('h'), 1 - ramp(t, TL.buried - .1, .45), k => k < 1 ? `translateY(${((1 - k) * -18).toFixed(1)}px)` : '');
+
+  // cold open: the chat window closes at 0.5 s; one finding card stays, its check unknown
+  const kc = ramp(t, TL.close, .25);
+  show(chat, 1 - kc, k => k < 1 ? `translateY(${((1 - k) * 40).toFixed(1)}px) scale(${(.9 + .1 * k).toFixed(4)})` : '');
+  // #find sits over the chat's finding slot (centre 403, 863 at scale .62) at frame 0, then lifts to the stage centre (520, 850)
+  const lift = ramp(t, TL.close + .15, .7);
+  const bury = ramp(t, TL.bury - .2, .6), gone = ramp(t, TL.fs + .1, .4);
+  const big = ramp(t, TL.claim - .35, .55);                  // back, enlarged, for claim → path:line
+  const leave = ramp(t, TL.takeEnd - .12, .12);
+  const fx = lerp(-117, 0, lift), fy = lerp(13, 0, lift) + bury * 60 + lerp(0, -40, big), fs = lerp(.62, 1, lift) * (1 - .3 * bury);
+  const fk = big > 0 ? big * (1 - leave) : (1 - gone);
+  show(find, fk, () => `translate(${fx.toFixed(1)}px,${fy.toFixed(1)}px) scale(${(big > 0 ? 1 + .06 * big : fs).toFixed(4)})`, big > 0 ? 0 : 6 * bury);
+  // the badge: "?" until the next agent re-runs the cited test, then a green check
+  const ok = t >= TL.check;
+  badge.textContent = ok ? '✓' : '?';
+  badge.style.background = ok ? 'var(--green)' : 'var(--amber)';
+  const pop = ok ? Math.sin(Math.PI * clamp((t - TL.check) / .5, 0, 1)) : (t < 2 ? .5 + .5 * Math.sin(t * 6) : 0) * .5;
+  badge.style.transform = pop > 0 ? `scale(${(1 + .18 * pop).toFixed(4)})` : '';
+  badge.style.boxShadow = ok ? `0 0 ${(30 + 40 * pop).toFixed(0)}px oklch(0.76 0.19 148 / .7)` : '0 0 30px oklch(0.82 0.15 75 / .45)';
+  // one line at a time on the card
+  const lines = [[TL.claim, TL.fix - .1, 'claim → path:line'], [TL.fix - .05, TL.next + .4, 'fix → test + result'], [TL.next + .45, TL.takeEnd, 're-run test → pass']];
+  const cur = lines.find(([a, b]) => t >= a - .05 && t < b);
+  fline.textContent = cur ? cur[2] : '';
+  fline.style.opacity = cur ? String(Math.min(ramp(t, cur[0] - .05, .2), 1 - ramp(t, cur[1] - .15, .15))) : '0';
+  fline.style.color = cur && cur[2].endsWith('pass') && ok ? 'var(--green)' : '';
+
+  // the transcript scrolls past and buries the finding
+  const sk = win(t, TL.buried - .2, TL.fs + .9, .3, .4);
+  show($('sclip'), sk);
+  stream.style.transform = `translateY(${(840 - (t - TL.buried + .2) * 520).toFixed(1)}px)`;
+
+  // filesystem + shell slide in; open the file, run the test, leave a record
+  const tk = win(t, TL.filesystem - .35, TL.claim - .1, .55, .4), mk = win(t, TL.shell - .35, TL.claim - .1, .55, .4);
+  show($('tree'), tk, k => k < 1 ? `translateX(${((1 - k) * -360).toFixed(1)}px)` : '');
+  show($('term'), mk, k => k < 1 ? `translateX(${((1 - k) * 360).toFixed(1)}px)` : '');
+  const opened = ramp(t, TL.file - .1, .35);
+  rows.forEach((r, i) => { r.style.background = i === 2 && t >= TL.file - .2 && opened < 1 ? 'oklch(0.71 0.15 252 / .3)' : i === 6 && t >= TL.record ? 'oklch(0.76 0.19 148 / .22)' : '' });
+  $('rows').style.opacity = String(1 - opened);
+  $('code').style.opacity = String(opened * (1 - ramp(t, TL.record - .3, .3)));
+  if (t >= TL.record - .3) $('rows').style.opacity = String(ramp(t, TL.record - .3, .3));
+  codeLines.forEach((l, i) => { l.style.background = i === 6 && opened > 0 ? 'oklch(0.82 0.15 75 / .75)' : '' });
+  $('cursor').style.visibility = Math.floor(t * 2.5) % 2 === 0 && t < TL.test ? '' : 'hidden';
+  const run = clamp((t - TL.test) / .35, 0, 1);
+  $('prog').firstElementChild.style.width = `${(run * 100).toFixed(1)}%`;
+  const passK = win(t, TL.test + .35, TL.record + .05, .15, .2);
+  show($('pass'), passK, k => k < 1 ? `scale(${(.9 + .1 * k).toFixed(4)})` : '');
+  // the record flies from the terminal into the last row of the tree (notes/FINDINGS.md)
+  const fly = clamp((t - TL.record + .1) / .5, 0, 1), rk = fly > 0 && fly < 1 ? 1 : 0;
+  const rec = $('rec'), e = 1 - Math.pow(1 - fly, 3);
+  rec.style.visibility = rk ? '' : 'hidden';
+  rec.style.left = `${lerp(560, 230, e).toFixed(1)}px`; rec.style.top = `${lerp(800, 1033, e) - Math.sin(Math.PI * fly) * 120}px`;
+  show($('lab'), win(t, TL.record - .15, TL.claim + .45, .2, .25));   // stays under the card into the claim beat
+
+  // the next session finds the record and re-runs the cited test
+  const ob = $('orb'), ot = clamp((t - TL.next + .1) / 1.1, 0, 1), oe = 1 - Math.pow(1 - ot, 3);
+  const orbOut = ramp(t, TL.takeEnd - .2, .25);
+  show(ob, ot > 0 ? 1 - orbOut : 0);
+  ob.style.left = `${lerp(860, 820, oe) + Math.sin(t * 3) * 6 * oe}px`; ob.style.top = `${lerp(470, 690, oe) + Math.cos(t * 3) * 6 * oe}px`;
+
+  // the playbook excerpt, alone, for its full hold; an amber rule reads across it
+  const exK = win(t, TL.ex - .1, TL.exEnd + .12, .1, .12);
+  show($('ex'), exK);
+  $('ex').querySelector('.rule').style.width = `${(592 * clamp((t - TL.ex) / S.excerpt.hold, 0, 1)).toFixed(1)}px`;
+
+  // end card: what the CTA delivers, then the next part's question; each gently floats
+  const aK = win(t, TL.exEnd - .02, TL.endSwap, .2, .2), bK = ramp(t, TL.endSwap - .02, .25);
+  show($('endA'), aK, () => `translateY(${(Math.sin((t - TL.cta) * 1.3) * 10).toFixed(1)}px)`);
+  show($('endB'), bK, () => `translateY(${(Math.sin((t - TL.endSwap) * 1.3) * 10).toFixed(1)}px)`);
+};
+
+const Q = new URLSearchParams(location.search);
+Promise.all(['300 84px Raleway', '400 84px Raleway', '400 50px "Roboto Flex"', '700 50px "Roboto Flex"', '500 50px "JetBrains Mono"', '600 64px Inter']
+  .map(f => document.fonts.load(f).catch(() => null))).then(() => document.fonts.ready).then(() => {
+  window.renderAt(+(Q.get('t') || 0));
+  window.__ready = true;
+  if (!Q.has('t')) {
+    const t0 = performance.now();
+    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % S.total_dur); requestAnimationFrame(loop) };
+    requestAnimationFrame(loop);
+  }
+});
+</script>
+</body>
+</html>
