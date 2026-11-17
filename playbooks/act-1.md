@@ -28,7 +28,7 @@ pwd
 git status --short
 ```
 
-Launch your harness there and run every check from that repository root. Each step has quoted prompts: give them to the agent in order, or do the edits yourself. Each check block is safe to paste into a terminal: it prints what is missing and ends with `ok` only when everything passed. Stop at a failing check and fix it before continuing. Commands test structure; the observable under each check tests meaning.
+Launch your harness there and run every check from that repository root. Each step has quoted prompts: give them to the agent in order, or do the edits yourself. Each check block prints what is missing and ends with `ok` only when everything passed. Pasting one never closes your terminal; steps 1–5 only read files, and step 6 runs the test command your agent recorded, so read that command first. Stop at a failing check and fix it before continuing. Commands test structure; the observable under each check tests meaning.
 
 Each step names its keynote source. To read a scene's guide, clone the keynote repository, open `deck/index.html` in a browser at the scene number given (for example `deck/index.html#scene=5`) and press `G`.
 
@@ -188,7 +188,7 @@ The quote verifier and its tests need neither subagents nor a ledger, so build a
 
 > Write a review skill for documents in bronze/. For each document, launch one reader subagent with read-only tools. It returns claims as JSON: {field, value, quote, page, bbox}. Then run a deterministic verifier that checks each quote occurs verbatim in the source; unverified claims keep status "claimed". Only verified claims reach the rules. Record every step in the ledger. Show the skill file and the verifier's tests. Put the skill at skills/review/SKILL.md. Implement the verifier and tests in this repository, with cases for an exact quote, a fabricated quote, and an unverified claim that stays "claimed" and never reaches the rules. Run the tests. Write docs/review-verification.md with one line beginning "TEST: " followed by the exact command that runs them, and the observed result. In the same file, mark read-only readers, case isolation and the external ledger each as working (with how you exercised it) or "not provisioned".
 
-**Check:**
+**Check.** This block runs the command on the `TEST: ` line your agent wrote in `docs/review-verification.md`. Read that line before you paste it; it prints the command before running it.
 
 ```sh
 (
@@ -196,6 +196,7 @@ The quote verifier and its tests need neither subagents nor a ledger, so build a
     test -s "$f" || { echo "missing: $f"; exit 1; }
   done
   grep -q '^TEST: ' docs/review-verification.md || { echo "no TEST: line in docs/review-verification.md"; exit 1; }
+  grep -m1 '^TEST: ' docs/review-verification.md | sed 's/^TEST: /running: /'
   grep -m1 '^TEST: ' docs/review-verification.md | sed 's/^TEST: //' | sh || { echo "the recorded verifier tests failed"; exit 1; }
 ) && echo "step 6: ok"
 ```
