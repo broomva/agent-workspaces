@@ -41,7 +41,8 @@ No claim may go beyond what the keynote slice says. The Act I review on 2026-10-
 - Each writer owns `reels/<reel>.html` and `reels/captions/<reel>.*`. Nothing else.
 - `series.json`, `render.mjs`, `tts.mjs` and the shared overlay belong to the series PR. If you need a change there, ask for it; do not edit them.
 - New reels start from `r01-folder.html`'s structure. Port the scene's own deck visual from `deck/index.html`, and keep `renderAt(t)` a pure function of time.
-- Layout follows the deck's vertical contract (`deck/vertical.json`, BRO-3566). Check every render with `--safe`, and check the content-engine vertical layout gate if you have it. Nothing important goes in the top 277 px or below the caption band.
+- Layout follows the deck's vertical contract (`deck/vertical.json`, BRO-3566). Check every render with `--safe`, and check the content-engine vertical layout gate if you have it. Content stays in the safe zone (x 143–938, y 277–1643) and out of the right action rail (x > 872 below y 922). There are two exceptions: a headline may use the contract's title band (y 121–436, `title_band` in `skills/video/content-engine/layout/vertical-9x16.json`), and the kicker row sits at y 140. Nothing important goes below the caption band.
+- Text that carries meaning is at least 19 px. Shorten long paths rather than clip them.
 - Quality bar before handing back:
   - a full render;
   - a contact sheet;

@@ -66,8 +66,8 @@ window.SERIES={
   },
   "gap": 0.25,
   "screenHook": [
-    "chat history",
-    "is where agent findings go to die"
+    "findings in chat history",
+    "can the next agent check them?"
   ],
   "body": {
     "start": 53.84,

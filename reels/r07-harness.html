@@ -96,7 +96,7 @@ h1{top:296px;font-size:70px;line-height:1.04}
 #fg{z-index:1}
 h1,.ctr,.cap,.kick{z-index:2}
 .ctr.k{top:836px;padding:12px 20px;gap:12px;border-radius:20px}
-.ctr.k small{font-size:14px}
+.ctr.k small{font-size:18px}
 .ctr.k b{font-size:30px}
 .ctr.ok b{color:var(--green)}
 </style>
@@ -317,7 +317,7 @@ function harness(t, f) {
 }
 
 // ── durable integrations: wired into the harness at first, then moved behind a CLI / MCP server boundary ──
-const CHIP_IN = [[255, 752], [255, 818], [832, 868]], CHIP_RAIL = [[662, 950], [762, 950], [862, 950]];
+const CHIP_IN = [[255, 752], [255, 818], [832, 868]], CHIP_RAIL = [[630, 950], [724, 950], [818, 950]];
 function integrations(t, f) {
   const r = bandAt('rail', t), ry = 950;
   if (r.k > .01) {
@@ -329,7 +329,7 @@ function integrations(t, f) {
   }
   const kc = ramp(t, TL.chips - .15, .45); if (kc <= .01) return;
   const kept = ramp(t, TL.rebuilt, .5), flare = t > TL.capability ? Math.max(0, 1 - (t - TL.capability) / 1.2) : 0;
-  T('durable integrations', 262, 702, { s: 18, al: 'center', c: C.t3, a: kc * (1 - ramp(t, TL.behind, .5)) * f });
+  T('durable integrations', 262, 702, { s: 20, al: 'center', c: C.t3, a: kc * (1 - ramp(t, TL.behind, .5)) * f });
   CHIP_IN.forEach((p0, j) => {
     const m = ramp(t, TL.behind + j * .16, .85), p = [lerp(p0[0], CHIP_RAIL[j][0], m), lerp(p0[1], CHIP_RAIL[j][1], m)];
     // before the move each one is wired straight into the harness internals: a tangle of direct links
@@ -337,7 +337,7 @@ function integrations(t, f) {
     const c = kept > .01 ? C.green : C.cyan, fa = m > .5 ? 1 : f;
     rr(p[0] - 43, p[1] - 19, 86, 38, 19, c, kc * fa, al(C.deep, .7), 1.4 + kept * .6);
     if (kept > .01 || flare) { getCtx().globalAlpha = 1; glow(p[0], p[1], 50 + flare * 30, C.green, (.15 * kept + .5 * flare) * kc) }
-    T(`CAP ${String(j + 1).padStart(2, '0')}`, p[0], p[1] + 1, { s: 16, w: 600, ls: 1.2, al: 'center', c: kept > .5 ? C.green : C.t1, a: kc * fa });
+    T(`CAP ${String(j + 1).padStart(2, '0')}`, p[0], p[1] + 1, { s: 19, w: 600, ls: 1, al: 'center', c: kept > .5 ? C.green : C.t1, a: kc * fa });
   });
 }
 

@@ -228,7 +228,7 @@ function workspace(t, a) {
     const hc0 = ev > .01 ? C.green : k === REC && rec > 0 ? C.gold : C.blue;
     if (hi > .01) { ctx.globalAlpha = a * hi * .9; rrect(x - 12, y - 19, WS.w - 28, 38, 10, al(hc0, .55), al(hc0, .14), 1.2); ctx.globalAlpha = a }
     rrect(x, y - 10, 14, 20, 3, k === REC && rec > 0 ? C.gold : C.t2);
-    T(f, x + 26, y + 1, { s: 22, c: hi > .5 ? (k === REC && rec > 0 && ev < .01 ? C.gold : C.t1) : C.t2 });
+    T(f, x + 26, y + 1, { s: 24, c: hi > .5 ? (k === REC && rec > 0 && ev < .01 ? C.gold : C.t1) : C.t2 });
     if (k === REC && t > B.ends + .3) glow(x + 120, y, 150, C.gold, .22 * ramp(t, B.ends + .3, .8));   // the record outlives the session
     if (chk > 0) { ctx.globalAlpha = a * chk; const cx = WS.x + WS.w - 34; dot(cx, y, 15, al(C.green, .2)); ctx.strokeStyle = C.green; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx - 7, y); ctx.lineTo(cx - 2, y + 6); ctx.lineTo(cx + 8, y - 6); ctx.stroke(); ctx.globalAlpha = a }
   });
@@ -238,22 +238,22 @@ function workspace(t, a) {
 function terminal(t, a) {
   if (a <= .01) return;
   const ctx = getCtx(); ctx.globalAlpha = a; gpanel(TM.x, TM.y, TM.w, TM.h, 22);
-  T('bash', TM.x + TM.w - 24, TM.y + 30, { s: 16, al: 'right', c: C.t3, ls: 2 });
+  T('bash', TM.x + TM.w - 24, TM.y + 30, { s: 20, al: 'right', c: C.t3, ls: 2 });
   const c = [...CMDS].reverse().find(x => t >= x.at);
   const y0 = TM.y + 46;
-  if (!c) { T('$', TM.x + 26, y0, { s: 22, w: 600, c: C.green }); if (Math.sin(t * 8) > 0) T('▍', TM.x + 52, y0, { s: 22 }); ctx.globalAlpha = 1; return }
+  if (!c) { T('$', TM.x + 26, y0, { s: 24, w: 600, c: C.green }); if (Math.sin(t * 8) > 0) T('▍', TM.x + 52, y0, { s: 24 }); ctx.globalAlpha = 1; return }
   const n = Math.min(c.s.length, Math.floor((t - c.at) * 34)), typing = n < c.s.length;
-  T('$', TM.x + 26, y0, { s: 22, w: 600, c: C.green }); T(c.s.slice(0, n) + (typing || Math.sin(t * 8) > 0 ? '▍' : ''), TM.x + 52, y0, { s: 22, c: C.t1 });
+  T('$', TM.x + 26, y0, { s: 24, w: 600, c: C.green }); T(c.s.slice(0, n) + (typing || Math.sin(t * 8) > 0 ? '▍' : ''), TM.x + 52, y0, { s: 24, c: C.t1 });
   if (t >= c.outAt) c.out.forEach(([s, col, w], i) => {
     const k = ramp(t, c.outAt + i * .3, .25), y = y0 + 44 + i * 38; if (k <= 0) return;
     ctx.globalAlpha = a * k;
     if (s === 'bars') { ctx.fillStyle = C.t3; [380, 260, 320].forEach((w2, j) => ctx.fillRect(TM.x + 52, y - 8 + j * 22, w2, 3)); }
-    else if (w) { T(s, TM.x + 52, y, { s: 22, w: 600, c: C[col] }); ctx.fillStyle = al(C[col], .7); ctx.fillRect(TM.x + 80, y - 2, w, 4) }
+    else if (w) { T(s, TM.x + 52, y, { s: 24, w: 600, c: C[col] }); ctx.fillStyle = al(C[col], .7); ctx.fillRect(TM.x + 80, y - 2, w, 4) }
     else {
       if (c === CMDS[5] && i === 1 && t < B.check) return;
       const lit = (c === CMDS[4] && t > B.result - .3 && t < B.design) ? 1 : 0;
       if (lit) { ctx.globalAlpha = a * k * .9; rrect(TM.x + 40, y - 18, 160, 36, 10, al(C.green, .6), al(C.green, .14)); ctx.globalAlpha = a * k }
-      T(s, TM.x + 52, y, { s: 22, w: 600, c: C[col] });
+      T(s, TM.x + 52, y, { s: 24, w: 600, c: C[col] });
     }
     ctx.globalAlpha = a;
   });
@@ -405,7 +405,7 @@ window.renderAt = function (t) {
   }); ctx.globalAlpha = 1;
   ctx.globalAlpha = tA * (1 - away); flow(t, 4, .7, 3, B.shell, (u, k) => { const [x, y] = bz(k % 2 ? backP : outP, u); dot(x, y, 2.2, k % 2 ? C.green : C.blue, 3.4) }); ctx.globalAlpha = 1;
   ctx.globalAlpha = win(t, B.leave, B.record + 2, .3); flow(t, 4, .8, 4, B.leave - .1, u => { const [x, y] = bz(recP, u); dot(x, y, 3, C.gold, 4) }); ctx.globalAlpha = 1;
-  T('bash', A[0] + 30, (A[1] + 46 + TM.y) / 2, { s: 16, c: C.t3, a: tA * (1 - away) });
+  T('bash', A[0] + 30, (A[1] + 46 + TM.y) / 2, { s: 20, c: C.t3, a: tA * (1 - away) });
 
   workspace(t, m);
   terminal(t, tA);

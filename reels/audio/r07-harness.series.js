@@ -119,12 +119,12 @@ window.SERIES={
     "audio": "cta.mp3"
   },
   "hold": 1.5,
-  "next": "Bronze, silver, gold: your filesystem as a data platform.",
+  "next": "Bronze, silver and gold, as plain folders.",
   "cardCta": "Comment WORKSPACE → get the Act I playbook",
   "keyword": "WORKSPACE",
   "card": [
     "Part 4/5 · Agent Workspaces",
-    "Next → Bronze, silver, gold: your filesystem as a data platform.",
+    "Next → Bronze, silver and gold, as plain folders.",
     "Comment WORKSPACE → get the Act I playbook"
   ],
   "total_dur": 42.19

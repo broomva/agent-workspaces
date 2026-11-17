@@ -36,10 +36,22 @@ const { start, end } = reel.audio, dur = end - start;
 const seriesJson = path.join(here, 'audio', `${ID}.series.json`), SERIES = existsSync(seriesJson) ? JSON.parse(readFileSync(seriesJson, 'utf8')) : null;
 if (SERIES && (Math.abs(SERIES.body.start - start) > 1e-3 || Math.abs(SERIES.body.end - end) > 1e-3))
   throw new Error(`${ID}: series body ${SERIES.body.start}-${SERIES.body.end} differs from the reel's audio ${start}-${end}; rerun bun reels/tts.mjs --reel ${ID}`);
+// The generated timeline has to match the canonical series.json and the .series.js the page loads; otherwise the
+// soundtrack (from .series.json) and the visuals (from .series.js) could disagree without any error.
+if (SERIES) {
+  const part = JSON.parse(readFileSync(path.join(here, 'series.json'), 'utf8')).parts.find(p => p.reel === ID);
+  const js = readFileSync(path.join(here, 'audio', `${ID}.series.js`), 'utf8').replace(/^[\s\S]*?window\.SERIES=/, '').replace(/;\s*$/, '');
+  const same = (x, y) => JSON.stringify(x) === JSON.stringify(y);
+  const why = !part ? 'it is not a part in series.json'
+    : Math.abs(part.body.start - start) > 1e-3 || Math.abs(part.body.end - end) > 1e-3 ? `series.json body ${part.body.start}-${part.body.end} differs from the reel's audio ${start}-${end}`
+    : part.spokenHook !== SERIES.hook.text || !same(part.screenHook, SERIES.screenHook) || part.next !== SERIES.next ? 'its hook, screen hook or next differs from series.json'
+    : (() => { try { return same(JSON.parse(js), SERIES) ? null : `audio/${ID}.series.js differs from audio/${ID}.series.json` } catch { return `audio/${ID}.series.js does not parse` } })();
+  if (why) throw new Error(`${ID}: the series timeline is stale (${why}); rerun bun reels/tts.mjs --reel ${ID}`);
+}
 const N = Math.round((SERIES ? SERIES.total_dur : dur) * FPS);
 
 // 1. Narration slice.
-const audio = path.join(OUT, `${ID}.m4a`);
+const audio = path.join(OUT, `${ID}-${start}-${end}.m4a`);   // keyed by range, so an edited slice is never served from cache
 if (!existsSync(audio)) run('ffmpeg', ['-y', '-loglevel', 'error', '-ss', String(start), '-t', String(dur), '-i', path.resolve(here, reel.audio.src), '-c:a', 'aac', '-b:a', '192k', audio]);
 
 // 1b. Series audio: hook, gap, the same keynote slice, CTA, hold. Every segment is resampled to one format and padded or
@@ -68,6 +80,9 @@ if (!existsSync(cwi) || argv.includes('--recaption')) {
   writeFileSync(ref, nar.captions.filter(c => c[0] >= start - 0.05 && c[1] <= end + 0.05).map(c => c[2]).join(' '));
   oc('generate', audio, '--reference-text', ref, '--output', cwi);
 }
+// stored captions belong to one slice: a caption past its end, or a last word well short of it, means the range moved
+{ const last = JSON.parse(readFileSync(cwi, 'utf8')).captions.flatMap(c => c.words).at(-1)?.end ?? 0;
+  if (last > dur + .5 || last < dur - 3) throw new Error(`${ID}: captions/${ID}.cwi.json ends at ${last.toFixed(2)} s but the slice is ${dur.toFixed(2)} s; rerun with --recaption`) }
 // report the CWI validation (12 rules, three pillars); a failing pillar is printed, not fatal
 const val = spawnSync('bun', ['run', path.join(ocDir, 'packages/cli/src/index.ts'), 'validate', cwi], { encoding: 'utf8' });
 console.log((val.stdout || '').split('\n').filter(l => /Overall|Attribution|Synchronization|Intonation/.test(l)).join('\n'));

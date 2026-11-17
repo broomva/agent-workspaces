@@ -306,8 +306,8 @@ function ledger(t) {
   T('shared ledger', L, y + 44, { f: FONT.d, s: 38, w: 400, ls: -.4, c: on || rec > .5 ? C.cyan : C.t1, a: k });
   T('system of record', L + 252, y + 47, { f: FONT.s, s: 21, w: 400, c: rec > .5 ? C.cyan : C.t3, a: ramp(t, TL.rows[0] - .1, .5) });
   const n = TL.rows.filter(r => t >= r).length;
-  T('ROWS', 832, y + 46, { s: 16, w: 500, ls: 2.5, c: C.t3, al: 'right', a: k });
-  T(String(n).padStart(3, '0'), 902, y + 46, { s: 27, w: 500, ls: 1, c: C.cyan, al: 'right', a: k });
+  T('ROWS', 790, y + 46, { s: 19, w: 500, ls: 2.5, c: C.t3, al: 'right', a: k });
+  T(String(n).padStart(3, '0'), 866, y + 46, { s: 27, w: 500, ls: 1, c: C.cyan, al: 'right', a: k });
   if (rec > .01) { const g = Math.max(0, 1 - (t - TL.shared) / 1.8); rr(LEDGER[0] + 6, y + 6, LEDGER[2] - 12, LEDGER[3] - 12, 22, C.cyan, rec * (.3 + .6 * g), null, 1.4 + g) }
   ENTRY.forEach(([b, kind], j) => {
     const at = TL.rows[j], [bx, by, bw, bh] = BOX[b], cx = bx + bw / 2;
@@ -319,7 +319,7 @@ function ledger(t) {
     if (fresh) rr(L - 14, ry - 22, 748, 44, 12, null, fresh * .9, al(C.cyan, .12));
     T(String(j + 1).padStart(3, '0'), L, ry, { s: 20, c: C.t3, a: kr });
     T(kind, L + 72, ry, { s: 23, w: 600, c: fresh > .3 ? C.cyan : C.t1, a: kr, ls: .5 });
-    T(`← sandbox ${String(b + 1).padStart(2, '0')}`, 902, ry, { s: 20, al: 'right', c: C.t3, a: kr });
+    T(`← sandbox ${String(b + 1).padStart(2, '0')}`, 866, ry, { s: 20, al: 'right', c: C.t3, a: kr });
   });
 }
 

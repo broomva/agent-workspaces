@@ -138,12 +138,12 @@
     "audio": "cta.mp3"
   },
   "hold": 1.5,
-  "next": "Buy the box, swap the brain, keep the wire thin.",
+  "next": "Switch harnesses without rebuilding capabilities.",
   "cardCta": "Comment WORKSPACE → get the Act I playbook",
   "keyword": "WORKSPACE",
   "card": [
     "Part 3/5 · Agent Workspaces",
-    "Next → Buy the box, swap the brain, keep the wire thin.",
+    "Next → Switch harnesses without rebuilding capabilities.",
     "Comment WORKSPACE → get the Act I playbook"
   ],
   "total_dur": 40.71

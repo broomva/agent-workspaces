@@ -67,14 +67,14 @@ h1 .l2{display:inline-block}
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
 /* the deck's anatomy plates (.plate): index, layer name, path; geometry is set per frame from t */
 .plate{display:grid;grid-template-columns:58px 1fr;align-items:center;padding:0 30px;border-radius:24px;overflow:hidden}
-.plate .ix{font:600 17px/1 var(--mono);color:var(--blue);letter-spacing:.1em}
+.plate .ix{font:600 20px/1 var(--mono);color:var(--blue);letter-spacing:.1em}
 .plate .nm{font:400 38px/1 var(--display);letter-spacing:-.022em;white-space:nowrap}
-.plate .pt{display:block;overflow:hidden;font:500 17px/1.2 var(--mono);color:var(--t3);letter-spacing:.02em;white-space:nowrap}
+.plate .pt{display:block;overflow:hidden;font:500 20px/1.2 var(--mono);color:var(--t3);letter-spacing:.02em;white-space:nowrap}
 .tag{position:absolute;display:flex;align-items:center;gap:12px;font:500 19px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;white-space:nowrap}
 .tag::before{content:"";width:28px;height:1.5px;background:currentColor;opacity:.7}
 .rail{color:var(--t3)}
 .dump{overflow:hidden;padding:26px 26px 0;display:flex;flex-direction:column}
-.dump .hd{font:500 17px/1 var(--mono);color:var(--t2);letter-spacing:.02em}
+.dump .hd{font:500 20px/1 var(--mono);color:var(--t2);letter-spacing:.02em}
 .dump .in{margin-top:18px;flex:1;min-height:0;overflow:hidden}
 .dump .sc i{display:block;height:5px;margin-bottom:8px;border-radius:3px;background:var(--t3)}
 /* Caption with Intention, drawn in the page (content-engine opencaptions skill, CWI-Remotion bridge):
@@ -123,7 +123,7 @@ const TL = {
 const O = [540, 870], RINGS = [['PRIMER', 92], ['POLICY', 136], ['SKILLS', 180], ['MEMORY', 224], ['RECORD', 268]];
 // Part 3: the deck's six plates, text from deck/index.html SC.anatomy (name, path)
 const L = [['Primer', 'AGENTS.md ≡ CLAUDE.md'], ['Policy', '.control/policy.yaml'], ['Skills', 'skills/<category>/<name>/'],
-  ['Knowledge', 'research/entities/ · knowledge-index.md'], ['Record', 'docs/conversations/ · .control/initiatives/'], ['Work', 'repos · worktrees · sandboxes']];
+  ['Knowledge', 'research/ · knowledge-index.md'], ['Record', 'conversations/ · initiatives/'], ['Work', 'repos · worktrees · sandboxes']];
 const PX = 236, PW = 588, PY = 500, PH = 104, PG = 122, RX = 198, WX = 856;   // plates, read rail, write rail (WX < 872)
 const MAPBOX = { x: 150, y: 560, w: 344, h: 116 }, ROW = { x: 190, y: 712, w: 304, h: 70, g: 90 }, DUMP = { x: 520, y: 560, w: 350, h: 580 };
 const plateY = i => PY + i * PG, plateC = i => PY + i * PG + PH / 2;
@@ -150,7 +150,7 @@ function background(t) {
 // ring label: centred at 12 o'clock on its own ring, on a small Midnight chip (as Reel 01)
 function ringLabel(s, R, c, a = 1) {
   if (a <= .01) return;
-  const ctx = getCtx(), x = O[0], y = O[1] - R; ctx.font = `600 17px ${FONT.m}`; ctx.letterSpacing = '2px';
+  const ctx = getCtx(), x = O[0], y = O[1] - R; ctx.font = `600 19px ${FONT.m}`; ctx.letterSpacing = '2px';
   const w = ctx.measureText(s).width + 18; ctx.globalAlpha = a * .92; ctx.fillStyle = 'oklch(0.17 0.03 250)';
   ctx.beginPath(); ctx.roundRect(x - w / 2, y - 13, w, 26, 13); ctx.fill();
   ctx.globalAlpha = a; ctx.fillStyle = c; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, x + 1, y + 1);

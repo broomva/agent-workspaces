@@ -7,59 +7,54 @@ window.SERIES={
   "series": "Agent Workspaces",
   "act": "I",
   "hook": {
-    "text": "Bronze, silver, gold: a data platform your agents already understand.",
+    "text": "Can bronze, silver and gold live in ordinary folders?",
     "at": 0,
-    "dur": 5.36,
+    "dur": 3.92,
     "words": [
       {
-        "text": "Bronze,",
+        "text": "Can",
         "start": 0,
-        "end": 0.8
+        "end": 0.16
       },
       {
-        "text": "silver,",
-        "start": 1.04,
-        "end": 1.52
+        "text": "bronze,",
+        "start": 0.32,
+        "end": 1.04
       },
       {
-        "text": "gold:",
-        "start": 1.6,
-        "end": 2.48
+        "text": "silver",
+        "start": 1.24,
+        "end": 1.44
       },
       {
-        "text": "a",
-        "start": 2.52,
+        "text": "and",
+        "start": 1.52,
+        "end": 1.68
+      },
+      {
+        "text": "gold",
+        "start": 1.76,
+        "end": 2.16
+      },
+      {
+        "text": "live",
+        "start": 2.24,
+        "end": 2.4
+      },
+      {
+        "text": "in",
+        "start": 2.48,
         "end": 2.56
       },
       {
-        "text": "data",
+        "text": "ordinary",
         "start": 2.64,
-        "end": 2.8
+        "end": 3.12
       },
       {
-        "text": "platform",
-        "start": 2.88,
-        "end": 3.36
-      },
-      {
-        "text": "your",
-        "start": 3.44,
-        "end": 3.52
-      },
-      {
-        "text": "agents",
-        "start": 3.6,
-        "end": 4
-      },
-      {
-        "text": "already",
-        "start": 4.08,
-        "end": 4.48
-      },
-      {
-        "text": "understand.",
-        "start": 4.56,
-        "end": 5.36
+        "text": "folders?",
+        "start": 3.2,
+        "end": 3.92
       }
     ],
     "audio": "r08-medallion-hook.mp3"
@@ -73,11 +68,11 @@ window.SERIES={
     "start": 269.44,
     "end": 312.08,
     "dur": 42.64,
-    "at": 5.61
+    "at": 4.17
   },
   "cta": {
     "text": "Comment WORKSPACE and I'll send you the Act One playbook.",
-    "at": 48.25,
+    "at": 46.81,
     "dur": 3.28,
     "words": [
       {
@@ -142,5 +137,5 @@ window.SERIES={
     "Next → Act II: how an agent's context is built.",
     "Comment WORKSPACE → get the Act I playbook"
   ],
-  "total_dur": 53.03
+  "total_dur": 51.59
 };
