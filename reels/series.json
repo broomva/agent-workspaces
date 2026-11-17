@@ -1,0 +1,81 @@
+{
+  "$comment": "Single source of truth for the Agent Workspaces reel series (BRO-3817). Writers, reels/tts.mjs and reels/render.mjs read this; SERIES.md explains it. Edit hooks here, never inside a reel.",
+  "series": "Agent Workspaces",
+  "act": "I",
+  "account": "@broomva.tech",
+  "voice": {
+    "name": "River",
+    "provider": "ElevenLabs",
+    "voiceIdFrom": "~/.config/broomva/fleet/evidence/agent-workspaces-narration-20261027/river-eleven-v4/river-eleven-v4-script.json",
+    "disclosure": "AI-generated narration using ElevenLabs River stock voice, selected by the author; not a recording or clone of Carlos Escobar."
+  },
+  "funnel": {
+    "keyword": "WORKSPACE",
+    "magnet": "Act I playbook: five copy-paste agent prompts with verification steps",
+    "magnetSource": "playbooks/act-1.md (BRO-3554)",
+    "spokenCta": "Comment WORKSPACE and I'll send you the Act One playbook.",
+    "cardCta": "Comment WORKSPACE → get the Act I playbook"
+  },
+  "parts": [
+    {
+      "part": 1,
+      "reel": "r02-thesis",
+      "scene": 2,
+      "title": "Give the agent a filesystem and a shell",
+      "body": { "start": 53.84, "end": 87.52, "endsOn": "Do its findings disappear into chat history, or can the next agent find and check them?" },
+      "spokenHook": "When the chat ends, where do your agent's findings go?",
+      "screenHook": ["chat history", "is where agent findings go to die"],
+      "next": "A folder is not a workspace."
+    },
+    {
+      "part": 2,
+      "reel": "r01-folder",
+      "scene": 5,
+      "title": "A folder is not a workspace",
+      "body": { "start": 144.64, "end": 185.6, "endsOn": "Its contents should make the next session easier to orient, safer to act, and cheaper to verify." },
+      "spokenHook": "Session twenty, and your agent still starts from zero.",
+      "screenHook": ["SESSIONS 020", "RETAINED 000"],
+      "next": "The six layers your agent reads before it writes."
+    },
+    {
+      "part": 3,
+      "reel": "r06-anatomy",
+      "scene": 6,
+      "title": "Anatomy of a workspace",
+      "body": { "start": 185.6, "end": 217.68, "endsOn": "Keep the primer compact enough to act as a map, rather than a dump of every instruction." },
+      "spokenHook": "Your agent should read six layers before it writes a line.",
+      "screenHook": ["read ↓ top-down", "write ↑ evidence back"],
+      "next": "Buy the box, swap the brain, keep the wire thin."
+    },
+    {
+      "part": 4,
+      "reel": "r07-harness",
+      "scene": 7,
+      "title": "Sandbox, harness, wire",
+      "body": { "start": 225.2, "end": 258.44, "endsOn": "Then changing harnesses need not mean rebuilding every capability." },
+      "spokenHook": "Switch agent harnesses without rebuilding every capability.",
+      "screenHook": ["sandbox · harness · wire", "three layers, three speeds of change"],
+      "next": "Bronze, silver, gold: your filesystem as a data platform."
+    },
+    {
+      "part": 5,
+      "reel": "r08-medallion",
+      "scene": 8,
+      "title": "Medallion layers in the filesystem",
+      "body": { "start": 269.44, "end": 312.08, "endsOn": "The useful separation is between local working state and the shared system of record." },
+      "spokenHook": "Bronze, silver, gold: a data platform your agents already understand.",
+      "screenHook": ["bronze/ → silver/ → gold/", "plus one shared ledger"],
+      "next": "Act II: how an agent's context is built."
+    }
+  ],
+  "endCard": {
+    "holdSeconds": 1.5,
+    "lines": ["Part {part}/5 · Agent Workspaces", "Next → {next}", "{cardCta}"]
+  },
+  "postCopy": {
+    "firstLine": "{spokenHook}",
+    "body": "Part {part}/5 of Agent Workspaces, Act I. {cardCta}.\nFull keynote and field guide: broomva.tech/agent-workspaces",
+    "disclosure": "AI voice (ElevenLabs River stock voice), not a clone of the author.",
+    "hashtags": ["#AIAgents", "#AgenticAI", "#ClaudeCode", "#DevTools", "#AgentWorkspaces"]
+  }
+}
