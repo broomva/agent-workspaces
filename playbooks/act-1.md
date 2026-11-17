@@ -104,7 +104,7 @@ Read primer, policy and procedures before acting. Write knowledge, records and p
   for h in '## Philosophy' '## Non-negotiable boundaries' '## When / read' '## Completion checks'; do
     grep -Fxq "$h" AGENTS.md || { echo "missing heading in AGENTS.md: $h"; exit 1; }
   done
-  grep -o '](\([^)#]*\)' AGENTS.md | sed 's/^](//' | grep -v '://' | grep -v '^$' | grep -q . || { echo "AGENTS.md has no local route"; exit 1; }
+  awk '/^## When \/ read$/{t=1;next} /^## /{t=0} t' AGENTS.md | grep -o '](\([^)#]*\)' | sed 's/^](//' | grep -v '://' | grep -v '^$' | grep -q . || { echo "the When / read table has no local route"; exit 1; }
   grep -o '](\([^)#]*\)' AGENTS.md | sed 's/^](//' | grep -v '://' | grep -v '^$' | while read -r p; do
     test -e "$p" || { echo "broken route in AGENTS.md: $p"; exit 1; }
   done || exit 1
