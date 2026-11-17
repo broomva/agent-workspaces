@@ -86,7 +86,7 @@ h1 em{font-style:normal;font-weight:400;color:var(--blue)}
 .cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
 /* emphasised words get side room equal to the 15% bounce overhang (7.5% of their width each side), set when the caption is built */
 .ctr{top:1150px;padding:18px 26px;display:flex;align-items:baseline;gap:16px}
-.ctr small{font:500 16px/1 var(--mono);letter-spacing:.18em;color:var(--t3)}
+.ctr small{font:500 19px/1 var(--mono);letter-spacing:.18em;color:var(--t3)}
 .ctr b{font:500 38px/1 var(--mono);letter-spacing:.04em}
 </style>
 </head>
@@ -148,9 +148,9 @@ function background(t) {
 // ring label: centred at 12 o'clock on its own ring, on a small Midnight chip so the ring line never runs through it
 function ringLabel(s, R, c, a = 1) {
   if (a <= .01) return;
-  const ctx = getCtx(), x = O[0], y = O[1] - R; ctx.font = `600 17px ${FONT.m}`; ctx.letterSpacing = '2px';
+  const ctx = getCtx(), x = O[0], y = O[1] - R; ctx.font = `600 19px ${FONT.m}`; ctx.letterSpacing = '2px';
   const w = ctx.measureText(s).width + 18; ctx.globalAlpha = a * .92; ctx.fillStyle = 'oklch(0.17 0.03 250)';
-  ctx.beginPath(); ctx.roundRect(x - w / 2, y - 13, w, 26, 13); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(x - w / 2, y - 14, w, 28, 14); ctx.fill();
   ctx.globalAlpha = a; ctx.fillStyle = c; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, x + 1, y + 1);
   ctx.letterSpacing = '0px'; ctx.globalAlpha = 1;
 }
@@ -165,7 +165,7 @@ function folder(t, a) {
     ctx.globalAlpha = a * f * .8; ctx.fillStyle = C.t3; ctx.fillRect(x + 18, y + 34 + k * 16 - (1 - f) * 14, 70 - k * 14, 3);
   }
   ctx.restore();
-  ctx.globalAlpha = a; ctx.font = `500 22px ${FONT.m}`; ctx.fillStyle = C.t2; ctx.textAlign = 'center'; ctx.fillText('project/', O[0], O[1] + 140); ctx.globalAlpha = 1;
+  ctx.globalAlpha = a; ctx.font = `500 22px ${FONT.m}`; ctx.fillStyle = C.t2; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillText('project/', O[0], O[1] + 140); ctx.globalAlpha = 1;
 }
 
 // an orb with a fading ASCII glyph trail along its recent path

@@ -3,10 +3,12 @@
 //   --still writes one PNG at that time instead of the video; --safe overlays the IG/TikTok unsafe areas;
 //   --ass burns OpenCaptions' ASS export instead of the in-page captions (fallback path);
 //   --recaption regenerates the CWI document even if reels/captions/<id>.cwi.json exists.
-// Series mode (BRO-3817) switches on when reels/audio/<id>.series.json exists (written by reels/tts.mjs): the reel becomes
-// spoken hook + 0.25 s gap + keynote slice + spoken CTA + end-card hold. The page gets window.SERIES before it loads
-// and reels/series-overlay.js draws the cold open and the end card and maps the reel's own renderAt to body time.
-// A reel that is not a part in series.json renders exactly as before without that file; a part without it fails closed.
+// Series mode (BRO-3817) is on for every reel listed as a part in reels/series.json: the reel becomes spoken hook +
+// 0.25 s gap + keynote slice + spoken CTA + end-card hold. Each run rebuilds the part's timeline (audio/<id>.series.json
+// and .series.js) from series.json and the cached River lines with `tts.mjs --offline`, so there is no generated copy
+// to go stale; it fails if a line needs new audio. The page gets window.SERIES before it loads, and
+// reels/series-overlay.js draws the cold open and the end card and maps the reel's own renderAt to body time.
+// A reel that is not a part renders exactly as before.
 // Frames are window.renderAt(t) screenshots. Narration is a slice of the keynote audio. Captions are
 // OpenCaptions (Caption with Intention) documents: generated once, stored in reels/captions/ (json + a
 // script the page loads), and drawn by the page itself, word by word (content-engine opencaptions skill,
@@ -33,25 +35,11 @@ const run = (cmd, args) => { const r = spawnSync(cmd, args, { encoding: 'utf8' }
 const htmlPath = path.join(here, `${ID}.html`);
 const reel = JSON.parse(readFileSync(htmlPath, 'utf8').match(/<script id="reel-data"[^>]*>([\s\S]*?)<\/script>/)[1]);
 const { start, end } = reel.audio, dur = end - start;
-const seriesJson = path.join(here, 'audio', `${ID}.series.json`), SERIES = existsSync(seriesJson) ? JSON.parse(readFileSync(seriesJson, 'utf8')) : null;
-// A part of the series must render in series mode: its page loads the overlay on its own, so a plain render would play
-// the keynote audio under the cold open. Only a reel that is not a part may render plain.
 const PART = JSON.parse(readFileSync(path.join(here, 'series.json'), 'utf8')).parts.find(p => p.reel === ID);
-if (PART && !SERIES) throw new Error(`${ID} is Part ${PART.part} in series.json but audio/${ID}.series.json is missing; run bun reels/tts.mjs --reel ${ID}`);
-if (SERIES && (Math.abs(SERIES.body.start - start) > 1e-3 || Math.abs(SERIES.body.end - end) > 1e-3))
-  throw new Error(`${ID}: series body ${SERIES.body.start}-${SERIES.body.end} differs from the reel's audio ${start}-${end}; rerun bun reels/tts.mjs --reel ${ID}`);
-// The generated timeline has to match the canonical series.json and the .series.js the page loads; otherwise the
-// soundtrack (from .series.json) and the visuals (from .series.js) could disagree without any error.
-if (SERIES) {
-  const part = PART;
-  const js = readFileSync(path.join(here, 'audio', `${ID}.series.js`), 'utf8').replace(/^[\s\S]*?window\.SERIES=/, '').replace(/;\s*$/, '');
-  const same = (x, y) => JSON.stringify(x) === JSON.stringify(y);
-  const why = !part ? 'it is not a part in series.json'
-    : Math.abs(part.body.start - start) > 1e-3 || Math.abs(part.body.end - end) > 1e-3 ? `series.json body ${part.body.start}-${part.body.end} differs from the reel's audio ${start}-${end}`
-    : part.spokenHook !== SERIES.hook.text || !same(part.screenHook, SERIES.screenHook) || part.next !== SERIES.next ? 'its hook, screen hook or next differs from series.json'
-    : (() => { try { return same(JSON.parse(js), SERIES) ? null : `audio/${ID}.series.js differs from audio/${ID}.series.json` } catch { return `audio/${ID}.series.js does not parse` } })();
-  if (why) throw new Error(`${ID}: the series timeline is stale (${why}); rerun bun reels/tts.mjs --reel ${ID}`);
-}
+if (PART && (Math.abs(PART.body.start - start) > 1e-3 || Math.abs(PART.body.end - end) > 1e-3))
+  throw new Error(`${ID}: series.json body ${PART.body.start}-${PART.body.end} differs from the reel's audio ${start}-${end}`);
+if (PART) process.stdout.write(run('bun', [path.join(here, 'tts.mjs'), '--reel', ID, '--offline']));
+const SERIES = PART ? JSON.parse(readFileSync(path.join(here, 'audio', `${ID}.series.json`), 'utf8')) : null;
 const N = Math.round((SERIES ? SERIES.total_dur : dur) * FPS);
 
 // 1. Narration slice.
@@ -73,7 +61,8 @@ if (SERIES) {
 }
 
 // 2. CWI captions, generated once with the script as reference text, kept in the repo with the reel.
-const capDir = path.join(here, 'captions'), cwi = path.join(capDir, `${ID}.cwi.json`);
+const capDir = path.join(here, 'captions'), cwi = path.join(capDir, `${ID}.cwi.json`), sliceFile = path.join(capDir, `${ID}.cwi.slice.json`);
+const SLICE = { src: reel.audio.src, start, end };   // the narration the stored captions were made from
 mkdirSync(capDir, { recursive: true });
 const ocDir = process.env.OPENCAPTIONS_DIR || path.join(root, '..', 'apps', 'opencaptions');
 const oc = (...a) => run('bun', ['run', path.join(ocDir, 'packages/cli/src/index.ts'), ...a]);
@@ -83,10 +72,11 @@ if (!existsSync(cwi) || argv.includes('--recaption')) {
   const ref = path.join(OUT, `${ID}.ref.txt`);
   writeFileSync(ref, nar.captions.filter(c => c[0] >= start - 0.05 && c[1] <= end + 0.05).map(c => c[2]).join(' '));
   oc('generate', audio, '--reference-text', ref, '--output', cwi);
+  writeFileSync(sliceFile, `${JSON.stringify(SLICE)}\n`);
 }
-// stored captions belong to one slice: a caption past its end, or a last word well short of it, means the range moved
-{ const last = JSON.parse(readFileSync(cwi, 'utf8')).captions.flatMap(c => c.words).at(-1)?.end ?? 0;
-  if (last > dur + .5 || last < dur - 3) throw new Error(`${ID}: captions/${ID}.cwi.json ends at ${last.toFixed(2)} s but the slice is ${dur.toFixed(2)} s; rerun with --recaption`) }
+// stored captions belong to the exact slice recorded beside them; a missing or different record means they may not
+{ const was = existsSync(sliceFile) ? readFileSync(sliceFile, 'utf8').trim() : null;
+  if (was !== JSON.stringify(SLICE)) throw new Error(`${ID}: captions/${ID}.cwi.json was ${was ? `made from ${was}` : 'made from an unrecorded slice'}, not ${JSON.stringify(SLICE)}; rerun with --recaption`) }
 // report the CWI validation (12 rules, three pillars); a failing pillar is printed, not fatal
 const val = spawnSync('bun', ['run', path.join(ocDir, 'packages/cli/src/index.ts'), 'validate', cwi], { encoding: 'utf8' });
 console.log((val.stdout || '').split('\n').filter(l => /Overall|Attribution|Synchronization|Intonation/.test(l)).join('\n'));
@@ -119,8 +109,8 @@ if (SERIES) {                                           // a part that does not 
 const safeCss = 'body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;' +
   'border-style:solid;border-color:rgba(255,40,40,.32);border-width:277px 142px 277px 143px}';
 
+if (SAFE) await page.addStyleTag({ content: safeCss });   // proofs only: a --safe video is written as <id>-safe.mp4
 if (STILL !== null) {
-  if (SAFE) await page.addStyleTag({ content: safeCss });
   await page.evaluate(t => window.renderAt(t), STILL);
   const png = path.join(OUT, `${ID}-t${STILL.toFixed(1)}${SAFE ? '-safe' : ''}.png`);
   const shot = await page.screenshot({ type: 'png' });
@@ -130,7 +120,7 @@ if (STILL !== null) {
   } else writeFileSync(png, shot);
   console.log(png);
 } else {
-  const mp4 = path.join(OUT, `${ID}.mp4`), part = path.join(OUT, `${ID}.part.mp4`), t0 = Date.now();
+  const mp4 = path.join(OUT, `${ID}${SAFE ? '-safe' : ''}.mp4`), part = path.join(OUT, `${ID}.part.mp4`), t0 = Date.now();
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-i', mux,
     '-map', '0:v', '-map', '1:a', ...(vf ? ['-vf', vf] : []), '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(FPS),
     '-c:a', 'copy', '-metadata', `comment=${reel.disclosure}`, '-movflags', '+faststart', '-f', 'mp4', part], { stdio: ['pipe', 'inherit', 'inherit'] });
