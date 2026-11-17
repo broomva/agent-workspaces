@@ -202,15 +202,15 @@ async function v2() {
   const V = series.v2, P = V.parts.find(p => p.reel === want);
   if (!P?.spoken) { console.error(`no v2 part with reel "${want}" and spoken lines in series.json v2.parts`); process.exit(2) }
   const D = path.join(AUDIO, 'v2'); if (!DRY) mkdirSync(D, { recursive: true });
-  const rate = V.budget.creditsPerCharacter, takeText = P.spoken.join(' ');
+  const rate = V.budget.creditsPerCharacter, partCap = P.capCredits ?? V.budget.partCapCredits, takeText = P.spoken.join(' ');
   // pre-flight: both lines are checked against their caps before either request, so a run never spends half
-  for (const [what, text, cap] of [['the shared CTA', V.cta.spoken, V.budget.ctaCapCredits], [P.reel, takeText, V.budget.partCapCredits]])
+  for (const [what, text, cap] of [['the shared CTA', V.cta.spoken, V.budget.ctaCapCredits], [P.reel, takeText, partCap]])
     if (Math.ceil(text.length * rate) > cap)
       throw new Error(`Stopped before spending: ${what} is ${text.length} characters × ${rate} ≈ ${Math.ceil(text.length * rate)} credits, over its cap of ${cap}. Nothing was sent.`);
   const cta = await line(`v2/${V.cta.asset}`, V.cta.spoken, { line: 'cta', field: 'v2.cta.spoken', shared: 'every v2 part' },
     { rate, cap: V.budget.ctaCapCredits });
   const take = await line(`v2/${P.reel}`, takeText, { line: 'take', field: 'v2.parts[].spoken', part: P.part, reel: P.reel, script: P.scriptSha256 },
-    { rate, cap: V.budget.partCapCredits });
+    { rate, cap: partCap });
   if (!cta || !take) { console.log(`${P.reel}: timeline would be rebuilt (dry run writes nothing)`); return summary() }
   const gapped = gapTake(take, P, takeText, V.lineGapSeconds, D);
   const takeDur = gapped.dur, ctaDur = duration(cta.mp3);

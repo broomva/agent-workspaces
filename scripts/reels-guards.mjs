@@ -197,6 +197,68 @@ refuses(
   }
 }
 
+// Each v2 part gets only its own override; exceeding either cap stops before a request.
+{
+  const dir = fresh();
+  try {
+    editJson(path.join(dir, "reels", "series.json"), (s) => {
+      s.v2.budget.creditsPerCharacter = 1;
+      s.v2.budget.ctaCapCredits = 1000;
+      s.v2.budget.partCapCredits = 10;
+      s.v2.parts[0].capCredits = 20;
+      s.v2.parts[0].spoken = ["x".repeat(21)];
+      s.v2.parts[1].spoken = ["x".repeat(15)];
+    });
+    const run = (reel) =>
+      spawnSync(
+        "bun",
+        [path.join(dir, "reels", "tts.mjs"), "--v2", "--reel", reel],
+        {
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            ELEVENLABS_ENV_FILE: path.join(dir, "no-such-key-file"),
+          },
+        },
+      );
+    const over = run("v2-p1-folder"),
+      other = run("v2-p2-findings");
+    expect(
+      "v2 override stops its part before spending",
+      over.status !== 0 &&
+        /over its cap of 20\. Nothing was sent/.test(over.stderr),
+      over.stderr,
+    );
+    expect(
+      "v2 override does not apply to other parts",
+      other.status !== 0 &&
+        /over its cap of 10\. Nothing was sent/.test(other.stderr),
+      other.stderr,
+    );
+    editJson(path.join(dir, "reels", "series.json"), (s) => {
+      s.v2.parts[0].spoken = ["x".repeat(15)];
+    });
+    const within = spawnSync(
+      "bun",
+      [
+        path.join(dir, "reels", "tts.mjs"),
+        "--v2",
+        "--reel",
+        "v2-p1-folder",
+        "--dry-run",
+      ],
+      { encoding: "utf8" },
+    );
+    expect(
+      "v2 override allows its part within its own cap",
+      within.status === 0 && /cap 20/.test(within.stdout),
+      within.stderr + within.stdout,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 if (failures) {
   console.error(`reels guards: ${failures} case(s) failed`);
   process.exit(1);
