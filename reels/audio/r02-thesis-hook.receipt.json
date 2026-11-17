@@ -1,0 +1,18 @@
+{
+  "line": "hook",
+  "field": "spokenHook",
+  "part": 1,
+  "reel": "r02-thesis",
+  "voice_id": "SAz9YHcvj6GT2YYXdXww",
+  "model_id": "eleven_v4",
+  "endpoint": "with-timestamps",
+  "outputFormat": "mp3_44100_128",
+  "requestSha256": "550a33ebac57795144c00914039bb6b72adb97f4176d6176572c8af1052d01b2",
+  "audioSha256": "dd0e951a40391cd93b6fb22e61efbce5cc35be5835055a757148d251a54f9b9b",
+  "characters": 54,
+  "generatedAt": "2026-11-17T03:28:12.441Z",
+  "response": {
+    "request-id": "A83H79bmRPif9zaghcPJ",
+    "character-cost": "24"
+  }
+}
