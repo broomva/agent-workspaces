@@ -3,6 +3,10 @@
 //   --still writes one PNG at that time instead of the video; --safe overlays the IG/TikTok unsafe areas;
 //   --ass burns OpenCaptions' ASS export instead of the in-page captions (fallback path);
 //   --recaption regenerates the CWI document even if reels/captions/<id>.cwi.json exists.
+// Series mode (BRO-3817) switches on when reels/audio/<id>.series.json exists (written by reels/tts.mjs): the reel becomes
+// spoken hook + 0.25 s gap + keynote slice + spoken CTA + end-card hold. The page gets window.SERIES before it loads
+// and reels/series-overlay.js draws the cold open and the end card and maps the reel's own renderAt to body time.
+// Without that file a reel renders exactly as before.
 // Frames are window.renderAt(t) screenshots. Narration is a slice of the keynote audio. Captions are
 // OpenCaptions (Caption with Intention) documents: generated once, stored in reels/captions/ (json + a
 // script the page loads), and drawn by the page itself, word by word (content-engine opencaptions skill,
@@ -28,11 +32,29 @@ const run = (cmd, args) => { const r = spawnSync(cmd, args, { encoding: 'utf8' }
 
 const htmlPath = path.join(here, `${ID}.html`);
 const reel = JSON.parse(readFileSync(htmlPath, 'utf8').match(/<script id="reel-data"[^>]*>([\s\S]*?)<\/script>/)[1]);
-const { start, end } = reel.audio, dur = end - start, N = Math.round(dur * FPS);
+const { start, end } = reel.audio, dur = end - start;
+const seriesJson = path.join(here, 'audio', `${ID}.series.json`), SERIES = existsSync(seriesJson) ? JSON.parse(readFileSync(seriesJson, 'utf8')) : null;
+if (SERIES && (Math.abs(SERIES.body.start - start) > 1e-3 || Math.abs(SERIES.body.end - end) > 1e-3))
+  throw new Error(`${ID}: series body ${SERIES.body.start}-${SERIES.body.end} differs from the reel's audio ${start}-${end}; rerun bun reels/tts.mjs --reel ${ID}`);
+const N = Math.round((SERIES ? SERIES.total_dur : dur) * FPS);
 
 // 1. Narration slice.
 const audio = path.join(OUT, `${ID}.m4a`);
 if (!existsSync(audio)) run('ffmpeg', ['-y', '-loglevel', 'error', '-ss', String(start), '-t', String(dur), '-i', path.resolve(here, reel.audio.src), '-c:a', 'aac', '-b:a', '192k', audio]);
+
+// 1b. Series audio: hook, gap, the same keynote slice, CTA, hold. Every segment is resampled to one format and padded or
+// trimmed to the duration series.json declares, so the soundtrack and the overlay share one timeline to the sample.
+let mux = audio;
+if (SERIES) {
+  mux = path.join(OUT, `${ID}.series.m4a`);
+  const A = path.join(here, 'audio'), silence = d => ['-f', 'lavfi', '-t', String(d), '-i', 'anullsrc=r=44100:cl=mono'];
+  const segs = [SERIES.hook.dur, SERIES.gap, SERIES.body.dur, SERIES.cta.dur, SERIES.hold];
+  const filter = segs.map((d, i) => `[${i}:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=mono,apad,atrim=0:${d},asetpts=N/SR/TB[a${i}]`).join(';')
+    + `;${segs.map((_, i) => `[a${i}]`).join('')}concat=n=${segs.length}:v=0:a=1[out]`;
+  run('ffmpeg', ['-y', '-loglevel', 'error', '-i', path.join(A, SERIES.hook.audio), ...silence(SERIES.gap),
+    '-ss', String(start), '-t', String(dur), '-i', path.resolve(here, reel.audio.src), '-i', path.join(A, SERIES.cta.audio), ...silence(SERIES.hold),
+    '-filter_complex', filter, '-map', '[out]', '-c:a', 'aac', '-b:a', '192k', mux]);
+}
 
 // 2. CWI captions, generated once with the script as reference text, kept in the repo with the reel.
 const capDir = path.join(here, 'captions'), cwi = path.join(capDir, `${ID}.cwi.json`);
@@ -58,6 +80,7 @@ if (ASS) {
     '--max-chars', String(cap.maxChars), '--margin-l', String(cap.marginL), '--margin-r', String(cap.marginR),
     '--margin-v', String(cap.marginV), '--box', '--output', ass);
   vf = `ass=filename='${ass}':fontsdir='${path.join(root, 'deck', 'fonts')}'`;
+  if (SERIES) vf = `setpts=PTS-${SERIES.body.at}/TB,${vf},setpts=PTS+${SERIES.body.at}/TB`;  // the CWI timeline is body time
 }
 
 // 3. Frames → ffmpeg.
@@ -65,8 +88,13 @@ const b = await chromium.launch();
 const page = await b.newPage({ viewport: { width: 1080, height: 1920 } });
 page.on('pageerror', e => console.error('[page error]', e.message));
 page.on('console', m => { if (m.type() === 'error') console.error('[console]', m.text()) });
+if (SERIES) await page.addInitScript({ content: readFileSync(path.join(here, 'audio', `${ID}.series.js`), 'utf8') });
 await page.goto(`${pathToFileURL(htmlPath).href}?t=0${ASS ? '&captions=off' : ''}`);
 await page.waitForFunction(() => window.__ready === true);
+if (SERIES) {                                           // a part that does not load the overlay itself still gets it
+  if (!(await page.evaluate(() => !!window.SERIES_OVERLAY))) await page.addScriptTag({ path: path.join(here, 'series-overlay.js') });
+  await page.evaluate(() => window.SERIES_OVERLAY.ready);
+}
 
 // Safe-zone overlay for proofs: the content-engine 9:16 contract (reels-organic), safe zone x 143-938, y 277-1643.
 const safeCss = 'body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;' +
@@ -84,7 +112,7 @@ if (STILL !== null) {
   console.log(png);
 } else {
   const mp4 = path.join(OUT, `${ID}.mp4`), part = path.join(OUT, `${ID}.part.mp4`), t0 = Date.now();
-  const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-i', audio,
+  const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-i', mux,
     '-map', '0:v', '-map', '1:a', ...(vf ? ['-vf', vf] : []), '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(FPS),
     '-c:a', 'copy', '-metadata', `comment=${reel.disclosure}`, '-movflags', '+faststart', '-f', 'mp4', part], { stdio: ['pipe', 'inherit', 'inherit'] });
   const done = new Promise((ok, ko) => ff.on('close', c => c ? ko(new Error('ffmpeg ' + c)) : ok()));
