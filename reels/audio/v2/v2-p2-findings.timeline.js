@@ -13,8 +13,39 @@ window.REEL_V2={
   "take": {
     "text": "Can your next agent check what this one found? Findings can get buried in chat history. Give it a filesystem and a shell. Now it can open the file, run the test, and leave a record. A claim can point to a file. A fix, to a test and its result. So the next agent can find it, and check it.",
     "at": 0,
-    "dur": 18,
-    "audio": "v2/v2-p2-findings.mp3",
+    "dur": 19.75,
+    "audio": "v2/v2-p2-findings.gapped.wav",
+    "source": "v2/v2-p2-findings.mp3",
+    "gaps": {
+      "seconds": 0.35,
+      "cuts": [
+        {
+          "afterLine": 1,
+          "sourceSample": 109896,
+          "sourceAt": 2.492
+        },
+        {
+          "afterLine": 2,
+          "sourceSample": 234356,
+          "sourceAt": 5.3142
+        },
+        {
+          "afterLine": 3,
+          "sourceSample": 325204,
+          "sourceAt": 7.3742
+        },
+        {
+          "afterLine": 4,
+          "sourceSample": 489472,
+          "sourceAt": 11.0991
+        },
+        {
+          "afterLine": 5,
+          "sourceSample": 680632,
+          "sourceAt": 15.4338
+        }
+      ]
+    },
     "words": [
       {
         "text": "Can",
@@ -63,263 +94,263 @@ window.REEL_V2={
       },
       {
         "text": "Findings",
-        "start": 2.72,
-        "end": 3.12
+        "start": 3.07,
+        "end": 3.47
       },
       {
         "text": "can",
-        "start": 3.2,
-        "end": 3.28
+        "start": 3.55,
+        "end": 3.63
       },
       {
         "text": "get",
-        "start": 3.36,
-        "end": 3.44
+        "start": 3.71,
+        "end": 3.79
       },
       {
         "text": "buried",
-        "start": 3.6,
-        "end": 4
+        "start": 3.95,
+        "end": 4.35
       },
       {
         "text": "in",
-        "start": 4.04,
-        "end": 4.08
+        "start": 4.39,
+        "end": 4.43
       },
       {
         "text": "chat",
-        "start": 4.16,
-        "end": 4.4
+        "start": 4.51,
+        "end": 4.75
       },
       {
         "text": "history.",
-        "start": 4.48,
-        "end": 4.96
+        "start": 4.83,
+        "end": 5.31
       },
       {
         "text": "Give",
-        "start": 5.36,
-        "end": 5.44
+        "start": 6.06,
+        "end": 6.14
       },
       {
         "text": "it",
-        "start": 5.48,
-        "end": 5.52
+        "start": 6.18,
+        "end": 6.22
       },
       {
         "text": "a",
-        "start": 5.56,
-        "end": 5.6
+        "start": 6.26,
+        "end": 6.3
       },
       {
         "text": "filesystem",
-        "start": 5.68,
-        "end": 6.32
+        "start": 6.38,
+        "end": 7.02
       },
       {
         "text": "and",
-        "start": 6.4,
-        "end": 6.48
+        "start": 7.1,
+        "end": 7.18
       },
       {
         "text": "a",
-        "start": 6.56,
-        "end": 6.6
+        "start": 7.26,
+        "end": 7.3
       },
       {
         "text": "shell.",
-        "start": 6.64,
-        "end": 7.04
+        "start": 7.34,
+        "end": 7.74
       },
       {
         "text": "Now",
-        "start": 7.44,
-        "end": 7.68
+        "start": 8.49,
+        "end": 8.73
       },
       {
         "text": "it",
-        "start": 7.84,
-        "end": 7.92
+        "start": 8.89,
+        "end": 8.97
       },
       {
         "text": "can",
-        "start": 8,
-        "end": 8.08
+        "start": 9.05,
+        "end": 9.13
       },
       {
         "text": "open",
-        "start": 8.16,
-        "end": 8.32
+        "start": 9.21,
+        "end": 9.37
       },
       {
         "text": "the",
-        "start": 8.36,
-        "end": 8.4
+        "start": 9.41,
+        "end": 9.45
       },
       {
         "text": "file,",
-        "start": 8.48,
-        "end": 9.04
+        "start": 9.53,
+        "end": 10.09
       },
       {
         "text": "run",
-        "start": 9.12,
-        "end": 9.2
+        "start": 10.17,
+        "end": 10.25
       },
       {
         "text": "the",
-        "start": 9.28,
-        "end": 9.32
+        "start": 10.33,
+        "end": 10.37
       },
       {
         "text": "test,",
-        "start": 9.36,
-        "end": 9.92
+        "start": 10.41,
+        "end": 10.97
       },
       {
         "text": "and",
-        "start": 9.96,
-        "end": 10
+        "start": 11.01,
+        "end": 11.05
       },
       {
         "text": "leave",
-        "start": 10.08,
-        "end": 10.16
+        "start": 11.13,
+        "end": 11.21
       },
       {
         "text": "a",
-        "start": 10.24,
-        "end": 10.28
+        "start": 11.29,
+        "end": 11.33
       },
       {
         "text": "record.",
-        "start": 10.32,
-        "end": 10.72
+        "start": 11.37,
+        "end": 11.77
       },
       {
         "text": "A",
-        "start": 11.12,
-        "end": 11.2
+        "start": 12.52,
+        "end": 12.6
       },
       {
         "text": "claim",
-        "start": 11.4,
-        "end": 11.6
+        "start": 12.8,
+        "end": 13
       },
       {
         "text": "can",
-        "start": 11.68,
-        "end": 11.84
+        "start": 13.08,
+        "end": 13.24
       },
       {
         "text": "point",
-        "start": 11.96,
-        "end": 12.08
+        "start": 13.36,
+        "end": 13.48
       },
       {
         "text": "to",
-        "start": 12.12,
-        "end": 12.16
+        "start": 13.52,
+        "end": 13.56
       },
       {
         "text": "a",
-        "start": 12.24,
-        "end": 12.32
+        "start": 13.64,
+        "end": 13.72
       },
       {
         "text": "file.",
-        "start": 12.4,
-        "end": 12.8
+        "start": 13.8,
+        "end": 14.2
       },
       {
         "text": "A",
-        "start": 13.12,
-        "end": 13.2
+        "start": 14.52,
+        "end": 14.6
       },
       {
         "text": "fix,",
-        "start": 13.28,
-        "end": 13.76
+        "start": 14.68,
+        "end": 15.16
       },
       {
         "text": "to",
-        "start": 13.84,
-        "end": 13.92
+        "start": 15.24,
+        "end": 15.32
       },
       {
         "text": "a",
-        "start": 13.96,
-        "end": 14
+        "start": 15.36,
+        "end": 15.4
       },
       {
         "text": "test",
-        "start": 14.08,
-        "end": 14.4
+        "start": 15.48,
+        "end": 15.8
       },
       {
         "text": "and",
-        "start": 14.48,
-        "end": 14.56
+        "start": 15.88,
+        "end": 15.96
       },
       {
         "text": "its",
-        "start": 14.64,
-        "end": 14.72
+        "start": 16.04,
+        "end": 16.12
       },
       {
         "text": "result.",
-        "start": 14.96,
-        "end": 15.36
+        "start": 16.36,
+        "end": 16.76
       },
       {
         "text": "So",
-        "start": 15.52,
-        "end": 15.6
+        "start": 17.27,
+        "end": 17.35
       },
       {
         "text": "the",
-        "start": 15.64,
-        "end": 15.68
+        "start": 17.39,
+        "end": 17.43
       },
       {
         "text": "next",
-        "start": 15.76,
-        "end": 16
+        "start": 17.51,
+        "end": 17.75
       },
       {
         "text": "agent",
-        "start": 16.08,
-        "end": 16.32
+        "start": 17.83,
+        "end": 18.07
       },
       {
         "text": "can",
-        "start": 16.4,
-        "end": 16.56
+        "start": 18.15,
+        "end": 18.31
       },
       {
         "text": "find",
-        "start": 16.64,
-        "end": 16.8
+        "start": 18.39,
+        "end": 18.55
       },
       {
         "text": "it,",
-        "start": 16.88,
-        "end": 17.2
+        "start": 18.63,
+        "end": 18.95
       },
       {
         "text": "and",
-        "start": 17.24,
-        "end": 17.28
+        "start": 18.99,
+        "end": 19.03
       },
       {
         "text": "check",
-        "start": 17.44,
-        "end": 17.6
+        "start": 19.19,
+        "end": 19.35
       },
       {
         "text": "it.",
-        "start": 17.68,
-        "end": 18
+        "start": 19.43,
+        "end": 19.75
       }
     ],
     "lines": [
@@ -330,98 +361,98 @@ window.REEL_V2={
       },
       {
         "text": "Findings can get buried in chat history.",
-        "start": 2.72,
-        "end": 4.96
+        "start": 3.07,
+        "end": 5.31
       },
       {
         "text": "Give it a filesystem and a shell.",
-        "start": 5.36,
-        "end": 7.04
+        "start": 6.06,
+        "end": 7.74
       },
       {
         "text": "Now it can open the file, run the test, and leave a record.",
-        "start": 7.44,
-        "end": 10.72
+        "start": 8.49,
+        "end": 11.77
       },
       {
         "text": "A claim can point to a file. A fix, to a test and its result.",
-        "start": 11.12,
-        "end": 15.36
+        "start": 12.52,
+        "end": 16.76
       },
       {
         "text": "So the next agent can find it, and check it.",
-        "start": 15.52,
-        "end": 18
+        "start": 17.27,
+        "end": 19.75
       }
     ]
   },
   "excerpt": {
     "text": "Cite each claim as path:line or as the command you ran.",
     "source": "playbooks/act-1.md:41",
-    "at": 18,
+    "at": 19.75,
     "hold": 2.8
   },
   "cta": {
     "text": "Comment WORKSPACE for the agent-workspace setup prompts and verification checks.",
     "keyword": "WORKSPACE",
-    "at": 20.8,
+    "at": 22.55,
     "dur": 4.64,
     "audio": "v2/v2-cta.mp3",
     "words": [
       {
         "text": "Comment",
-        "start": 20.8,
-        "end": 21.2
+        "start": 22.55,
+        "end": 22.95
       },
       {
         "text": "WORKSPACE",
-        "start": 21.28,
-        "end": 21.84
+        "start": 23.03,
+        "end": 23.59
       },
       {
         "text": "for",
-        "start": 21.92,
-        "end": 22
+        "start": 23.67,
+        "end": 23.75
       },
       {
         "text": "the",
-        "start": 22.08,
-        "end": 22.16
+        "start": 23.83,
+        "end": 23.91
       },
       {
         "text": "agent-workspace",
-        "start": 22.24,
-        "end": 23.12
+        "start": 23.99,
+        "end": 24.87
       },
       {
         "text": "setup",
-        "start": 23.2,
-        "end": 23.44
+        "start": 24.95,
+        "end": 25.19
       },
       {
         "text": "prompts",
-        "start": 23.52,
-        "end": 23.92
+        "start": 25.27,
+        "end": 25.67
       },
       {
         "text": "and",
-        "start": 24,
-        "end": 24.08
+        "start": 25.75,
+        "end": 25.83
       },
       {
         "text": "verification",
-        "start": 24.16,
-        "end": 24.8
+        "start": 25.91,
+        "end": 26.55
       },
       {
         "text": "checks.",
-        "start": 24.88,
-        "end": 25.44
+        "start": 26.63,
+        "end": 27.19
       }
     ]
   },
   "end": {
-    "at": 20.8,
+    "at": 22.55,
     "card": [
       "Build your layout · route AGENTS.md · check what survives",
       "Next: where does your agent look before it touches a file?"
@@ -431,7 +462,7 @@ window.REEL_V2={
   "captions": {
     "version": "1.0",
     "metadata": {
-      "duration": 27.94,
+      "duration": 29.69,
       "language": "en",
       "generator": "reels/tts.mjs --v2 (River character alignment)"
     },
@@ -534,61 +565,61 @@ window.REEL_V2={
       {
         "id": "e03",
         "speaker_id": "S0",
-        "start": 2.72,
-        "end": 4.96,
+        "start": 3.07,
+        "end": 5.31,
         "words": [
           {
             "text": "Findings",
-            "start": 2.72,
-            "end": 3.12,
+            "start": 3.07,
+            "end": 3.47,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "can",
-            "start": 3.2,
-            "end": 3.28,
+            "start": 3.55,
+            "end": 3.63,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "get",
-            "start": 3.36,
-            "end": 3.44,
+            "start": 3.71,
+            "end": 3.79,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "buried",
-            "start": 3.6,
-            "end": 4,
+            "start": 3.95,
+            "end": 4.35,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
           },
           {
             "text": "in",
-            "start": 4.04,
-            "end": 4.08,
+            "start": 4.39,
+            "end": 4.43,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "chat",
-            "start": 4.16,
-            "end": 4.4,
+            "start": 4.51,
+            "end": 4.75,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "history.",
-            "start": 4.48,
-            "end": 4.96,
+            "start": 4.83,
+            "end": 5.31,
             "weight": 400,
             "size": 1,
             "emphasis": false
@@ -598,61 +629,61 @@ window.REEL_V2={
       {
         "id": "e04",
         "speaker_id": "S0",
-        "start": 5.36,
-        "end": 7.04,
+        "start": 6.06,
+        "end": 7.74,
         "words": [
           {
             "text": "Give",
-            "start": 5.36,
-            "end": 5.44,
+            "start": 6.06,
+            "end": 6.14,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "it",
-            "start": 5.48,
-            "end": 5.52,
+            "start": 6.18,
+            "end": 6.22,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "a",
-            "start": 5.56,
-            "end": 5.6,
+            "start": 6.26,
+            "end": 6.3,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "filesystem",
-            "start": 5.68,
-            "end": 6.32,
+            "start": 6.38,
+            "end": 7.02,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
           },
           {
             "text": "and",
-            "start": 6.4,
-            "end": 6.48,
+            "start": 7.1,
+            "end": 7.18,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "a",
-            "start": 6.56,
-            "end": 6.6,
+            "start": 7.26,
+            "end": 7.3,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "shell.",
-            "start": 6.64,
-            "end": 7.04,
+            "start": 7.34,
+            "end": 7.74,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
@@ -662,53 +693,53 @@ window.REEL_V2={
       {
         "id": "e05",
         "speaker_id": "S0",
-        "start": 7.44,
-        "end": 9.04,
+        "start": 8.49,
+        "end": 10.09,
         "words": [
           {
             "text": "Now",
-            "start": 7.44,
-            "end": 7.68,
+            "start": 8.49,
+            "end": 8.73,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "it",
-            "start": 7.84,
-            "end": 7.92,
+            "start": 8.89,
+            "end": 8.97,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "can",
-            "start": 8,
-            "end": 8.08,
+            "start": 9.05,
+            "end": 9.13,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "open",
-            "start": 8.16,
-            "end": 8.32,
+            "start": 9.21,
+            "end": 9.37,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "the",
-            "start": 8.36,
-            "end": 8.4,
+            "start": 9.41,
+            "end": 9.45,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "file,",
-            "start": 8.48,
-            "end": 9.04,
+            "start": 9.53,
+            "end": 10.09,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
@@ -718,61 +749,61 @@ window.REEL_V2={
       {
         "id": "e06",
         "speaker_id": "S0",
-        "start": 9.12,
-        "end": 10.72,
+        "start": 10.17,
+        "end": 11.77,
         "words": [
           {
             "text": "run",
-            "start": 9.12,
-            "end": 9.2,
+            "start": 10.17,
+            "end": 10.25,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "the",
-            "start": 9.28,
-            "end": 9.32,
+            "start": 10.33,
+            "end": 10.37,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "test,",
-            "start": 9.36,
-            "end": 9.92,
+            "start": 10.41,
+            "end": 10.97,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
           },
           {
             "text": "and",
-            "start": 9.96,
-            "end": 10,
+            "start": 11.01,
+            "end": 11.05,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "leave",
-            "start": 10.08,
-            "end": 10.16,
+            "start": 11.13,
+            "end": 11.21,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "a",
-            "start": 10.24,
-            "end": 10.28,
+            "start": 11.29,
+            "end": 11.33,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "record.",
-            "start": 10.32,
-            "end": 10.72,
+            "start": 11.37,
+            "end": 11.77,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
@@ -782,61 +813,61 @@ window.REEL_V2={
       {
         "id": "e07",
         "speaker_id": "S0",
-        "start": 11.12,
-        "end": 12.8,
+        "start": 12.52,
+        "end": 14.2,
         "words": [
           {
             "text": "A",
-            "start": 11.12,
-            "end": 11.2,
+            "start": 12.52,
+            "end": 12.6,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "claim",
-            "start": 11.4,
-            "end": 11.6,
+            "start": 12.8,
+            "end": 13,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
           },
           {
             "text": "can",
-            "start": 11.68,
-            "end": 11.84,
+            "start": 13.08,
+            "end": 13.24,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "point",
-            "start": 11.96,
-            "end": 12.08,
+            "start": 13.36,
+            "end": 13.48,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "to",
-            "start": 12.12,
-            "end": 12.16,
+            "start": 13.52,
+            "end": 13.56,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "a",
-            "start": 12.24,
-            "end": 12.32,
+            "start": 13.64,
+            "end": 13.72,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "file.",
-            "start": 12.4,
-            "end": 12.8,
+            "start": 13.8,
+            "end": 14.2,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
@@ -846,69 +877,69 @@ window.REEL_V2={
       {
         "id": "e08",
         "speaker_id": "S0",
-        "start": 13.12,
-        "end": 15.36,
+        "start": 14.52,
+        "end": 16.76,
         "words": [
           {
             "text": "A",
-            "start": 13.12,
-            "end": 13.2,
+            "start": 14.52,
+            "end": 14.6,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "fix,",
-            "start": 13.28,
-            "end": 13.76,
+            "start": 14.68,
+            "end": 15.16,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
           },
           {
             "text": "to",
-            "start": 13.84,
-            "end": 13.92,
+            "start": 15.24,
+            "end": 15.32,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "a",
-            "start": 13.96,
-            "end": 14,
+            "start": 15.36,
+            "end": 15.4,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "test",
-            "start": 14.08,
-            "end": 14.4,
+            "start": 15.48,
+            "end": 15.8,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
           },
           {
             "text": "and",
-            "start": 14.48,
-            "end": 14.56,
+            "start": 15.88,
+            "end": 15.96,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "its",
-            "start": 14.64,
-            "end": 14.72,
+            "start": 16.04,
+            "end": 16.12,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "result.",
-            "start": 14.96,
-            "end": 15.36,
+            "start": 16.36,
+            "end": 16.76,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
@@ -918,61 +949,61 @@ window.REEL_V2={
       {
         "id": "e09",
         "speaker_id": "S0",
-        "start": 15.52,
-        "end": 17.2,
+        "start": 17.27,
+        "end": 18.95,
         "words": [
           {
             "text": "So",
-            "start": 15.52,
-            "end": 15.6,
+            "start": 17.27,
+            "end": 17.35,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "the",
-            "start": 15.64,
-            "end": 15.68,
+            "start": 17.39,
+            "end": 17.43,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "next",
-            "start": 15.76,
-            "end": 16,
+            "start": 17.51,
+            "end": 17.75,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "agent",
-            "start": 16.08,
-            "end": 16.32,
+            "start": 17.83,
+            "end": 18.07,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "can",
-            "start": 16.4,
-            "end": 16.56,
+            "start": 18.15,
+            "end": 18.31,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "find",
-            "start": 16.64,
-            "end": 16.8,
+            "start": 18.39,
+            "end": 18.55,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
           },
           {
             "text": "it,",
-            "start": 16.88,
-            "end": 17.2,
+            "start": 18.63,
+            "end": 18.95,
             "weight": 400,
             "size": 1,
             "emphasis": false
@@ -982,29 +1013,29 @@ window.REEL_V2={
       {
         "id": "e10",
         "speaker_id": "S0",
-        "start": 17.24,
-        "end": 18,
+        "start": 18.99,
+        "end": 19.75,
         "words": [
           {
             "text": "and",
-            "start": 17.24,
-            "end": 17.28,
+            "start": 18.99,
+            "end": 19.03,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "check",
-            "start": 17.44,
-            "end": 17.6,
+            "start": 19.19,
+            "end": 19.35,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
           },
           {
             "text": "it.",
-            "start": 17.68,
-            "end": 18,
+            "start": 19.43,
+            "end": 19.75,
             "weight": 400,
             "size": 1,
             "emphasis": false
@@ -1014,45 +1045,45 @@ window.REEL_V2={
       {
         "id": "e01",
         "speaker_id": "S0",
-        "start": 20.8,
-        "end": 23.12,
+        "start": 22.55,
+        "end": 24.87,
         "words": [
           {
             "text": "Comment",
-            "start": 20.8,
-            "end": 21.2,
+            "start": 22.55,
+            "end": 22.95,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "WORKSPACE",
-            "start": 21.28,
-            "end": 21.84,
+            "start": 23.03,
+            "end": 23.59,
             "weight": 700,
             "size": 1.08,
             "emphasis": true
           },
           {
             "text": "for",
-            "start": 21.92,
-            "end": 22,
+            "start": 23.67,
+            "end": 23.75,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "the",
-            "start": 22.08,
-            "end": 22.16,
+            "start": 23.83,
+            "end": 23.91,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "agent-workspace",
-            "start": 22.24,
-            "end": 23.12,
+            "start": 23.99,
+            "end": 24.87,
             "weight": 400,
             "size": 1,
             "emphasis": false
@@ -1062,45 +1093,45 @@ window.REEL_V2={
       {
         "id": "e02",
         "speaker_id": "S0",
-        "start": 23.2,
-        "end": 25.44,
+        "start": 24.95,
+        "end": 27.19,
         "words": [
           {
             "text": "setup",
-            "start": 23.2,
-            "end": 23.44,
+            "start": 24.95,
+            "end": 25.19,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "prompts",
-            "start": 23.52,
-            "end": 23.92,
+            "start": 25.27,
+            "end": 25.67,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "and",
-            "start": 24,
-            "end": 24.08,
+            "start": 25.75,
+            "end": 25.83,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "verification",
-            "start": 24.16,
-            "end": 24.8,
+            "start": 25.91,
+            "end": 26.55,
             "weight": 400,
             "size": 1,
             "emphasis": false
           },
           {
             "text": "checks.",
-            "start": 24.88,
-            "end": 25.44,
+            "start": 26.63,
+            "end": 27.19,
             "weight": 400,
             "size": 1,
             "emphasis": false
@@ -1109,5 +1140,5 @@ window.REEL_V2={
       }
     ]
   },
-  "total_dur": 27.94
+  "total_dur": 29.69
 };

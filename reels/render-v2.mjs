@@ -5,7 +5,10 @@
 //
 // 1. `tts.mjs --v2 --reel <id> --offline` rebuilds the timeline (audio/v2/<id>.timeline.json/.js) from series.json v2
 //    and the cached River lines; it refuses any line whose receipt does not vouch for the request, the MP3 and the
-//    alignment, and restores a missing v2 MP3 from the content-flow media store by its receipt digest.
+//    alignment, and restores a missing v2 MP3 from the content-flow media store by its receipt digest. It then inserts
+//    the script card's planned inter-line gaps (series.json v2.lineGapSeconds, 0.35 s) at the line boundaries the
+//    alignment gives, so the take the render plays is audio/v2/<id>.gapped.wav, with its shifted alignment and a derived
+//    receipt; the line, word, caption and scene timings in the timeline all come from that shifted alignment.
 // 2. The soundtrack is the take, then silence for the excerpt hold, then the shared CTA, then silence for the end hold,
 //    each resampled to one format and padded or trimmed to the duration the timeline declares, so audio and picture
 //    share one timeline to the sample.

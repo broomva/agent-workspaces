@@ -6,3 +6,6 @@ dist/
 # v2 narration is media: it lives in the content-flow media store (~/.local/share/content-flow/media/sha256/), never in git
 reels/audio/v2/*.mp3
 out/
+
+# derived narration (gapped takes) is media too
+reels/audio/v2/*.wav

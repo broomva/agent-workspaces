@@ -95,6 +95,8 @@
       "gets": "the Act I playbook: five copy-paste agent prompts, each with a verification check (playbooks/act-1.md)"
     },
     "excerptHold": { "$comment": "read at 4 words/s, at least 2.5 s, rounded up to a tenth", "wordsPerSecond": 4, "minSeconds": 2.5 },
+    "lineGapSeconds": 0.35,
+    "$lineGapSeconds": "the script cards plan 0.35 s between spoken lines (body start_s = words / 2.6 + 0.35); one River take runs them together, so tts.mjs --v2 inserts the gap at each line boundary at zero cost (<reel>.gapped.wav)",
     "endHoldSeconds": 2.5,
     "parts": [
       { "part": 1, "key": "folder", "reel": "v2-p1-folder", "script": "p1-folder/script.json", "scriptSha256": null, "status": "script in cf-script review" },
