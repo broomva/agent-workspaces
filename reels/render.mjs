@@ -19,6 +19,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { mkdirSync, existsSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url)), root = path.dirname(here);
@@ -43,8 +44,10 @@ const SERIES = PART ? JSON.parse(readFileSync(path.join(here, 'audio', `${ID}.se
 const N = Math.round((SERIES ? SERIES.total_dur : dur) * FPS);
 
 // 1. Narration slice.
-const audio = path.join(OUT, `${ID}-${start}-${end}.m4a`);   // keyed by range, so an edited slice is never served from cache
-if (!existsSync(audio)) run('ffmpeg', ['-y', '-loglevel', 'error', '-ss', String(start), '-t', String(dur), '-i', path.resolve(here, reel.audio.src), '-c:a', 'aac', '-b:a', '192k', audio]);
+// Cut fresh on every run (about a second): a cache keyed on anything less than the source bytes and the range can
+// serve narration that no longer matches reel-data, so there is no cache.
+const audio = path.join(OUT, `${ID}.m4a`);
+run('ffmpeg', ['-y', '-loglevel', 'error', '-ss', String(start), '-t', String(dur), '-i', path.resolve(here, reel.audio.src), '-c:a', 'aac', '-b:a', '192k', audio]);
 
 // 1b. Series audio: hook, gap, the same keynote slice, CTA, hold. Every segment is resampled to one format and padded or
 // trimmed to the duration series.json declares, so the soundtrack and the overlay share one timeline to the sample.
@@ -62,7 +65,8 @@ if (SERIES) {
 
 // 2. CWI captions, generated once with the script as reference text, kept in the repo with the reel.
 const capDir = path.join(here, 'captions'), cwi = path.join(capDir, `${ID}.cwi.json`), sliceFile = path.join(capDir, `${ID}.cwi.slice.json`);
-const SLICE = { src: reel.audio.src, start, end };   // the narration the stored captions were made from
+const SLICE = { src: reel.audio.src, sha256: createHash('sha256').update(readFileSync(path.resolve(here, reel.audio.src))).digest('hex'), start, end };
+// the narration the stored captions were made from: the source file by content, not just by path, and the range
 mkdirSync(capDir, { recursive: true });
 const ocDir = process.env.OPENCAPTIONS_DIR || path.join(root, '..', 'apps', 'opencaptions');
 const oc = (...a) => run('bun', ['run', path.join(ocDir, 'packages/cli/src/index.ts'), ...a]);
