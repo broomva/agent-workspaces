@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agent Workspaces · Reel 06 · Anatomy of a workspace</title>
+<meta name="viewport" content="width=1080">
+<!-- Vertical-native reel (1080x1920) on the keynote's render kit (reels/engine.js, extracted from deck/index.html).
+     Series Part 3/5 (BRO-3817): keynote scene 6 "anatomy", the six layers an agent reads before it writes.
+     Every frame is a pure function of time: window.renderAt(t). Open without ?t= to preview in real time. -->
+<style>
+@font-face{font-family:'Inter';font-weight:300 700;src:url(../deck/fonts/Inter-400.woff2) format('woff2')}
+@font-face{font-family:'Raleway';font-weight:200 600;src:url(../deck/fonts/Raleway-300.woff2) format('woff2')}
+/* Roboto Flex at the nine CWI weights (pitch → weight), static instances of the variable font */
+@font-face{font-family:'Roboto Flex';font-weight:100;src:url(../deck/fonts/RobotoFlex-Thin.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:200;src:url(../deck/fonts/RobotoFlex-ExtraLight.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:300;src:url(../deck/fonts/RobotoFlex-Light.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:400;src:url(../deck/fonts/RobotoFlex-Regular.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:500;src:url(../deck/fonts/RobotoFlex-Medium.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:600;src:url(../deck/fonts/RobotoFlex-SemiBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:700;src:url(../deck/fonts/RobotoFlex-Bold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:800;src:url(../deck/fonts/RobotoFlex-ExtraBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:900;src:url(../deck/fonts/RobotoFlex-Black.ttf) format('truetype')}
+@font-face{font-family:'JetBrains Mono';font-weight:300 700;src:url(../deck/fonts/JetBrainsMono-400.woff2) format('woff2')}
+:root{
+  --deep:oklch(0.155 0.028 250);--surface:oklch(0.205 0.03 245);--elev:oklch(0.245 0.03 245);
+  --t1:oklch(0.975 0.004 250);--t2:oklch(0.83 0.015 248);--t3:oklch(0.65 0.022 248);
+  --line:oklch(0.78 0.03 245 / .12);--line2:oklch(0.78 0.03 245 / .24);
+  --ai:oklch(0.62 0.19 256);--blue:oklch(0.71 0.15 252);--violet:oklch(0.79 0.035 235);
+  --cyan:oklch(0.81 0.12 225);--green:oklch(0.76 0.19 148);--warm:oklch(0.79 0.16 65);--coral:oklch(0.67 0.21 28);--gold:oklch(0.86 0.12 88);
+  --display:'Raleway',sans-serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+  /* 9:16 geometry from the content-engine layout contract (skills: video/content-engine/layout/vertical-9x16.json,
+     profile reels-organic, measured from a real Reel): safe zone x 143-938 y 277-1643, title band y 121-436,
+     caption band x 220-860 y 1288-1463, right action rail x > 872 below y 922. This reel keeps everything but the
+     kicker row inside the safe zone: the headline starts at y 290 and nothing right of x 872 goes below y 922. */
+  --sl:143px;--sw:795px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--deep);color:var(--t1)}
+body{position:relative;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+/* ambient light, moved from renderAt (no wall-clock CSS animation, so frames stay pure) */
+.ambient{position:absolute;inset:-20%;pointer-events:none;filter:blur(90px);opacity:.55}
+.ambient i{position:absolute;width:62vmax;height:62vmax;border-radius:50%}
+.ambient i:nth-child(1){left:-12%;top:8%;background:radial-gradient(circle,color-mix(in oklab,var(--blue) 45%,transparent),transparent 62%)}
+.ambient i:nth-child(2){right:-18%;top:34%;background:radial-gradient(circle,color-mix(in oklab,var(--violet) 32%,transparent),transparent 60%)}
+.ambient i:nth-child(3){left:18%;bottom:-6%;background:radial-gradient(circle,color-mix(in oklab,var(--ai) 34%,transparent),transparent 60%)}
+canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.kick{position:absolute;left:var(--sl);top:140px;width:var(--sw);display:flex;justify-content:space-between;align-items:center;
+  font:500 21px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+.kick b{font-weight:500;display:flex;align-items:center;gap:16px}
+.kick b::before{content:"";width:40px;height:1.5px;background:currentColor;opacity:.7}
+h1{position:absolute;left:calc(var(--sl) + 8px);top:290px;width:780px;font:300 78px/1.04 var(--display);letter-spacing:-.034em;
+  text-shadow:0 2px 30px oklch(0.155 0.028 250 / .6)}
+h1 em{font-style:normal;font-weight:400;color:var(--blue)}
+h1 .l2{display:inline-block}
+
+/* liquid glass cards (deck): thin tint so the live field reads through a light blur, vertical thickness gradient,
+   bright top edge, cyan caustic along the bottom, and a travelling liquid-metal rim (--ua advanced per frame) */
+.glass{position:absolute;isolation:isolate;border-radius:24px;
+  background:linear-gradient(180deg,oklch(0.36 0.03 248 / .3),oklch(0.2 0.03 250 / .26) 55%,oklch(0.17 0.03 250 / .34));
+  -webkit-backdrop-filter:blur(9px) saturate(220%) brightness(1.12);backdrop-filter:blur(9px) saturate(220%) brightness(1.12);
+  box-shadow:0 30px 80px -30px oklch(0.04 0.02 250 / .85),0 8px 22px -12px oklch(0.04 0.02 250 / .6),inset 0 1px 0 oklch(1 0 0 / .2),
+    inset 0 14px 28px -18px oklch(1 0 0 / .1),inset 0 -22px 34px -26px oklch(0.8 0.12 222 / .22),inset 0 0 0 1px oklch(1 0 0 / .045)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;pointer-events:none;opacity:.75;
+  background:conic-gradient(from var(--ua,0deg),
+  oklch(0.4 0.012 250 / .5) 0deg,oklch(0.62 0.014 245 / .6) 48deg,oklch(0.97 0.01 240 / .92) 70deg,oklch(0.82 0.12 215 / .8) 77deg,oklch(0.62 0.014 245 / .55) 98deg,
+  oklch(0.32 0.01 250 / .4) 168deg,oklch(0.56 0.014 245 / .55) 228deg,oklch(0.92 0.01 240 / .82) 250deg,oklch(0.86 0.1 85 / .55) 256deg,oklch(0.5 0.014 245 / .5) 278deg,oklch(0.4 0.012 250 / .5) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+/* the deck's anatomy plates (.plate): index, layer name, path; geometry is set per frame from t */
+.plate{display:grid;grid-template-columns:58px 1fr;align-items:center;padding:0 30px;border-radius:24px;overflow:hidden}
+.plate .ix{font:600 20px/1 var(--mono);color:var(--blue);letter-spacing:.1em}
+.plate .nm{font:400 38px/1 var(--display);letter-spacing:-.022em;white-space:nowrap}
+.plate .pt{display:block;overflow:hidden;font:500 20px/1.2 var(--mono);color:var(--t3);letter-spacing:.02em;white-space:nowrap}
+.tag{position:absolute;display:flex;align-items:center;gap:12px;font:500 19px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;white-space:nowrap}
+.tag::before{content:"";width:28px;height:1.5px;background:currentColor;opacity:.7}
+.rail{color:var(--t3)}
+.dump{overflow:hidden;padding:26px 26px 0;display:flex;flex-direction:column}
+.dump .hd{font:500 20px/1 var(--mono);color:var(--t2);letter-spacing:.02em}
+.dump .in{margin-top:18px;flex:1;min-height:0;overflow:hidden}
+.dump .sc i{display:block;height:5px;margin-bottom:8px;border-radius:3px;background:var(--t3)}
+/* Caption with Intention, drawn in the page (content-engine opencaptions skill, CWI-Remotion bridge):
+   one caption event at a time on a liquid-glass card in the 9:16 caption band (content-engine
+   layout/vertical-9x16.json, reels-organic: y 0.671-0.762), words styled per CWI word. */
+.cap{position:absolute;left:540px;bottom:460px;transform:translateX(-50%);max-width:640px;width:max-content;
+  padding:12px 28px 14px;border-radius:30px;text-align:center;font-size:50px;font-family:'Roboto Flex',var(--sans);line-height:1.12;letter-spacing:-.01em;text-wrap:balance}
+.cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
+</style>
+</head>
+<body>
+<div class="ambient"><i></i><i></i><i></i></div>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div class="kick"><b>03 · Anatomy</b></div>
+<h1 id="h"></h1>
+<div id="stack"></div>
+<div class="tag rail" id="tR" style="color:var(--blue)">Read ↓</div>
+<div class="tag rail" id="tW" style="color:var(--green)">Write ↑</div>
+<div class="glass dump" id="dump"><div class="hd">AGENTS.md</div><div class="in"><div class="sc" id="dumpIn"></div></div></div>
+<div class="tag" id="tMap" style="color:var(--blue)">Map</div>
+<div class="tag" id="tDump" style="color:var(--coral)">Dump</div>
+<div class="glass cap" id="cap"></div>
+
+<script id="reel-data" type="application/json">{
+  "id": "r06-anatomy",
+  "title": "Anatomy of a workspace",
+  "audio": { "src": "../deck/narration/river.mp3", "start": 185.6, "end": 217.68 },
+  "disclosure": "AI-generated narration using ElevenLabs River stock voice, selected by the author; not a recording or clone of Carlos Escobar.",
+  "captions": { "font": "Roboto Flex", "size": 64, "maxChars": 22, "marginL": 220, "marginR": 220, "marginV": 457,
+    "baseSize": 50, "maxEventChars": 42, "speakerColor": { "S0": "oklch(0.8 0.12 245)" } }
+}</script>
+<script src="engine.js"></script>
+<script src="captions/r06-anatomy.cwi.js"></script>
+<script>
+// Timeline in seconds of body time (the keynote slice 185.60-217.68), keyed to the narration's word timings
+// (captions/r06-anatomy.cwi.json): "continuity" 1.80, the six layer names, "Read" 21.86, "writing" 23.42,
+// "Write" 24.40, "Keep the primer" 26.90, "map" 29.10, "rather" 29.42, "dump" 30.18, "instruction" 30.98.
+const TL = {
+  morph: .35, title: 1.55,
+  lit: [3.10, 5.96, 11.14, 13.60, 16.24, 18.54],
+  read: 21.86, readEnd: 23.3, writing: 23.42, write: 24.40, writeEnd: 25.9,
+  map: 26.75, map2: 27.3, mapTag: 29.10, dumpIn: 29.42, dump: 30.18, instr: 30.98, end: 32.08
+};
+// Part 2's closing frame: five liquid-metal rings around the core, MEMORY carrying the session deposits
+const O = [540, 870], RINGS = [['PRIMER', 92], ['POLICY', 136], ['SKILLS', 180], ['MEMORY', 224], ['RECORD', 268]];
+// Part 3: the deck's six plates, text from deck/index.html SC.anatomy (name, path)
+const L = [['Primer', 'AGENTS.md ≡ CLAUDE.md'], ['Policy', '.control/policy.yaml'], ['Skills', 'skills/<category>/<name>/'],
+  ['Knowledge', 'research/ · knowledge-index.md'], ['Record', 'conversations/ · initiatives/'], ['Work', 'repos · worktrees · sandboxes']];
+const PX = 236, PW = 588, PY = 500, PH = 104, PG = 122, RX = 198, WX = 856;   // plates, read rail, write rail (WX < 872)
+const MAPBOX = { x: 150, y: 560, w: 344, h: 116 }, ROW = { x: 190, y: 712, w: 304, h: 70, g: 90 }, DUMP = { x: 520, y: 560, w: 350, h: 580 };
+const plateY = i => PY + i * PG, plateC = i => PY + i * PG + PH / 2;
+const ease = x => { x = clamp(x, 0, 1); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 };
+const ramp = (t, a, d) => ease((t - a) / d);
+const lin = (t, a, d) => clamp((t - a) / d, 0, 1);
+const bgc = document.getElementById('bg').getContext('2d'), cvc = document.getElementById('cv').getContext('2d');
+const amb = [...document.querySelectorAll('.ambient i')];
+const $ = id => document.getElementById(id);
+
+// background: the deck's liquid-metal ASCII flow, a little denser for a phone screen (as Reel 01)
+function background(t) {
+  setCtx(bgc); bgc.clearRect(0, 0, 1080, 1920);
+  const A = atlas(13, 'oklch(0.78 0.06 245)'); bgc.globalAlpha = .2;
+  asciiField(0, 0, 1080, 1920, 17, A, (X, Y) => {
+    const f = Math.sin(X * .011 + Math.sin(Y * .008 + t * .19) * 1.7 + t * .13) * .5 + .5,
+      g = Math.sin(Y * .015 - t * .11 + Math.sin(X * .005 + t * .07) * 2.2) * .5 + .5;
+    return Math.min(.72, Math.pow(f * g, 2.2) * 1.25);
+  });
+  bgc.globalAlpha = 1;
+  amb.forEach((el, i) => el.style.transform = `translate(${Math.sin(t * .05 + i * 2) * 60}px,${Math.cos(t * .04 + i) * 80}px) scale(${1 + .05 * Math.sin(t * .07 + i)})`);
+}
+
+// ring label: centred at 12 o'clock on its own ring, on a small Midnight chip (as Reel 01)
+function ringLabel(s, R, c, a = 1) {
+  if (a <= .01) return;
+  const ctx = getCtx(), x = O[0], y = O[1] - R; ctx.font = `600 19px ${FONT.m}`; ctx.letterSpacing = '2px';
+  const w = ctx.measureText(s).width + 18; ctx.globalAlpha = a * .92; ctx.fillStyle = 'oklch(0.17 0.03 250)';
+  ctx.beginPath(); ctx.roundRect(x - w / 2, y - 13, w, 26, 13); ctx.fill();
+  ctx.globalAlpha = a; ctx.fillStyle = c; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, x + 1, y + 1);
+  ctx.letterSpacing = '0px'; ctx.globalAlpha = 1;
+}
+
+// beat 0 (continuity with Part 2): Reel 01's rings flatten into the first five plates; the Work plate rises under them
+function rings(t) {
+  const ctx = getCtx(), lab = 1 - ramp(t, .1, .45);
+  RINGS.forEach(([n, R], i) => {
+    const k = ramp(t, TL.morph + i * .09, 1.15), fade = 1 - ramp(t, 1.45 + i * .1, .5); if (fade <= .01) return;
+    const rx = lerp(R, PW / 2 - 18, k), ry = lerp(R, 3, k), cx = lerp(O[0], PX + PW / 2, k), cy = lerp(O[1], plateC(i), k);
+    if (i === 3 && k < .98) { ctx.strokeStyle = al(C.green, .55 * (1 - k) * fade); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, TAU); ctx.stroke() }
+    metalRing(cx, cy, rx, t + i * .9, 1.7 + k * .6, fade * (.6 + .3 * k), ry, .9 + i * .12);
+    ringLabel(n, R, i === 3 ? C.green : C.t2, lab);
+    if (i === 3) for (let j = 0; j < 15; j++) {         // the deposits Part 2 left on MEMORY ride the ring down, then settle
+      const a = -1.9 + ((j * 2.39996) % 2.7) + Math.PI * .02 + t * .02;
+      dot(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry, 3, C.green, 3.5 * fade * (1 - k * .6));
+    }
+  });
+  const k0 = 1 - ramp(t, .2, 1.2);                       // the core light dims as the rings open into plates
+  if (k0 > .01) glow(O[0], O[1], 150, C.act, .35 * k0);
+}
+
+// the agent: Reel 01's core orb, which moves onto the read rail and walks down the layers as they are named
+function agentY(t) {
+  let y = plateC(0);
+  for (let i = 1; i < 6; i++) y = lerp(y, plateC(i), ramp(t, TL.lit[i] - .35, .6));
+  if (t >= TL.read - .35) y = lerp(plateC(0), plateC(5), ease(lin(t, TL.read, TL.readEnd - TL.read)));
+  return y;
+}
+function agent(t) {
+  const m = ramp(t, TL.morph, 1.6), off = ramp(t, TL.map, .5);
+  const gone = t >= TL.read - .35 && t < TL.read ? ramp(t, TL.read - .35, .2) : 0;   // back to the top for the read pass
+  const back = t >= TL.read - .15 && t < TL.read + .2 ? 1 - ramp(t, TL.read - .15, .3) : 0;
+  const a = (1 - off) * (1 - Math.max(gone, back)); if (a <= .01) return;
+  const x = lerp(O[0], RX, m), y = lerp(O[1], agentY(t), m);
+  orb(x, y, lerp(46, 34, m), C.act, t * 1.2, a);
+}
+
+// the two paths, after the deck's READ ORDER ↓ / WRITE PATH ↑ ribbons: a rail, travelling dots, and a lit sweep
+function rails(t) {
+  const ctx = getCtx(), on = ramp(t, 2.2, .8) * (1 - ramp(t, TL.map, .5)); if (on <= .01) return;
+  const y0 = PY + 8, y1 = PY + 5 * PG + PH - 8, ay = agentY(t);
+  ctx.lineWidth = 1.4;
+  ctx.strokeStyle = al(C.t3, .35 * on); ctx.beginPath(); ctx.moveTo(RX, y0); ctx.lineTo(RX, y1); ctx.stroke();
+  ctx.strokeStyle = al(C.blue, .75 * on); ctx.beginPath(); ctx.moveTo(RX, y0); ctx.lineTo(RX, Math.max(y0, ay)); ctx.stroke();
+  const wOn = ramp(t, TL.write - .2, .5);
+  ctx.strokeStyle = al(C.green, (.22 + .5 * wOn) * on); ctx.beginPath(); ctx.moveTo(WX, y0); ctx.lineTo(WX, y1); ctx.stroke();
+  const rd = .45 + .55 * (ramp(t, TL.read - .1, .3) * (1 - ramp(t, TL.readEnd + .5, .6)));
+  for (let k = 0; k < 7; k++) {                          // read: dots fall top-down
+    const u = ((t * .16 + k / 7) % 1), y = lerp(y0, y1, u);
+    ctx.globalAlpha = on * rd * Math.sin(Math.PI * u); dot(RX, y, 2.4, C.blue, 4);
+  }
+  for (let k = 0; k < 7; k++) {                          // write: dots rise bottom-up
+    const u = ((t * .16 + k / 7 + .07) % 1), y = lerp(y1, y0, u);
+    ctx.globalAlpha = on * (.3 + .7 * wOn) * Math.sin(Math.PI * u); dot(WX, y, 2.4, C.green, 4);
+  }
+  ctx.globalAlpha = 1;
+  // the sweeps: a light band passes behind the glass, down on "Read from the top down", up on "Write evidence back"
+  const rp = lin(t, TL.read, TL.readEnd - TL.read), wp = lin(t, TL.write, TL.writeEnd - TL.write);
+  if (rp > 0 && rp < 1) { const y = lerp(y0 - 40, y1 + 40, ease(rp)); glow(PX + PW / 2, y, 300, C.blue, .45 * on); dot(RX, y, 4, C.blue, 6) }
+  if (wp > 0 && wp < 1) { const y = lerp(y1 + 40, y0 - 40, ease(wp)); glow(PX + PW / 2, y, 300, C.green, .45 * on); dot(WX, y, 4, C.green, 6) }
+}
+
+// evidence written back: green deposits on each plate's right edge as the write band passes, kept until the map beat
+function evidence(t) {
+  const ctx = getCtx(), off = 1 - ramp(t, TL.map, .5); if (t < TL.write || off <= .01) return;
+  for (let i = 5; i >= 0; i--) {
+    const at = TL.write + (5 - i) / 5 * (TL.writeEnd - TL.write) * .9, k = ramp(t, at, .35); if (k <= 0) continue;
+    const x = PX + PW - 30, y = plateC(i) + 26;
+    for (let j = 0; j < 3; j++) { ctx.globalAlpha = off * k; dot(x - j * 14, y, 3, C.green, 3.5) }
+    if (k < 1) glow(x, y, 40, C.green, .5 * (1 - k) * off);
+  }
+  ctx.globalAlpha = 1;
+}
+
+// the map: a route from the primer to each layer (the primer "routes the agent to the right context")
+function routes(t) {
+  const ctx = getCtx(), k = ramp(t, TL.map2, .7); if (k <= .01) return;
+  const x = 168, top = MAPBOX.y + MAPBOX.h, lit = ramp(t, TL.mapTag - .1, .4);
+  ctx.strokeStyle = al(lit > 0 ? C.blue : C.t3, .45 + .45 * lit); ctx.lineWidth = 1.6;
+  const last = ROW.y + 4 * ROW.g + ROW.h / 2;
+  ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, lerp(top, last, k)); ctx.stroke();
+  for (let i = 0; i < 5; i++) {
+    const y = ROW.y + i * ROW.g + ROW.h / 2, b = ramp(t, TL.map2 + .12 * i, .4); if (b <= 0) continue;
+    ctx.globalAlpha = b; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 16 * b, y); ctx.stroke();
+    dot(x + 16 * b, y, 2.6, lit > 0 ? C.blue : C.t2, lit * 3);
+    const p = ((t * .5 + i * .2) % 1);                   // a pulse travels the route once the map is named
+    if (lit > 0 && p * (last - top) + top < y) { ctx.globalAlpha = lit * b * .9; dot(x, top + p * (last - top), 2.2, C.blue, 4) }
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ── DOM: plates, tags, the dump card; built once, styled from t ──
+const stack = $('stack');
+const PL = L.map(([n, p], i) => {
+  const d = document.createElement('div'); d.className = 'glass plate';
+  d.innerHTML = `<span class="ix">0${i + 1}</span><span><span class="nm">${n}</span><span class="pt">${p.replace(/</g, '&lt;')}</span></span>`;
+  stack.appendChild(d); return d;
+});
+const PT = PL.map(d => d.querySelector('.pt')), NM = PL.map(d => d.querySelector('.nm'));
+const GLASS_SH = getComputedStyle(PL[0]).boxShadow;
+const dumpEl = $('dump'), dumpIn = $('dumpIn'), DUMPN = 72;
+reseed(0xd0b5);
+for (let j = 0; j < DUMPN; j++) { const b = document.createElement('i'); b.style.width = `${Math.round(rnd(38, 100))}%`; dumpIn.appendChild(b) }
+const BARS = [...dumpIn.children];
+Object.assign(dumpEl.style, { left: `${DUMP.x}px`, top: `${DUMP.y}px`, width: `${DUMP.w}px`, height: `${DUMP.h}px` });
+const tR = $('tR'), tW = $('tW'), tMap = $('tMap'), tDump = $('tDump');
+tR.style.left = `${RX - 46}px`; tR.style.top = '466px'; tW.style.left = `${WX - 104}px`; tW.style.top = '466px';
+tMap.style.left = `${MAPBOX.x}px`; tMap.style.top = '518px'; tDump.style.left = `${DUMP.x}px`; tDump.style.top = '518px';
+
+// An element at rest carries no filter, transform or opacity: a leftover blur(0px) composites differently
+// depending on the frames rendered before it (motion-lab --verify-all, 1-level diffs), so a settled frame must be plain.
+function settle(el, k, transform, blur) {
+  if (k >= 1) { el.style.opacity = ''; el.style.filter = ''; el.style.transform = ''; return }
+  el.style.opacity = k; el.style.filter = k > 0 ? `blur(${(1 - k) * blur}px)` : ''; el.style.transform = transform(k);
+}
+const fade = (el, k) => { el.style.visibility = k > 0 ? '' : 'hidden'; el.style.opacity = k >= 1 ? '' : String(k) };
+
+function plates(t) {
+  const m = ramp(t, TL.map, .9), rp = lin(t, TL.read, TL.readEnd - TL.read), wp = lin(t, TL.write, TL.writeEnd - TL.write);
+  const rc = lerp(-.8, 5.8, ease(rp)), wc = lerp(5.8, -.8, ease(wp));
+  PL.forEach((d, i) => {
+    // geometry: the stack, then (from "Keep the primer compact") the primer as a map header with the five layers as its routes
+    const to = i === 0 ? MAPBOX : { x: ROW.x, y: ROW.y + (i - 1) * ROW.g, w: ROW.w, h: ROW.h };
+    d.style.left = `${lerp(PX, to.x, m).toFixed(1)}px`; d.style.top = `${lerp(plateY(i), to.y, m).toFixed(1)}px`;
+    d.style.width = `${lerp(PW, to.w, m).toFixed(1)}px`; d.style.height = `${lerp(PH, to.h, m).toFixed(1)}px`;
+    NM[i].style.fontSize = i && m > 0 ? `${lerp(38, 32, m).toFixed(1)}px` : '';
+    const pa = i === 0 ? 1 : 1 - m;
+    PT[i].style.height = pa >= 1 ? '' : `${(pa * 30).toFixed(1)}px`; PT[i].style.opacity = pa >= 1 ? '' : String(pa);
+    // presence: rises as the rings flatten (the Work plate last), then unread plates sit dim until they are named
+    const appear = ramp(t, 1.05 + i * .1, .55), named = ramp(t, TL.lit[i] - .15, .4);
+    const k = appear * (.5 + .5 * Math.max(named, ramp(t, TL.map, .5)));
+    d.style.visibility = k > 0 ? '' : 'hidden'; d.style.opacity = k >= 1 ? '' : k.toFixed(3);
+    d.style.transform = appear >= 1 ? '' : `translateY(${((1 - appear) * 18).toFixed(1)}px)`;
+    d.style.filter = appear >= 1 || appear <= 0 ? '' : `blur(${((1 - appear) * 6).toFixed(2)}px)`;
+    // light: the layer being named, then the read band (blue) and the write band (green)
+    const cur = t >= TL.lit[i] - .1 && (i === 5 ? t < TL.read - .4 : t < TL.lit[i + 1] - .1) ? named : 0;
+    const blue = Math.max(cur, Math.exp(-((i - rc) ** 2) / .45) * (rp > 0 && rp < 1 ? 1 : 0), i === 5 ? ramp(t, TL.writing - .1, .3) * (1 - ramp(t, TL.write + .3, .5)) : 0,
+      i === 0 ? ramp(t, TL.mapTag - .1, .4) * .8 : 0);
+    const green = Math.exp(-((i - wc) ** 2) / .45) * (wp > 0 && wp < 1 ? 1 : 0);
+    if (blue < .01 && green < .01) d.style.boxShadow = '';
+    else {
+      const c = green > blue ? `oklch(0.76 0.19 148 / ${(.75 * green).toFixed(3)})` : `oklch(0.71 0.15 252 / ${(.75 * blue).toFixed(3)})`, g = Math.max(blue, green);
+      d.style.boxShadow = `${GLASS_SH},0 0 0 1.5px ${c},0 0 ${(44 * g).toFixed(1)}px -6px ${c}`;
+    }
+  });
+}
+
+// the dump: the same file with every instruction pasted in; lines pile up past the bottom of the card
+function dump(t) {
+  const k = ramp(t, TL.dumpIn, .45); fade(dumpEl, k);
+  if (k <= 0) return;
+  dumpEl.style.transform = k >= 1 ? '' : `translateY(${((1 - k) * 22).toFixed(1)}px)`;
+  const n = Math.min(DUMPN, Math.floor(lin(t, TL.dumpIn, 1.6) * DUMPN)), fit = 39;
+  dumpIn.style.transform = n > fit ? `translateY(${-(n - fit) * 13}px)` : '';
+  const red = ramp(t, TL.dump - .05, .35);
+  BARS.forEach((b, j) => { b.style.visibility = j < n ? '' : 'hidden'; b.style.background = red > 0 ? `color-mix(in oklab, var(--coral) ${(red * 55).toFixed(1)}%, var(--t3))` : '' });
+  dumpEl.style.boxShadow = red > 0 ? `${GLASS_SH},0 0 0 1.5px oklch(0.67 0.21 28 / ${(.7 * red).toFixed(3)})` : '';
+}
+
+const H = ['Value is<br><em>continuity.</em>', 'Six layers help<br>organize <em>continuity.</em>',
+  'Read <em>top-down.</em><br><span class="l2">Write <em>evidence back.</em></span>', 'A compact <em>map</em>,<br>not a dump.'];
+const SW = [TL.title, TL.read - .45, TL.map2];          // headline swaps: on "continuity", before "Read", on "the primer compact"
+const h = $('h');
+function headline(t) {
+  let idx = 0, sw = 1, j = -1;
+  SW.forEach((at, k) => { if (t >= at - .35) j = k });
+  if (j >= 0) { sw = ramp(t, SW[j] - .35, .7); idx = sw < .5 ? j : j + 1 } else idx = 0;
+  if (h.dataset.i !== String(idx)) { h.innerHTML = H[idx]; h.dataset.i = String(idx) }
+  const vis = j < 0 ? 1 : sw < .5 ? 1 - sw * 2 : (sw - .5) * 2, dir = sw < .5 ? -16 : 16;
+  settle(h, vis, k => `translateY(${(1 - k) * dir}px)`, 10);
+  const l2 = h.querySelector('.l2');                     // "Write evidence back." lands with its words
+  if (l2) settle(l2, ramp(t, TL.write - .15, .5), k => `translateY(${(1 - k) * 18}px)`, 8);
+}
+
+// ── Caption with Intention: word-level CWI from OpenCaptions, rendered as a pure function of t (as Reel 01) ──
+const REEL = JSON.parse(document.getElementById('reel-data').textContent), CAPCFG = REEL.captions;
+const capEl = document.getElementById('cap');
+// FCC: at most 42 characters per caption; split long events at word boundaries, preferring punctuation.
+const FUNC = /^(a|an|the|of|to|in|on|and|or|but|for|with|by|its|it|is|be|can|that)$/i;
+function chunkEvents(doc) {
+  const out = [];
+  for (const e of doc.captions) {
+    let cur = [];
+    const len = ws => ws.map(w => w.text).join(' ').length;
+    for (const w of e.words) {
+      if (cur.length && len([...cur, w]) > CAPCFG.maxEventChars) {
+        let cut = cur.length;                                   // break after the last punctuation if it is not too early
+        for (let i = cur.length - 1; i >= Math.ceil(cur.length / 2); i--) if (/[.,;:?!]$/.test(cur[i].text)) { cut = i + 1; break }
+        while (cut > 1 && FUNC.test(cur[cut - 1].text)) cut--;  // never end a caption on "the", "a", "of", "and" …
+        out.push({ speaker: e.speaker_id, words: cur.slice(0, cut) }); cur = cur.slice(cut);
+      }
+      cur.push(w);
+    }
+    if (cur.length) out.push({ speaker: e.speaker_id, words: cur });
+  }
+  out.forEach((ev, i) => { ev.start = ev.words[0].start; ev.until = i + 1 < out.length ? out[i + 1].words[0].start : ev.words.at(-1).end + .6 });
+  // back-to-back captions share one card: the text swaps, the card does not fade out and in (no blank frame)
+  out.forEach((ev, i) => { ev.chainOut = i + 1 < out.length && out[i + 1].start - ev.words.at(-1).end < .5; ev.chainIn = i > 0 && out[i - 1].chainOut });
+  return out;
+}
+const CAPS = window.CWI && !new URLSearchParams(location.search).has('captions') ? chunkEvents(window.CWI) : [];
+const spk = id => CAPCFG.speakerColor?.[id] || window.CWI?.cast.find(c => c.id === id)?.color || '#fff';
+let capShown = -1;
+function captions(t) {
+  if (!CAPS.length) { capEl.style.display = 'none'; return }
+  let i = -1; for (let k = 0; k < CAPS.length; k++) if (t >= CAPS[k].start - .12) i = k;
+  const ev = CAPS[i];
+  if (!ev || t > ev.until) { capEl.style.opacity = '0'; capShown = -1; return }
+  if (capShown !== i) {                                         // rebuild only when the event changes; style is set from t below
+    capEl.innerHTML = ev.words.map(w => `<span class="w${w.emphasis ? ' em' : ''}">${w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join(' ');
+    capShown = i;
+    ev.words.forEach((w, j) => {                               // measure at the word's own weight and size, then reserve the overhang
+      if (!w.emphasis) return;
+      const el = capEl.children[j];
+      el.style.fontWeight = String(Math.round(w.weight / 100) * 100); el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+      el.style.margin = `0 ${Math.ceil(el.getBoundingClientRect().width * .08)}px`;
+    });
+  }
+  const inK = ev.chainIn ? 1 : ramp(t, ev.start - .12, .18), outK = ev.chainOut ? 1 : 1 - ramp(t, ev.until - .14, .14), k = Math.min(inK, outK);
+  capEl.style.opacity = k >= 1 ? '' : String(k);
+  const col = spk(ev.speaker), spans = capEl.children;
+  ev.words.forEach((w, j) => {
+    const el = spans[j], a = w.animation || {}, d = (a.delay_ms ?? 100) / 1000, dur = (a.duration_ms ?? 600) / 1000;
+    const p = ease((t - w.start - d) / dur);                  // CWI: white → speaker colour, 600 ms ease after 100 ms
+    const rise = ease((t - w.start + .05) / .22);              // entrance: the word lifts into place as it is spoken
+    const bump = w.emphasis ? Math.sin(Math.PI * clamp((t - w.start) / .45, 0, 1)) : 0;  // 15% bounce on emphasis
+    el.style.fontWeight = String(Math.round(w.weight / 100) * 100);
+    el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+    el.style.color = p >= 1 ? col : p <= 0 ? '#fff' : `color-mix(in oklab, ${col} ${(p * 100).toFixed(1)}%, #fff)`;
+    el.style.opacity = rise >= 1 ? '' : (.38 + .62 * rise).toFixed(3);
+    el.style.transform = bump > 0 ? `scale(${(1 + .15 * bump).toFixed(4)})` : rise >= 1 ? '' : `translateY(${((1 - rise) * 10).toFixed(2)}px)`;
+    el.style.textShadow = (w.emphasis && t >= w.start) ? `0 0 ${(20 * Math.max(bump, .35)).toFixed(1)}px ${col}, 0 0 40px color-mix(in oklab, ${col} 25%, transparent)` : '';
+  });
+}
+
+window.renderAt = function (t) {
+  document.documentElement.style.setProperty('--ua', ((t * 40) % 360).toFixed(1) + 'deg');
+  captions(t);
+  background(t);
+  setCtx(cvc); cvc.clearRect(0, 0, 1080, 1920);
+  rings(t);
+  rails(t);
+  evidence(t);
+  routes(t);
+  agent(t);
+  plates(t);
+  dump(t);
+  headline(t);
+  const rl = ramp(t, 2.2, .8) * (1 - ramp(t, TL.map, .5));
+  fade(tR, rl * (.55 + .45 * (ramp(t, TL.read - .1, .3) * (1 - ramp(t, TL.write, .4)) + (t < TL.read ? 1 : 0))));
+  fade(tW, rl * (.55 + .45 * ramp(t, TL.write - .1, .3)));
+  fade(tMap, ramp(t, TL.mapTag - .1, .4)); fade(tDump, ramp(t, TL.dump - .1, .4));
+};
+
+const Q = new URLSearchParams(location.search);
+FONTS_READY.then(() => Promise.all([100, 200, 300, 400, 500, 600, 700, 800, 900].map(w => document.fonts.load(`${w} 54px "Roboto Flex"`)))).then(() => document.fonts.ready).then(() => {
+  window.renderAt(+(Q.get('t') || 0));
+  window.__ready = true;
+  if (!Q.has('t')) {
+    const t0 = performance.now();
+    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % (window.SERIES?.total_dur || TL.end)); requestAnimationFrame(loop) };
+    requestAnimationFrame(loop);
+  }
+});
+</script>
+<!-- Series Part 3/5 (BRO-3817): the River hook, the end card and the series timeline. Without the generated
+     audio/r06-anatomy.series.js the overlay does nothing and the reel plays as the plain keynote slice. -->
+<script src="audio/r06-anatomy.series.js" onerror="this.remove()"></script>
+<script src="series-overlay.js"></script>
+</body>
+</html>

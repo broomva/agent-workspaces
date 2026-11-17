@@ -1,0 +1,20 @@
+{
+  "line": "hook",
+  "field": "spokenHook",
+  "part": 4,
+  "reel": "r07-harness",
+  "voice_id": "SAz9YHcvj6GT2YYXdXww",
+  "model_id": "eleven_v4",
+  "endpoint": "with-timestamps",
+  "outputFormat": "mp3_44100_128",
+  "requestSha256": "091c64699642a2009608696a1d1aef43c87d8a15bfc114ae02b9679942b7d5ae",
+  "audioSha256": "cbdd63802bb679f95e9655e37ff5a08e7ffd0f309edc090e920c091cd9b19918",
+  "alignmentSha256": "92582ba2fbf8cd4cd973d119d5f2fc6e67256c7652ebf1788187106efe00fbbd",
+  "alignmentSha256RecordedAt": "2026-11-17 (backfilled from the committed alignment; generatedAt is unchanged)",
+  "characters": 59,
+  "generatedAt": "2026-11-17T03:30:00.856Z",
+  "response": {
+    "request-id": "G4iKoaphNcBXr2k4YSni",
+    "character-cost": "26"
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "part": 4,
+  "total": 5,
+  "reel": "r07-harness",
+  "title": "Sandbox, harness, wire",
+  "series": "Agent Workspaces",
+  "act": "I",
+  "hook": {
+    "text": "Switch agent harnesses without rebuilding every capability.",
+    "at": 0,
+    "dur": 3.92,
+    "words": [
+      {
+        "text": "Switch",
+        "start": 0,
+        "end": 0.32
+      },
+      {
+        "text": "agent",
+        "start": 0.4,
+        "end": 0.72
+      },
+      {
+        "text": "harnesses",
+        "start": 0.8,
+        "end": 1.36
+      },
+      {
+        "text": "without",
+        "start": 1.44,
+        "end": 1.84
+      },
+      {
+        "text": "rebuilding",
+        "start": 1.92,
+        "end": 2.48
+      },
+      {
+        "text": "every",
+        "start": 2.64,
+        "end": 2.88
+      },
+      {
+        "text": "capability.",
+        "start": 2.96,
+        "end": 3.92
+      }
+    ],
+    "audio": "r07-harness-hook.mp3"
+  },
+  "gap": 0.25,
+  "screenHook": [
+    "sandbox · harness · wire",
+    "three layers, three speeds of change"
+  ],
+  "body": {
+    "start": 225.2,
+    "end": 258.44,
+    "dur": 33.24,
+    "at": 4.17
+  },
+  "cta": {
+    "text": "Comment WORKSPACE and I'll send you the Act One playbook.",
+    "at": 37.41,
+    "dur": 3.28,
+    "words": [
+      {
+        "text": "Comment",
+        "start": 0,
+        "end": 0.4
+      },
+      {
+        "text": "WORKSPACE",
+        "start": 0.48,
+        "end": 1.12
+      },
+      {
+        "text": "and",
+        "start": 1.28,
+        "end": 1.36
+      },
+      {
+        "text": "I'll",
+        "start": 1.413,
+        "end": 1.52
+      },
+      {
+        "text": "send",
+        "start": 1.6,
+        "end": 1.68
+      },
+      {
+        "text": "you",
+        "start": 1.76,
+        "end": 1.84
+      },
+      {
+        "text": "the",
+        "start": 1.88,
+        "end": 1.92
+      },
+      {
+        "text": "Act",
+        "start": 2.08,
+        "end": 2.32
+      },
+      {
+        "text": "One",
+        "start": 2.4,
+        "end": 2.56
+      },
+      {
+        "text": "playbook.",
+        "start": 2.64,
+        "end": 3.28
+      }
+    ],
+    "audio": "cta.mp3"
+  },
+  "hold": 1.5,
+  "next": "Bronze, silver and gold, as plain folders.",
+  "cardCta": "Comment WORKSPACE → get the Act I playbook",
+  "keyword": "WORKSPACE",
+  "card": [
+    "Part 4/5 · Agent Workspaces",
+    "Next → Bronze, silver and gold, as plain folders.",
+    "Comment WORKSPACE → get the Act I playbook"
+  ],
+  "total_dur": 42.19
+}

@@ -16,6 +16,8 @@ jobs:
         with:
           bun-version: 1.3.14
       - run: bun install --frozen-lockfile
+      - name: ffprobe for the reel guards (scripts/reels-guards.mjs)
+        run: command -v ffprobe || (sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg)
       - run: bun run check
       - run: bunx playwright install --with-deps chromium
       - run: bun run smoke

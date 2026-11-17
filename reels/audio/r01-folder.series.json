@@ -1,0 +1,140 @@
+{
+  "part": 2,
+  "total": 5,
+  "reel": "r01-folder",
+  "title": "A folder is not a workspace",
+  "series": "Agent Workspaces",
+  "act": "I",
+  "hook": {
+    "text": "Session twenty, and your agent still starts from zero.",
+    "at": 0,
+    "dur": 3.84,
+    "words": [
+      {
+        "text": "Session",
+        "start": 0,
+        "end": 0.4
+      },
+      {
+        "text": "twenty,",
+        "start": 0.48,
+        "end": 1.2
+      },
+      {
+        "text": "and",
+        "start": 1.28,
+        "end": 1.36
+      },
+      {
+        "text": "your",
+        "start": 1.44,
+        "end": 1.52
+      },
+      {
+        "text": "agent",
+        "start": 1.72,
+        "end": 1.92
+      },
+      {
+        "text": "still",
+        "start": 2.08,
+        "end": 2.4
+      },
+      {
+        "text": "starts",
+        "start": 2.56,
+        "end": 2.8
+      },
+      {
+        "text": "from",
+        "start": 2.88,
+        "end": 3.04
+      },
+      {
+        "text": "zero.",
+        "start": 3.12,
+        "end": 3.84
+      }
+    ],
+    "audio": "r01-folder-hook.mp3"
+  },
+  "gap": 0.25,
+  "screenHook": [
+    "folder: somewhere to put files",
+    "workspace: what survives the task"
+  ],
+  "body": {
+    "start": 144.64,
+    "end": 185.6,
+    "dur": 40.96,
+    "at": 4.09
+  },
+  "cta": {
+    "text": "Comment WORKSPACE and I'll send you the Act One playbook.",
+    "at": 45.05,
+    "dur": 3.28,
+    "words": [
+      {
+        "text": "Comment",
+        "start": 0,
+        "end": 0.4
+      },
+      {
+        "text": "WORKSPACE",
+        "start": 0.48,
+        "end": 1.12
+      },
+      {
+        "text": "and",
+        "start": 1.28,
+        "end": 1.36
+      },
+      {
+        "text": "I'll",
+        "start": 1.413,
+        "end": 1.52
+      },
+      {
+        "text": "send",
+        "start": 1.6,
+        "end": 1.68
+      },
+      {
+        "text": "you",
+        "start": 1.76,
+        "end": 1.84
+      },
+      {
+        "text": "the",
+        "start": 1.88,
+        "end": 1.92
+      },
+      {
+        "text": "Act",
+        "start": 2.08,
+        "end": 2.32
+      },
+      {
+        "text": "One",
+        "start": 2.4,
+        "end": 2.56
+      },
+      {
+        "text": "playbook.",
+        "start": 2.64,
+        "end": 3.28
+      }
+    ],
+    "audio": "cta.mp3"
+  },
+  "hold": 1.5,
+  "next": "The six layers your agent reads before it writes.",
+  "cardCta": "Comment WORKSPACE → get the Act I playbook",
+  "keyword": "WORKSPACE",
+  "card": [
+    "Part 2/5 · Agent Workspaces",
+    "Next → The six layers your agent reads before it writes.",
+    "Comment WORKSPACE → get the Act I playbook"
+  ],
+  "total_dur": 49.83
+}

@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agent Workspaces · Reel 08 · Medallion layers in the filesystem</title>
+<meta name="viewport" content="width=1080">
+<!-- Vertical-native reel (1080x1920) on the keynote's render kit (reels/engine.js, extracted from deck/index.html).
+     Every frame is a pure function of time: window.renderAt(t). Open without ?t= to preview in real time. -->
+<style>
+@font-face{font-family:'Inter';font-weight:300 700;src:url(../deck/fonts/Inter-400.woff2) format('woff2')}
+@font-face{font-family:'Raleway';font-weight:200 600;src:url(../deck/fonts/Raleway-300.woff2) format('woff2')}
+/* Roboto Flex at the nine CWI weights (pitch → weight), static instances of the variable font */
+@font-face{font-family:'Roboto Flex';font-weight:100;src:url(../deck/fonts/RobotoFlex-Thin.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:200;src:url(../deck/fonts/RobotoFlex-ExtraLight.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:300;src:url(../deck/fonts/RobotoFlex-Light.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:400;src:url(../deck/fonts/RobotoFlex-Regular.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:500;src:url(../deck/fonts/RobotoFlex-Medium.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:600;src:url(../deck/fonts/RobotoFlex-SemiBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:700;src:url(../deck/fonts/RobotoFlex-Bold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:800;src:url(../deck/fonts/RobotoFlex-ExtraBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:900;src:url(../deck/fonts/RobotoFlex-Black.ttf) format('truetype')}
+@font-face{font-family:'JetBrains Mono';font-weight:300 700;src:url(../deck/fonts/JetBrainsMono-400.woff2) format('woff2')}
+:root{
+  --deep:oklch(0.155 0.028 250);--surface:oklch(0.205 0.03 245);--elev:oklch(0.245 0.03 245);
+  --t1:oklch(0.975 0.004 250);--t2:oklch(0.83 0.015 248);--t3:oklch(0.65 0.022 248);
+  --line:oklch(0.78 0.03 245 / .12);--line2:oklch(0.78 0.03 245 / .24);
+  --ai:oklch(0.62 0.19 256);--blue:oklch(0.71 0.15 252);--violet:oklch(0.79 0.035 235);
+  --cyan:oklch(0.81 0.12 225);--green:oklch(0.76 0.19 148);--warm:oklch(0.79 0.16 65);--coral:oklch(0.67 0.21 28);--gold:oklch(0.86 0.12 88);
+  --display:'Raleway',sans-serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+  /* 9:16 geometry from the content-engine layout contract (skills: video/content-engine/layout/vertical-9x16.json,
+     profile reels-organic, measured from a real Reel): safe zone x 143-938 y 277-1643, title band y 121-436,
+     caption band x 220-860 y 1288-1463, right action rail x > 872 below y 922 */
+  --sl:143px;--sw:795px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--deep);color:var(--t1)}
+body{position:relative;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+/* ambient light, moved from renderAt (no wall-clock CSS animation, so frames stay pure) */
+.ambient{position:absolute;inset:-20%;pointer-events:none;filter:blur(90px);opacity:.55}
+.ambient i{position:absolute;width:62vmax;height:62vmax;border-radius:50%}
+.ambient i:nth-child(1){left:-12%;top:8%;background:radial-gradient(circle,color-mix(in oklab,var(--blue) 45%,transparent),transparent 62%)}
+.ambient i:nth-child(2){right:-18%;top:34%;background:radial-gradient(circle,color-mix(in oklab,var(--violet) 32%,transparent),transparent 60%)}
+.ambient i:nth-child(3){left:18%;bottom:-6%;background:radial-gradient(circle,color-mix(in oklab,var(--ai) 34%,transparent),transparent 60%)}
+canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.kick{position:absolute;left:var(--sl);top:140px;width:var(--sw);display:flex;justify-content:space-between;align-items:center;
+  font:500 21px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+.kick b{font-weight:500;display:flex;align-items:center;gap:16px}
+.kick b::before{content:"";width:40px;height:1.5px;background:currentColor;opacity:.7}
+.kick span{font-size:16px;color:var(--t3);letter-spacing:.14em}
+h1{position:absolute;left:calc(var(--sl) + 8px);top:172px;width:var(--sw);font:300 100px/1.02 var(--display);letter-spacing:-.034em;
+  text-shadow:0 2px 30px oklch(0.155 0.028 250 / .6)}
+h1 em{font-style:normal;font-weight:400;color:var(--blue)}
+
+/* liquid glass cards (deck): thin tint so the live field reads through a light blur, vertical thickness gradient,
+   bright top edge, cyan caustic along the bottom, and a travelling liquid-metal rim (--ua advanced per frame) */
+.glass{position:absolute;isolation:isolate;border-radius:24px;
+  background:linear-gradient(180deg,oklch(0.36 0.03 248 / .3),oklch(0.2 0.03 250 / .26) 55%,oklch(0.17 0.03 250 / .34));
+  -webkit-backdrop-filter:blur(9px) saturate(220%) brightness(1.12);backdrop-filter:blur(9px) saturate(220%) brightness(1.12);
+  box-shadow:0 30px 80px -30px oklch(0.04 0.02 250 / .85),0 8px 22px -12px oklch(0.04 0.02 250 / .6),inset 0 1px 0 oklch(1 0 0 / .2),
+    inset 0 14px 28px -18px oklch(1 0 0 / .1),inset 0 -22px 34px -26px oklch(0.8 0.12 222 / .22),inset 0 0 0 1px oklch(1 0 0 / .045)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;pointer-events:none;opacity:.75;
+  background:conic-gradient(from var(--ua,0deg),
+  oklch(0.4 0.012 250 / .5) 0deg,oklch(0.62 0.014 245 / .6) 48deg,oklch(0.97 0.01 240 / .92) 70deg,oklch(0.82 0.12 215 / .8) 77deg,oklch(0.62 0.014 245 / .55) 98deg,
+  oklch(0.32 0.01 250 / .4) 168deg,oklch(0.56 0.014 245 / .55) 228deg,oklch(0.92 0.01 240 / .82) 250deg,oklch(0.86 0.1 85 / .55) 256deg,oklch(0.5 0.014 245 / .5) 278deg,oklch(0.4 0.012 250 / .5) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+/* liquid glass capsule (deck .seg): dark thick glass, lit top edge, raised chip thumb */
+.seg{position:absolute;left:var(--sl);top:420px;display:flex;padding:7px;border-radius:999px;isolation:isolate;
+  background:linear-gradient(180deg,oklch(0.29 0.022 250 / .66),oklch(0.185 0.024 250 / .74));
+  -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+  box-shadow:0 22px 60px -20px oklch(0.03 0.02 250 / .92),0 3px 8px -3px oklch(0 0 0 / .55),inset 0 1px 0 oklch(1 0 0 / .16),inset 0 -1px 0 oklch(0 0 0 / .4)}
+.seg::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.2px;pointer-events:none;opacity:.9;
+  background:conic-gradient(from var(--ua,0deg),oklch(0.4 0.012 250 / .55) 0deg,oklch(0.6 0.014 245 / .6) 48deg,oklch(0.97 0.01 240 / .95) 70deg,oklch(0.82 0.12 215 / .85) 76deg,oklch(0.78 0.13 250 / .7) 80deg,oklch(0.62 0.014 245 / .55) 98deg,
+  oklch(0.32 0.01 250 / .45) 168deg,oklch(0.55 0.014 245 / .55) 228deg,oklch(0.92 0.01 240 / .85) 250deg,oklch(0.86 0.1 85 / .65) 256deg,oklch(0.5 0.014 245 / .5) 278deg,oklch(0.4 0.012 250 / .55) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.seg span{position:relative;z-index:1;padding:15px 26px;font:500 24px/1 var(--sans);color:var(--t3);white-space:nowrap}
+.seg span.on{color:var(--t1)}
+.seg .thumb{position:absolute;top:7px;bottom:7px;border-radius:999px;
+  background:linear-gradient(180deg,oklch(0.42 0.03 248 / .75),oklch(0.28 0.03 250 / .7));
+  box-shadow:inset 0 1px 0 oklch(1 0 0 / .28),inset 0 -1px 0 oklch(0 0 0 / .3),0 6px 16px -6px oklch(0.03 0.02 250 / .8)}
+.chip{top:420px;padding:16px 22px;font:400 25px/1 var(--sans);color:var(--t1);white-space:nowrap;border-radius:999px}
+.chip i{font-style:normal;color:var(--blue)}
+/* Caption with Intention, drawn in the page (content-engine opencaptions skill, CWI-Remotion bridge):
+   one caption event at a time on a liquid-glass card in the 9:16 caption band (content-engine
+   layout/vertical-9x16.json, reels-organic: y 0.671-0.762), words styled per CWI word. */
+.cap{position:absolute;left:540px;bottom:460px;transform:translateX(-50%);max-width:640px;width:max-content;
+  padding:12px 28px 14px;border-radius:30px;text-align:center;font-size:50px;font-family:'Roboto Flex',var(--sans);line-height:1.12;letter-spacing:-.01em;text-wrap:balance}
+.cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
+/* emphasised words get side room equal to the 15% bounce overhang (7.5% of their width each side), set when the caption is built */
+.ctr{top:1150px;padding:18px 26px;display:flex;align-items:baseline;gap:16px}
+.ctr small{font:500 16px/1 var(--mono);letter-spacing:.18em;color:var(--t3)}
+.ctr b{font:500 38px/1 var(--mono);letter-spacing:.04em}
+/* Reel 08: one workspace's bronze / silver / gold folders on a glass panel that shrinks into the first of three
+   sandboxes above one shared ledger; the drawings sit on their own canvas above the glass so the backdrop blur never
+   softens them. Everything stays in the safe zone and above the caption band. */
+h1{top:296px;font-size:70px;line-height:1.04}
+.band{border-radius:28px}
+#fg{z-index:1}
+h1,.cap,.kick{z-index:2}
+</style>
+</head>
+<body>
+<div class="ambient"><i></i><i></i><i></i></div>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<div class="glass band" id="g1"></div>
+<div class="glass band" id="g2"></div>
+<div class="glass band" id="g3"></div>
+<div class="glass band" id="gL"></div>
+<canvas id="fg" width="1080" height="1920"></canvas>
+<div class="kick"><b>05 · Medallion</b></div>
+<h1 id="h"></h1>
+<div class="glass cap" id="cap"></div>
+
+<script id="reel-data" type="application/json">{
+  "id": "r08-medallion",
+  "title": "Medallion layers in the filesystem",
+  "audio": { "src": "../deck/narration/river.mp3", "start": 269.44, "end": 312.08 },
+  "disclosure": "AI-generated narration using ElevenLabs River stock voice, selected by the author; not a recording or clone of Carlos Escobar.",
+  "captions": { "font": "Roboto Flex", "size": 64, "maxChars": 22, "marginL": 220, "marginR": 220, "marginV": 457,
+    "baseSize": 50, "maxEventChars": 42, "speakerColor": { "S0": "oklch(0.8 0.12 245)" } }
+}</script>
+<script src="engine.js"></script>
+<script src="captions/r08-medallion.cwi.js"></script>
+<script>
+// Timeline in seconds from the start of the keynote slice (269.44 s), keyed to the narration's word timings
+// (captions/r08-medallion.cwi.json): "Bronze@4.08 holds source material. Silver@6.04 holds normalized@6.80 or extracted@7.70 …"
+const TL = {
+  fs: 3.02, bronze: 4.08, source: 4.68, silver: 6.04, normalized: 6.8, extracted: 7.7, gold: 9.38, accepted: 10.02, definitions: 10.48,
+  ops: [15.44, 16.12, 16.68, 17.44], opsEnd: 18.2,                      // search, read, compare, write
+  provenance: 18.42, traced: 20.96, inputs: 21.9,
+  arch: 23.16, sandboxes: [25.02, 25.24, 25.5], working: 26.56,         // "each sandbox owns its own working files"
+  ledger: 27.9, rows: [28.94, 29.9, 31.16],                             // activities, approvals, accepted definitions
+  record: 37.86, local: 39.48, shared: 41.16, end: 42.64
+};
+const ease = x => { x = clamp(x, 0, 1); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 };
+const ramp = (t, a, d) => ease((t - a) / d);
+const win = (t, a, b) => t >= a && t < b ? Math.min(1, (t - a) / .12, (b - t) / .25) : 0;
+const bgc = document.getElementById('bg').getContext('2d'), fgc = document.getElementById('fg').getContext('2d');
+const amb = [...document.querySelectorAll('.ambient i')];
+
+// the deck's medallion colours (deck/index.html, scene "medallion")
+const TIER = { bronze: 'oklch(0.72 0.1 55)', silver: 'oklch(0.84 0.012 250)', gold: 'oklch(0.82 0.12 88)' };
+// Geometry: x 143-938 is the safe zone; everything stops at y 1210 so the caption band (y 1288-1463) stays clear.
+const PANEL = [143, 480, 795, 730];                                      // one workspace: x, y, w, h
+const BOX = [[143, 480, 245, 380], [418, 480, 245, 380], [693, 480, 245, 380]];  // many workspaces, one sandbox each
+const LEDGER = [143, 940, 795, 270];
+const L = 180, ROWY = [655, 840, 1025], TX = [612, 734, 856], TW = 108, TH = 58;
+const ROWS = [['bronze', 'source material', TL.bronze, TL.source], ['silver', 'normalized or extracted', TL.silver, TL.normalized],
+  ['gold', 'accepted definitions', TL.gold, TL.accepted]];
+const TILES = [['src-01', 'src-02', 'src-03'], ['rec-01', 'rec-02'], ['def-01']];
+const OPS = ['search', 'read', 'compare', 'write'];
+
+// background: the deck's liquid-metal ASCII flow, as in reel 01
+function background(t) {
+  setCtx(bgc); bgc.clearRect(0, 0, 1080, 1920);
+  const A = atlas(13, 'oklch(0.78 0.06 245)'); bgc.globalAlpha = .2;
+  asciiField(0, 0, 1080, 1920, 17, A, (X, Y) => {
+    const f = Math.sin(X * .011 + Math.sin(Y * .008 + t * .19) * 1.7 + t * .13) * .5 + .5,
+      g = Math.sin(Y * .015 - t * .11 + Math.sin(X * .005 + t * .07) * 2.2) * .5 + .5;
+    return Math.min(.72, Math.pow(f * g, 2.2) * 1.25);
+  });
+  bgc.globalAlpha = 1;
+  amb.forEach((el, i) => el.style.transform = `translate(${Math.sin(t * .05 + i * 2) * 60}px,${Math.cos(t * .04 + i) * 80}px) scale(${1 + .05 * Math.sin(t * .07 + i)})`);
+}
+
+// ── small canvas kit (the deck's T / pill, reduced to what this scene uses) ──
+function T(s, x, y, o = {}) {
+  const ctx = getCtx(), a = o.a ?? 1; if (a <= .01) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.font = `${o.w || 500} ${o.s || 16}px ${o.f || FONT.m}`; ctx.letterSpacing = `${o.ls || 0}px`;
+  ctx.fillStyle = o.c || C.t2; ctx.textAlign = o.al || 'left'; ctx.textBaseline = 'middle'; ctx.fillText(s, x, y); ctx.restore();
+}
+function rr(x, y, w, h, r, stroke, a = 1, fill = null, lw = 1.4) {
+  const ctx = getCtx(); if (a <= .01) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
+  if (fill) { ctx.fillStyle = fill; ctx.fill() }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke() }
+  ctx.restore();
+}
+const qb = (p, u) => [0, 1].map(i => (1 - u) * (1 - u) * p[0][i] + 2 * (1 - u) * u * p[1][i] + u * u * p[2][i]);
+function curve(p, c, a, lw = 1.4, dash = null) {
+  if (a <= .01) return;
+  const ctx = getCtx(); ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = c; ctx.lineWidth = lw; if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(...p[0]); ctx.quadraticCurveTo(...p[1], ...p[2]); ctx.stroke(); ctx.restore();
+}
+// a travelling pulse with a short trail, u in [0,1] along a quadratic path
+function pulse(p, u, c, a = 1) {
+  if (u <= 0 || u >= 1 || a <= .01) return;
+  const ctx = getCtx(), g0 = ctx.globalAlpha, fade = Math.min(1, u / .12, (1 - u) / .12);
+  for (let k = 5; k >= 1; k--) { const q = qb(p, clamp(u - k * .03, 0, 1)); ctx.globalAlpha = g0 * a * fade * (1 - k / 6) * .5; dot(q[0], q[1], 2.4, c) }
+  ctx.globalAlpha = g0 * a * fade; const q = qb(p, u); dot(q[0], q[1], 3.6, c, 4); ctx.globalAlpha = g0;
+}
+
+// ── glass panels: one workspace that becomes the first of three sandboxes, and the shared ledger below them ──
+const G = ['g1', 'g2', 'g3', 'gL'].map(id => document.getElementById(id));
+function place(el, r, k) {
+  el.style.left = `${r[0].toFixed(2)}px`; el.style.top = `${r[1].toFixed(2)}px`; el.style.width = `${r[2].toFixed(2)}px`; el.style.height = `${r[3].toFixed(2)}px`;
+  el.style.visibility = k > .005 ? '' : 'hidden'; el.style.opacity = k >= 1 ? '' : String(k);
+}
+function panels(t) {
+  const m = ramp(t, TL.arch + .3, .9);                                   // the workspace shrinks into sandbox 01
+  place(G[0], PANEL.map((v, i) => lerp(v, BOX[0][i], m)), ramp(t, .1, .6));
+  place(G[1], BOX[1], ramp(t, TL.sandboxes[1] - .1, .5));
+  place(G[2], BOX[2], ramp(t, TL.sandboxes[2] - .1, .5));
+  place(G[3], LEDGER, ramp(t, TL.ledger - .2, .5));
+}
+
+// ── one workspace: bronze, silver and gold as folders, and the file operations an agent already knows ──
+const tileY = r => ROWY[r];
+const ARRIVE = [[TL.bronze + .2, TL.bronze + .48, TL.bronze + .76], [TL.normalized, TL.extracted], [TL.accepted]];
+const toSilver = j => [[TX[j], ROWY[0] + TH / 2], [TX[j] + 46, (ROWY[0] + ROWY[1]) / 2], [TX[j], ROWY[1] - TH / 2]];
+const toGold = j => [[TX[j], ROWY[1] + TH / 2], [lerp(TX[j], TX[0], .5) + 40, (ROWY[1] + ROWY[2]) / 2], [TX[0], ROWY[2] - TH / 2]];
+const EDGE = TX[0] - TW / 2 - 6;
+const back = [[[EDGE, ROWY[2]], [EDGE - 62, (ROWY[1] + ROWY[2]) / 2], [EDGE, ROWY[1]]], [[EDGE, ROWY[1]], [EDGE - 62, (ROWY[0] + ROWY[1]) / 2], [EDGE, ROWY[0]]]];
+function lit(r, j, t) {
+  let v = win(t, ARRIVE[r][j], ARRIVE[r][j] + 1) * .8;
+  if (t >= TL.ops[0] && t < TL.ops[1]) { const sy = lerp(590, 1090, (t - TL.ops[0]) / (TL.ops[1] - TL.ops[0])); v = Math.max(v, 1 - Math.abs(tileY(r) - sy) / 50) }
+  if (r === 0 && j === 0) v = Math.max(v, win(t, TL.ops[1], TL.ops[2]), win(t, TL.inputs, TL.arch));
+  if (r === 1) v = Math.max(v, win(t, TL.ops[2], TL.ops[3]));
+  if (r === 1 && j === 0) v = Math.max(v, win(t, TL.traced + .5, TL.arch));
+  if (r === 2) v = Math.max(v, win(t, TL.ops[3], TL.opsEnd + .3), win(t, TL.traced, TL.arch));
+  return clamp(v, 0, 1);
+}
+function tile(name, x, y, c, a, l, check = 0) {
+  if (a <= .01) return;
+  if (l > .01) { const ctx = getCtx(), g0 = ctx.globalAlpha; ctx.globalAlpha = g0 * a; glow(x, y, 86, c, .32 * l); ctx.globalAlpha = g0 }
+  rr(x - TW / 2, y - TH / 2, TW, TH, 12, l > .3 ? c : al(c, .7), a, al(C.deep, .72), 1.4 + l * 1.2);
+  T(name, x - (check > .01 ? 9 * check : 0), y + 1, { s: 19, w: 500, al: 'center', c: l > .3 ? c : C.t1, a, ls: .5 });
+  if (check > .01) T('✓', x + 38, y + 1, { s: 20, w: 700, al: 'center', c: C.green, a: a * check });
+}
+function opChip(t, fa) {
+  let label = null, c = C.cyan, k = 0;
+  if (t >= TL.ops[0] - .15 && t < TL.provenance - .1) {
+    let i = 0; TL.ops.forEach((s, j) => { if (t >= s - .08) i = j }); label = OPS[i]; k = ramp(t, TL.ops[0] - .15, .3);
+  } else if (t >= TL.provenance - .1) { label = 'provenance'; c = C.warm; k = ramp(t, TL.provenance - .1, .4) }
+  if (!label || k * fa <= .01) return;
+  const w = label.length * 13.6 + 58;
+  rr(900 - w, 507, w, 44, 22, c, k * fa, al(C.deep, .7), 1.4);
+  T('›', 900 - w + 20, 529, { s: 22, w: 600, c, a: k * fa }); T(label, 900 - w + 40, 529, { s: 21, w: 600, ls: 1, c, a: k * fa });
+}
+function single(t) {
+  const fa = 1 - ramp(t, TL.arch - .1, .55); if (fa <= .01) return;
+  const kh = ramp(t, .25, .6);
+  T('workspace/', L, 529, { s: 30, w: 600, c: t >= TL.fs && t < TL.fs + 1.4 ? C.blue : C.t1, a: kh * fa, ls: .5 });
+  T('filesystem', L + 206, 531, { s: 21, c: C.t3, a: ramp(t, TL.fs - .1, .5) * fa });
+  // "the workspace filesystem": the three folders are there, empty and dim, before the narration names each one
+  const ghost = .3 * ramp(t, TL.fs - .1, .6);
+  [748, 933].forEach((y, i) => rr(L, y, 720, 1.2, .6, null, Math.max(ghost, ramp(t, ROWS[i + 1][2] - .2, .5)) * fa, C.line2));
+  ROWS.forEach(([n, d, at, dt], r) => {
+    const k = Math.max(ghost, ramp(t, at - .15, .45)); if (k <= .01) return;
+    const on = t >= at && t < at + 1.6, y = ROWY[r];
+    if (on) { const ctx = getCtx(); ctx.globalAlpha = fa; glow(L + 60, y - 18, 90, TIER[n], .18 * (1 - (t - at) / 1.6)); ctx.globalAlpha = 1 }
+    T(n + '/', L, y - 17, { s: 34, w: 600, c: TIER[n], a: k * fa, ls: .5 });
+    T(d, L, y + 25, { f: FONT.s, s: 22, w: 400, c: on || t >= dt && t < dt + 1.4 ? C.t1 : C.t3, a: ramp(t, dt - .1, .45) * fa });
+  });
+  // each transformation is a pulse down a layer: bronze to silver, silver to gold
+  [0, 1].forEach(j => pulse(toSilver(j), (t - (ARRIVE[1][j] - .55)) / .55, TIER.silver, fa));
+  [0, 1].forEach(j => pulse(toGold(j), (t - (TL.accepted - .55)) / .55, TIER.gold, fa));
+  TILES.forEach((row, r) => row.forEach((name, j) => {
+    const at = ARRIVE[r][j], k = ramp(t, at - .05, .35); if (k <= .01) return;
+    const y = tileY(r) - (r === 0 ? (1 - k) * 26 : 0);
+    tile(name, TX[j], y, TIER[['bronze', 'silver', 'gold'][r]], k * fa, lit(r, j, t), r === 2 ? ramp(t, TL.definitions - .05, .3) : 0);
+  }));
+  // search: a scan line passes over every layer
+  if (t >= TL.ops[0] && t < TL.ops[1]) {
+    const sy = lerp(590, 1090, (t - TL.ops[0]) / (TL.ops[1] - TL.ops[0])), ctx = getCtx();
+    ctx.globalAlpha = fa; glow(740, sy, 140, C.cyan, .12); ctx.globalAlpha = 1; rr(L - 8, sy - 1, 736, 2, 1, null, fa * .8, C.cyan);
+  }
+  // compare: the two silver records side by side
+  if (t >= TL.ops[2] - .1 && t < TL.ops[3] + .3) T('⇄', (TX[0] + TX[1]) / 2, ROWY[1] + 1, { s: 24, w: 600, al: 'center', c: C.cyan, a: win(t, TL.ops[2] - .1, TL.ops[3] + .3) * fa });
+  opChip(t, fa);
+  // provenance: the gold result is traced back through silver to its bronze input
+  const kp = ramp(t, TL.provenance - .1, .6);
+  back.forEach((p, i) => curve(p, C.warm, kp * fa * .8, 1.6, [4, 6]));
+  pulse(back[0], (t - TL.traced) / .5, C.warm, fa); pulse(back[1], (t - TL.traced - .48) / .5, C.warm, fa);
+}
+
+// ── many workspaces: each sandbox owns its working files; one shared ledger records what was decided ──
+const HOLD = [[3, 2, 1], [2, 2, 1], [3, 1, 1]];                         // each sandbox holds its own files
+function boxes(t) {
+  const kl = ramp(t, TL.local - .1, .5);                                 // "local working state"
+  BOX.forEach(([x, y, w, h], i) => {
+    const k = i === 0 ? ramp(t, TL.arch + 1.05, .5) : ramp(t, TL.sandboxes[i] + .1, .5); if (k <= .01) return;
+    const on = t >= TL.sandboxes[i] && t < TL.sandboxes[i] + 1.3;
+    T(`sandbox ${String(i + 1).padStart(2, '0')}`, x + 22, y + 38, { s: 21, w: 600, ls: 1, c: on ? C.blue : C.t1, a: k });
+    ['bronze', 'silver', 'gold'].forEach((n, r) => {
+      const yy = y + 104 + r * 76, send = i === 2 && r === 2 ? win(t, TL.rows[2] - .75, TL.rows[2] + .4) : 0;
+      T(n + '/', x + 22, yy, { s: 19, w: 600, c: TIER[n], a: k });
+      for (let j = 0; j < HOLD[i][r]; j++) {
+        const sx = x + 112 + j * 40;
+        if (send) { const ctx = getCtx(); ctx.globalAlpha = k; glow(sx + 16, yy, 40, TIER[n], .4 * send); ctx.globalAlpha = 1 }
+        rr(sx, yy - 15, 32, 30, 6, al(TIER[n], .8), k, al(TIER[n], .14 + .3 * send), 1.2);
+      }
+    });
+    const kw = ramp(t, TL.working - .1, .5), wl = t >= TL.working && t < TL.working + 1.5 || kl > .01;
+    T('working files', x + w / 2, y + h - 36, { f: FONT.s, s: 21, w: 400, al: 'center', c: wl ? (kl > .01 ? C.warm : C.t1) : C.t3, a: k * kw });
+  });
+  // "local working state": a bracket under the three sandboxes
+  if (kl > .01) {
+    rr(153, 880, 775, 1.6, .8, null, kl * .9, C.warm); [153, 926].forEach(x => rr(x, 870, 1.6, 12, .8, null, kl * .9, C.warm));
+    rr(390, 868, 300, 26, 13, null, kl, C.deep); T('local working state', 540, 881, { s: 20, w: 600, ls: 1, al: 'center', c: C.warm, a: kl });
+  }
+}
+const ENTRY = [[0, 'activity'], [1, 'approval'], [2, 'definition']];
+function ledger(t) {
+  const [x, y] = LEDGER, k = ramp(t, TL.ledger - .1, .5); if (k <= .01) return;
+  const on = t >= TL.ledger && t < TL.ledger + 1.4, rec = ramp(t, TL.shared - .1, .5);
+  T('shared ledger', L, y + 44, { f: FONT.d, s: 38, w: 400, ls: -.4, c: on || rec > .5 ? C.cyan : C.t1, a: k });
+  T('system of record', L + 252, y + 47, { f: FONT.s, s: 21, w: 400, c: rec > .5 ? C.cyan : C.t3, a: ramp(t, TL.rows[0] - .1, .5) });
+  const n = TL.rows.filter(r => t >= r).length;
+  T('ROWS', 790, y + 46, { s: 19, w: 500, ls: 2.5, c: C.t3, al: 'right', a: k });
+  T(String(n).padStart(3, '0'), 866, y + 46, { s: 27, w: 500, ls: 1, c: C.cyan, al: 'right', a: k });
+  if (rec > .01) { const g = Math.max(0, 1 - (t - TL.shared) / 1.8); rr(LEDGER[0] + 6, y + 6, LEDGER[2] - 12, LEDGER[3] - 12, 22, C.cyan, rec * (.3 + .6 * g), null, 1.4 + g) }
+  ENTRY.forEach(([b, kind], j) => {
+    const at = TL.rows[j], [bx, by, bw, bh] = BOX[b], cx = bx + bw / 2;
+    const path = [[cx, by + bh + 2], [cx + 20, (by + bh + y) / 2], [cx, y + 4]];
+    curve(path, C.cyan, k * .4, 1.2, [2, 6]);
+    pulse(path, (t - (at - .5)) / .5, C.cyan, 1);
+    const kr = ramp(t, at - .05, .35); if (kr <= .01) return;
+    const ry = y + 112 + j * 52, fresh = win(t, at, at + 1.2);
+    if (fresh) rr(L - 14, ry - 22, 748, 44, 12, null, fresh * .9, al(C.cyan, .12));
+    T(String(j + 1).padStart(3, '0'), L, ry, { s: 20, c: C.t3, a: kr });
+    T(kind, L + 72, ry, { s: 23, w: 600, c: fresh > .3 ? C.cyan : C.t1, a: kr, ls: .5 });
+    T(`← sandbox ${String(b + 1).padStart(2, '0')}`, 866, ry, { s: 20, al: 'right', c: C.t3, a: kr });
+  });
+}
+
+const HL = [[0, 'Medallion layers,<br><em>as folders.</em>'], [TL.ledger - .3, 'Many sandboxes,<br><em>one shared ledger.</em>'],
+  [TL.record, 'Local working state.<br><em>One shared record.</em>']];
+const h = document.getElementById('h');
+// An element at rest carries no filter, transform or opacity (see reel 01): a settled frame must be plain.
+function settle(el, k, transform, blur) {
+  if (k >= 1) { el.style.opacity = ''; el.style.filter = ''; el.style.transform = ''; el.style.visibility = ''; return }
+  el.style.visibility = k > 0 ? '' : 'hidden';
+  el.style.opacity = k; el.style.filter = k > 0 ? `blur(${(1 - k) * blur}px)` : ''; el.style.transform = transform(k);
+}
+function headline(t) {
+  let i = 0; for (let k = 1; k < HL.length; k++) if (t >= HL[k][0]) i = k;
+  const nb = HL[i + 1]?.[0], pb = i ? HL[i][0] : -9;
+  let k = 1, dir = 1;
+  if (nb !== undefined && t > nb - .35) { k = (nb - t) / .35; dir = -1 } else if (t < pb + .35) k = (t - pb) / .35;
+  k = ease(k);
+  if (h.innerHTML !== HL[i][1]) h.innerHTML = HL[i][1];
+  settle(h, k, kk => `translateY(${(1 - kk) * 16 * dir}px)`, 10);
+}
+
+// ── Caption with Intention: word-level CWI from OpenCaptions, rendered as a pure function of t ──
+const REEL = JSON.parse(document.getElementById('reel-data').textContent), CAPCFG = REEL.captions;
+const capEl = document.getElementById('cap');
+// FCC: at most 42 characters per caption; split long events at word boundaries, preferring punctuation.
+const FUNC = /^(a|an|the|of|to|in|on|and|or|but|for|with|by|its|it|is|be|can|that)$/i;
+function chunkEvents(doc) {
+  const out = [];
+  for (const e of doc.captions) {
+    let cur = [];
+    const len = ws => ws.map(w => w.text).join(' ').length;
+    for (const w of e.words) {
+      if (cur.length && len([...cur, w]) > CAPCFG.maxEventChars) {
+        let cut = cur.length;                                   // break after the last punctuation if it is not too early
+        for (let i = cur.length - 1; i >= Math.ceil(cur.length / 2); i--) if (/[.,;:?!]$/.test(cur[i].text)) { cut = i + 1; break }
+        while (cut > 1 && FUNC.test(cur[cut - 1].text)) cut--;  // never end a caption on "the", "a", "of", "and" …
+        out.push({ speaker: e.speaker_id, words: cur.slice(0, cut) }); cur = cur.slice(cut);
+      }
+      cur.push(w);
+    }
+    if (cur.length) out.push({ speaker: e.speaker_id, words: cur });
+  }
+  out.forEach((ev, i) => { ev.start = ev.words[0].start; ev.until = i + 1 < out.length ? out[i + 1].words[0].start : ev.words.at(-1).end + .6 });
+  // back-to-back captions share one card: the text swaps, the card does not fade out and in (no blank frame)
+  out.forEach((ev, i) => { ev.chainOut = i + 1 < out.length && out[i + 1].start - ev.words.at(-1).end < .5; ev.chainIn = i > 0 && out[i - 1].chainOut });
+  return out;
+}
+const CAPS = window.CWI && !new URLSearchParams(location.search).has('captions') ? chunkEvents(window.CWI) : [];
+const spk = id => CAPCFG.speakerColor?.[id] || window.CWI?.cast.find(c => c.id === id)?.color || '#fff';
+let capShown = -1;
+function captions(t) {
+  if (!CAPS.length) { capEl.style.display = 'none'; return }
+  let i = -1; for (let k = 0; k < CAPS.length; k++) if (t >= CAPS[k].start - .12) i = k;
+  const ev = CAPS[i];
+  if (!ev || t > ev.until) { capEl.style.opacity = '0'; capShown = -1; return }
+  if (capShown !== i) {                                         // rebuild only when the event changes; style is set from t below
+    capEl.innerHTML = ev.words.map(w => `<span class="w${w.emphasis ? ' em' : ''}">${w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join(' ');
+    capShown = i;
+    ev.words.forEach((w, j) => {                               // measure at the word's own weight and size, then reserve the overhang
+      if (!w.emphasis) return;
+      const el = capEl.children[j];
+      el.style.fontWeight = String(Math.round(w.weight / 100) * 100); el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+      el.style.margin = `0 ${Math.ceil(el.getBoundingClientRect().width * .08)}px`;
+    });
+  }
+  const inK = ev.chainIn ? 1 : ramp(t, ev.start - .12, .18), outK = ev.chainOut ? 1 : 1 - ramp(t, ev.until - .14, .14), k = Math.min(inK, outK);
+  capEl.style.opacity = k >= 1 ? '' : String(k);
+  const col = spk(ev.speaker), spans = capEl.children;
+  ev.words.forEach((w, j) => {
+    const el = spans[j], a = w.animation || {}, d = (a.delay_ms ?? 100) / 1000, dur = (a.duration_ms ?? 600) / 1000;
+    const p = ease((t - w.start - d) / dur);                  // CWI: white → speaker colour, 600 ms ease after 100 ms
+    const rise = ease((t - w.start + .05) / .22);              // entrance: the word lifts into place as it is spoken
+    const bump = w.emphasis ? Math.sin(Math.PI * clamp((t - w.start) / .45, 0, 1)) : 0;  // 15% bounce on emphasis
+    el.style.fontWeight = String(Math.round(w.weight / 100) * 100);
+    el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+    el.style.color = p >= 1 ? col : p <= 0 ? '#fff' : `color-mix(in oklab, ${col} ${(p * 100).toFixed(1)}%, #fff)`;
+    el.style.opacity = rise >= 1 ? '' : (.38 + .62 * rise).toFixed(3);
+    el.style.transform = bump > 0 ? `scale(${(1 + .15 * bump).toFixed(4)})` : rise >= 1 ? '' : `translateY(${((1 - rise) * 10).toFixed(2)}px)`;
+    el.style.textShadow = (w.emphasis && t >= w.start) ? `0 0 ${(20 * Math.max(bump, .35)).toFixed(1)}px ${col}, 0 0 40px color-mix(in oklab, ${col} 25%, transparent)` : '';
+  });
+}
+
+
+window.renderAt = function (t) {
+  document.documentElement.style.setProperty('--ua', ((t * 40) % 360).toFixed(1) + 'deg');
+  captions(t);
+  background(t);
+  panels(t);
+  setCtx(fgc); fgc.clearRect(0, 0, 1080, 1920);
+  single(t);
+  boxes(t);
+  ledger(t);
+  headline(t);
+};
+
+const Q = new URLSearchParams(location.search);
+FONTS_READY.then(() => Promise.all([...[100, 200, 300, 400, 500, 600, 700, 800, 900].map(w => `${w} 54px "Roboto Flex"`),
+  '400 36px Raleway', '500 25px Raleway', '600 20px "JetBrains Mono"'].map(s => document.fonts.load(s)))).then(() => document.fonts.ready).then(() => {
+  window.renderAt(+(Q.get('t') || 0));
+  window.__ready = true;
+  if (!Q.has('t')) {
+    const t0 = performance.now();
+    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % (window.SERIES?.total_dur || TL.end)); requestAnimationFrame(loop) };
+    requestAnimationFrame(loop);
+  }
+});
+</script>
+<!-- Series Part 5/5 (BRO-3817): the River hook, the end card and the series timeline. Without the generated
+     audio/r08-medallion.series.js the overlay does nothing and the reel plays as the plain keynote slice. -->
+<script src="audio/r08-medallion.series.js" onerror="this.remove()"></script>
+<script src="series-overlay.js"></script>
+</body>
+</html>
