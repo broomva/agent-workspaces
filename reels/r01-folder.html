@@ -372,10 +372,14 @@ FONTS_READY.then(() => Promise.all([100, 200, 300, 400, 500, 600, 700, 800, 900]
   window.__ready = true;
   if (!Q.has('t')) {
     const t0 = performance.now();
-    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % TL.end); requestAnimationFrame(loop) };
+    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % (window.SERIES?.total_dur || TL.end)); requestAnimationFrame(loop) };
     requestAnimationFrame(loop);
   }
 });
 </script>
+<!-- Series Part 2/5 (BRO-3817): the River hook, the end card and the series timeline. Without the generated
+     audio/r01-folder.series.js the overlay does nothing and the reel plays as the plain keynote slice. -->
+<script src="audio/r01-folder.series.js" onerror="this.remove()"></script>
+<script src="series-overlay.js"></script>
 </body>
 </html>
