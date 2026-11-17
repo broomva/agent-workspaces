@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agent Workspaces · Reel 02 · Give the agent a filesystem and a shell</title>
+<meta name="viewport" content="width=1080">
+<!-- Vertical-native reel (1080x1920) on the keynote's render kit (reels/engine.js, extracted from deck/index.html).
+     Every frame is a pure function of time: window.renderAt(t). Open without ?t= to preview in real time. -->
+<style>
+@font-face{font-family:'Inter';font-weight:300 700;src:url(../deck/fonts/Inter-400.woff2) format('woff2')}
+@font-face{font-family:'Raleway';font-weight:200 600;src:url(../deck/fonts/Raleway-300.woff2) format('woff2')}
+/* Roboto Flex at the nine CWI weights (pitch → weight), static instances of the variable font */
+@font-face{font-family:'Roboto Flex';font-weight:100;src:url(../deck/fonts/RobotoFlex-Thin.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:200;src:url(../deck/fonts/RobotoFlex-ExtraLight.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:300;src:url(../deck/fonts/RobotoFlex-Light.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:400;src:url(../deck/fonts/RobotoFlex-Regular.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:500;src:url(../deck/fonts/RobotoFlex-Medium.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:600;src:url(../deck/fonts/RobotoFlex-SemiBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:700;src:url(../deck/fonts/RobotoFlex-Bold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:800;src:url(../deck/fonts/RobotoFlex-ExtraBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:900;src:url(../deck/fonts/RobotoFlex-Black.ttf) format('truetype')}
+@font-face{font-family:'JetBrains Mono';font-weight:300 700;src:url(../deck/fonts/JetBrainsMono-400.woff2) format('woff2')}
+:root{
+  --deep:oklch(0.155 0.028 250);--surface:oklch(0.205 0.03 245);--elev:oklch(0.245 0.03 245);
+  --t1:oklch(0.975 0.004 250);--t2:oklch(0.83 0.015 248);--t3:oklch(0.65 0.022 248);
+  --line:oklch(0.78 0.03 245 / .12);--line2:oklch(0.78 0.03 245 / .24);
+  --ai:oklch(0.62 0.19 256);--blue:oklch(0.71 0.15 252);--violet:oklch(0.79 0.035 235);
+  --cyan:oklch(0.81 0.12 225);--green:oklch(0.76 0.19 148);--warm:oklch(0.79 0.16 65);--coral:oklch(0.67 0.21 28);--gold:oklch(0.86 0.12 88);
+  --display:'Raleway',sans-serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+  /* 9:16 geometry from the content-engine layout contract (skills: video/content-engine/layout/vertical-9x16.json,
+     profile reels-organic, measured from a real Reel): safe zone x 143-938 y 277-1643, title band y 121-436,
+     caption band x 220-860 y 1288-1463, right action rail x > 872 below y 922 */
+  --sl:143px;--sw:795px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--deep);color:var(--t1)}
+body{position:relative;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+/* ambient light, moved from renderAt (no wall-clock CSS animation, so frames stay pure) */
+.ambient{position:absolute;inset:-20%;pointer-events:none;filter:blur(90px);opacity:.55}
+.ambient i{position:absolute;width:62vmax;height:62vmax;border-radius:50%}
+.ambient i:nth-child(1){left:-12%;top:8%;background:radial-gradient(circle,color-mix(in oklab,var(--blue) 45%,transparent),transparent 62%)}
+.ambient i:nth-child(2){right:-18%;top:34%;background:radial-gradient(circle,color-mix(in oklab,var(--violet) 32%,transparent),transparent 60%)}
+.ambient i:nth-child(3){left:18%;bottom:-6%;background:radial-gradient(circle,color-mix(in oklab,var(--ai) 34%,transparent),transparent 60%)}
+canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.kick{position:absolute;left:var(--sl);top:140px;width:var(--sw);display:flex;justify-content:space-between;align-items:center;
+  font:500 21px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+.kick b{font-weight:500;display:flex;align-items:center;gap:16px}
+.kick b::before{content:"";width:40px;height:1.5px;background:currentColor;opacity:.7}
+h1{position:absolute;left:calc(var(--sl) + 8px);top:290px;width:var(--sw);font:300 92px/1.02 var(--display);letter-spacing:-.034em;
+  text-shadow:0 2px 30px oklch(0.155 0.028 250 / .6)}
+h1 em{font-style:normal;font-weight:400;color:var(--blue)}
+
+/* liquid glass cards (deck): thin tint so the live field reads through a light blur, vertical thickness gradient,
+   bright top edge, cyan caustic along the bottom, and a travelling liquid-metal rim (--ua advanced per frame) */
+.glass{position:absolute;isolation:isolate;border-radius:24px;
+  background:linear-gradient(180deg,oklch(0.36 0.03 248 / .3),oklch(0.2 0.03 250 / .26) 55%,oklch(0.17 0.03 250 / .34));
+  -webkit-backdrop-filter:blur(9px) saturate(220%) brightness(1.12);backdrop-filter:blur(9px) saturate(220%) brightness(1.12);
+  box-shadow:0 30px 80px -30px oklch(0.04 0.02 250 / .85),0 8px 22px -12px oklch(0.04 0.02 250 / .6),inset 0 1px 0 oklch(1 0 0 / .2),
+    inset 0 14px 28px -18px oklch(1 0 0 / .1),inset 0 -22px 34px -26px oklch(0.8 0.12 222 / .22),inset 0 0 0 1px oklch(1 0 0 / .045)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;pointer-events:none;opacity:.75;
+  background:conic-gradient(from var(--ua,0deg),
+  oklch(0.4 0.012 250 / .5) 0deg,oklch(0.62 0.014 245 / .6) 48deg,oklch(0.97 0.01 240 / .92) 70deg,oklch(0.82 0.12 215 / .8) 77deg,oklch(0.62 0.014 245 / .55) 98deg,
+  oklch(0.32 0.01 250 / .4) 168deg,oklch(0.56 0.014 245 / .55) 228deg,oklch(0.92 0.01 240 / .82) 250deg,oklch(0.86 0.1 85 / .55) 256deg,oklch(0.5 0.014 245 / .5) 278deg,oklch(0.4 0.012 250 / .5) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+/* liquid glass capsule (deck .seg): dark thick glass, lit top edge, raised chip thumb */
+.seg{position:absolute;left:var(--sl);top:502px;display:flex;padding:7px;border-radius:999px;isolation:isolate;
+  background:linear-gradient(180deg,oklch(0.29 0.022 250 / .66),oklch(0.185 0.024 250 / .74));
+  -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+  box-shadow:0 22px 60px -20px oklch(0.03 0.02 250 / .92),0 3px 8px -3px oklch(0 0 0 / .55),inset 0 1px 0 oklch(1 0 0 / .16),inset 0 -1px 0 oklch(0 0 0 / .4)}
+.seg::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.2px;pointer-events:none;opacity:.9;
+  background:conic-gradient(from var(--ua,0deg),oklch(0.4 0.012 250 / .55) 0deg,oklch(0.6 0.014 245 / .6) 48deg,oklch(0.97 0.01 240 / .95) 70deg,oklch(0.82 0.12 215 / .85) 76deg,oklch(0.78 0.13 250 / .7) 80deg,oklch(0.62 0.014 245 / .55) 98deg,
+  oklch(0.32 0.01 250 / .45) 168deg,oklch(0.55 0.014 245 / .55) 228deg,oklch(0.92 0.01 240 / .85) 250deg,oklch(0.86 0.1 85 / .65) 256deg,oklch(0.5 0.014 245 / .5) 278deg,oklch(0.4 0.012 250 / .55) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.seg span{position:relative;z-index:1;padding:15px 26px;font:500 24px/1 var(--sans);color:var(--t3);white-space:nowrap}
+.seg span.on{color:var(--t1)}
+.seg .thumb{position:absolute;top:7px;bottom:7px;border-radius:999px;
+  background:linear-gradient(180deg,oklch(0.42 0.03 248 / .75),oklch(0.28 0.03 250 / .7));
+  box-shadow:inset 0 1px 0 oklch(1 0 0 / .28),inset 0 -1px 0 oklch(0 0 0 / .3),0 6px 16px -6px oklch(0.03 0.02 250 / .8)}
+/* Caption with Intention, drawn in the page (content-engine opencaptions skill, CWI-Remotion bridge):
+   one caption event at a time on a liquid-glass card in the 9:16 caption band (content-engine
+   layout/vertical-9x16.json, reels-organic: y 0.671-0.762), words styled per CWI word. */
+.cap{position:absolute;left:540px;bottom:460px;transform:translateX(-50%);max-width:640px;width:max-content;
+  padding:12px 28px 14px;border-radius:30px;text-align:center;font-size:50px;font-family:'Roboto Flex',var(--sans);line-height:1.12;letter-spacing:-.01em;text-wrap:balance}
+.cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
+/* emphasised words get side room equal to the 15% bounce overhang (7.5% of their width each side), set when the caption is built */
+</style>
+</head>
+<body>
+<div class="ambient"><i></i><i></i><i></i></div>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div class="kick"><b>02 · Thesis</b></div>
+<h1 id="h"></h1>
+<div class="seg" id="seg"><i class="thumb" id="thumb"></i><span>Chat only</span><span>Filesystem + shell</span></div>
+<div class="glass cap" id="cap"></div>
+
+<script id="reel-data" type="application/json">{
+  "id": "r02-thesis",
+  "title": "Give the agent a filesystem and a shell",
+  "audio": { "src": "../deck/narration/river.mp3", "start": 53.84, "end": 87.52 },
+  "disclosure": "AI-generated narration using ElevenLabs River stock voice, selected by the author; not a recording or clone of Carlos Escobar.",
+  "captions": { "font": "Roboto Flex", "size": 64, "maxChars": 22, "marginL": 220, "marginR": 220, "marginV": 457,
+    "baseSize": 50, "maxEventChars": 42, "speakerColor": { "S0": "oklch(0.8 0.12 245)" } }
+}</script>
+<script src="engine.js"></script>
+<script src="captions/r02-thesis.cwi.js"></script>
+<script>
+// Timeline in seconds of body time (the keynote slice 53.84-87.52), keyed to the CWI word timings in captions/r02-thesis.cwi.json.
+const B = {
+  fs: 1.10, shell: 1.86, gaps: [2.64, 3.00, 3.32], lookup: 5.00,
+  open: 6.14, run: 7.46, diff: 8.34, leave: 9.60, record: 9.88,
+  model: 12.54, claims: 14.58, meet: 15.50, evidence: 16.38,
+  statement: 17.50, pointFile: 19.18, file: 19.74,
+  claim2: 20.64, pointTest: 22.18, test: 22.70, result: 23.70,
+  design: 24.86, ends: 27.54, findings: 28.78, disappear: 29.08, history: 30.34,
+  next: 31.60, find: 32.20, check: 32.76, end: 33.68
+};
+const ease = x => { x = clamp(x, 0, 1); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 };
+const ramp = (t, a, d) => ease((t - a) / d);
+const win = (t, a, b, d = .25) => Math.min(ramp(t, a - d, d), 1 - ramp(t, b, d));   // on across [a, b], soft edges
+const bgc = document.getElementById('bg').getContext('2d'), cvc = document.getElementById('cv').getContext('2d');
+const amb = [...document.querySelectorAll('.ambient i')];
+
+// background: the deck's liquid-metal ASCII flow, as in reel 01
+function background(t) {
+  setCtx(bgc); bgc.clearRect(0, 0, 1080, 1920);
+  const A = atlas(13, 'oklch(0.78 0.06 245)'); bgc.globalAlpha = .2;
+  asciiField(0, 0, 1080, 1920, 17, A, (X, Y) => {
+    const f = Math.sin(X * .011 + Math.sin(Y * .008 + t * .19) * 1.7 + t * .13) * .5 + .5,
+      g = Math.sin(Y * .015 - t * .11 + Math.sin(X * .005 + t * .07) * 2.2) * .5 + .5;
+    return Math.min(.72, Math.pow(f * g, 2.2) * 1.25);
+  });
+  bgc.globalAlpha = 1;
+  amb.forEach((el, i) => el.style.transform = `translate(${Math.sin(t * .05 + i * 2) * 60}px,${Math.cos(t * .04 + i) * 80}px) scale(${1 + .05 * Math.sin(t * .07 + i)})`);
+}
+
+// ── deck kit (deck/index.html, scene "thesis"), ported as pure functions of t ──
+const bz = (p, u) => { const v = 1 - u; return [v * v * v * p[0][0] + 3 * v * v * u * p[1][0] + 3 * v * u * u * p[2][0] + u * u * u * p[3][0], v * v * v * p[0][1] + 3 * v * v * u * p[1][1] + 3 * v * u * u * p[2][1] + u * u * u * p[3][1]] };
+const hc = (a, b, k = .5) => { const d = (b[0] - a[0]) * k; return [a, [a[0] + d, a[1]], [b[0] - d, b[1]], b] };
+const vc = (a, b, k = .5) => { const d = (b[1] - a[1]) * k; return [a, [a[0], a[1] + d], [b[0], b[1] - d], b] };
+const bend = (a, b, s) => { const dx = b[0] - a[0], dy = b[1] - a[1], nx = -dy * s, ny = dx * s; return [a, [a[0] + dx * .33 + nx, a[1] + dy * .33 + ny], [a[0] + dx * .67 + nx, a[1] + dy * .67 + ny], b] };
+function T(s, x, y, o = {}) {
+  const ctx = getCtx(); ctx.font = `${o.w || 500} ${o.s || 20}px ${o.f || FONT.m}`; ctx.fillStyle = o.c || C.t1;
+  const g = ctx.globalAlpha; ctx.globalAlpha = g * (o.a ?? 1); ctx.textAlign = o.al || 'left'; ctx.textBaseline = 'middle';
+  ctx.letterSpacing = (o.ls ?? .6) + 'px'; ctx.fillText(s, x, y); ctx.letterSpacing = '0px'; ctx.globalAlpha = g;
+}
+function rrect(x, y, w, h, r, stroke, fill, lw = 1.3) { const ctx = getCtx(); ctx.beginPath(); ctx.roundRect(x, y, w, h, r); if (fill) { ctx.fillStyle = fill; ctx.fill() } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke() } }
+// glass drawn in canvas (deck gpanel): frosted fill, top sheen, rim
+function gpanel(x, y, w, h, r, a = 1, dash) {
+  const ctx = getCtx(), g = ctx.globalAlpha; ctx.fillStyle = C.surface; ctx.globalAlpha = g * a * .6; ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill();
+  const s = ctx.createLinearGradient(x, y, x, y + h * .5); s.addColorStop(0, 'oklch(1 0 0 / .07)'); s.addColorStop(1, 'oklch(1 0 0 / 0)'); ctx.globalAlpha = g * a; ctx.fillStyle = s; ctx.fill();
+  const rg = ctx.createLinearGradient(x, y, x + w, y + h); rg.addColorStop(0, 'oklch(1 0 0 / .32)'); rg.addColorStop(.35, 'oklch(1 0 0 / .06)'); rg.addColorStop(.7, 'oklch(1 0 0 / .04)'); rg.addColorStop(1, 'oklch(1 0 0 / .16)');
+  ctx.strokeStyle = dash ? C.line2 : rg; ctx.lineWidth = 1.2; if (dash) ctx.setLineDash(dash); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = g;
+}
+// deck ribbon: a bundle of strands with a travelling liquid-metal specular; alpha multiplies the caller's
+function ribbon(p, n, s0, s1, cA, cB, a, t, amp = 5, lw = 1, dash) {
+  const ctx = getCtx(), g0 = ctx.globalAlpha; if (a * g0 <= .004) return;
+  const dx = p[3][0] - p[0][0], dy = p[3][1] - p[0][1], L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, seed = (p[0][0] * .013 + p[0][1] * .007) % 7;
+  const path = (o0, o1, o2, o3) => { ctx.beginPath(); ctx.moveTo(p[0][0] + nx * o0, p[0][1] + ny * o0); ctx.bezierCurveTo(p[1][0] + nx * o1, p[1][1] + ny * o1, p[2][0] + nx * o2, p[2][1] + ny * o2, p[3][0] + nx * o3, p[3][1] + ny * o3) };
+  ctx.strokeStyle = !dash ? metalGrad(p, cA, cB, t, seed) : (() => { const gr = ctx.createLinearGradient(p[0][0], p[0][1], p[3][0], p[3][1]); gr.addColorStop(0, cA); gr.addColorStop(1, cB); return gr })();
+  ctx.lineWidth = lw; ctx.globalAlpha = g0 * a; if (dash) ctx.setLineDash(dash);
+  for (let i = 0; i < n; i++) { const k = n == 1 ? 0 : i / (n - 1) - .5, w = Math.sin(t * .7 + i * .45) * amp * k * 2, o0 = k * s0, o3 = k * s1; path(o0, lerp(o0, o3, .33) + w, lerp(o0, o3, .67) - w, o3); ctx.stroke() }
+  ctx.setLineDash([]);
+  if (!dash) {
+    ctx.strokeStyle = fringe(p, C.shine, t, seed); ctx.globalAlpha = g0 * Math.min(1, a * 2.6); ctx.lineWidth = lw * 1.7; path(0, 0, 0, 0); ctx.stroke(); ctx.lineWidth = lw;
+    const op = ctx.globalCompositeOperation; ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = Math.max(.8, lw * .9);
+    for (const [c, off] of [[C.fringeA, 1.2], [C.fringeB, -1.2]]) { ctx.strokeStyle = fringe(p, c, t, seed); ctx.globalAlpha = g0 * a * .55; path(off, off, off, off); ctx.stroke() }
+    ctx.globalCompositeOperation = op;
+  }
+  ctx.globalAlpha = g0;
+}
+// the deck's Flow, made pure: particle k is born at k/rate and lives `life` seconds; alpha follows sin(πu)
+function flow(t, rate, life, seed, from, draw) {
+  const ctx = getCtx(), g = ctx.globalAlpha;
+  for (let k = Math.ceil((t - life) * rate); k <= Math.floor(t * rate); k++) {
+    const s = k / rate, u = (t - s) / life; if (s < from || u < 0 || u > 1) continue;
+    reseed(seed * 7919 + k * 104729); ctx.globalAlpha = g * Math.sin(Math.PI * u); draw(u, k);
+  }
+  ctx.globalAlpha = g;
+}
+// a link drawn on as it is spoken: the curve grows from its source to its target over d seconds
+function link(p, t, at, d, c, a = 1, lw = 2.4) {
+  const u = ramp(t, at, d); if (u <= 0 || a <= .01) return;
+  const ctx = getCtx(), g = ctx.globalAlpha; ctx.globalAlpha = g * a; ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.lineCap = 'round';
+  ctx.beginPath(); for (let i = 0; i <= 40; i++) { const q = bz(p, u * i / 40); i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]) } ctx.stroke(); ctx.lineCap = 'butt';
+  const e = bz(p, u); dot(e[0], e[1], 4, c, u < 1 ? 5 : 3); ctx.globalAlpha = g;
+}
+// an orb with a fading ASCII glyph trail along its recent path (reel 01)
+function travel(pos, t, c, a) {
+  const ctx = getCtx(), A = atlas(16, c);
+  for (let k = 8; k >= 1; k--) { const p = pos(t - k * .045); if (!p) continue; ctx.globalAlpha = a * (1 - k / 9) * .7; glyph(A, Math.max(1, 9 - k), p[0] - 5, p[1] - 10) }
+  ctx.globalAlpha = 1; const p = pos(t); if (p) orb(p[0], p[1], 64, c, t * 1.6, a);
+}
+
+// ── layout: everything inside the 9:16 safe zone (x 143-938, y 277-1643), clear of the caption band (y > 1290) ──
+const A = [540, 936];                                    // the agent
+const WS = { x: 143, y: 598, w: 372, h: 286 }, CH = { x: 566, y: 598, w: 372, h: 286 }, TM = { x: 143, y: 1096, w: 795, h: 172 };
+const FILES = ['AGENTS.md', 'src/parser.ts', 'tests/parser.test.ts', 'docs/', 'notes/FINDINGS.md'];
+const row = k => [WS.x + 26, WS.y + 82 + k * 44];
+const REC = 4;                                           // notes/FINDINGS.md: the record
+const SLOT = k => ({ x: CH.x + 20, y: CH.y + 62 + k * 72, w: CH.w - 40, h: 58 });
+// terminal: what the agent runs, in narration order (open, run, inspect, leave; later the test again and the next agent's read)
+const CMDS = [
+  { at: 5.92, s: 'cat src/parser.ts', out: [['bars']], outAt: 6.5, file: 1 },
+  { at: 7.22, s: 'bun test', out: [['✓ pass', 'green']], outAt: 7.78, file: 2 },
+  { at: 8.14, s: 'git diff', out: [['+', 'green', 260], ['-', 'coral', 200]], outAt: 8.6 },
+  { at: 9.30, s: 'echo "finding" >> notes/FINDINGS.md', out: [['→ recorded', 'gold']], outAt: 10.3, file: REC },
+  { at: 21.40, s: 'bun test', out: [['✓ pass', 'green']], outAt: B.test - .1, file: 2 },
+  { at: 31.84, s: 'cat notes/FINDINGS.md', out: [['finding', 'gold'], ['✓ checked', 'green']], outAt: B.find + .1, file: REC },
+];
+// chat column: what leaves the agent as an answer, and whether anything checks it
+const BUBBLES = [
+  { slot: 0, in: -1, states: [[-1, 'unchecked ?', 'coral'], [B.lookup + .3, 'looked up', 'blue']] },
+  { slot: 1, in: 11.9, states: [[11.9, 'unchecked ?', 'coral'], [B.file, '✓ src/parser.ts', 'green']] },
+  { slot: 2, in: B.claims, states: [[B.claims, 'unchecked ?', 'coral'], [B.test + .15, '✓ test · pass', 'green']] },
+];
+const stateAt = (b, t) => b.states.reduce((s, x) => t >= x[0] ? x : s, b.states[0]);
+
+function workspace(t, a) {
+  if (a <= .01) return;
+  const ctx = getCtx(); ctx.globalAlpha = a; gpanel(WS.x, WS.y, WS.w, WS.h, 22);
+  T('workspace/', WS.x + 24, WS.y + 34, { s: 21, w: 600, c: C.t1 });
+  FILES.forEach((f, k) => {
+    const [x, y] = row(k), cmd = CMDS.filter(c => c.file === k).some(c => t >= c.at && t < c.at + 1.3);
+    const ev = (k === 1 && win(t, B.pointFile, B.claim2 - .2, .3)) || (k === 2 && win(t, B.pointTest + .2, B.design, .3)) || 0;
+    const rec = k === REC ? ramp(t, B.record, .5) : 0, chk = k === REC ? ramp(t, B.check, .4) : 0;
+    const hi = Math.max(cmd ? 1 : 0, ev, rec * (t > B.ends ? 1 : .75));
+    const hc0 = ev > .01 ? C.green : k === REC && rec > 0 ? C.gold : C.blue;
+    if (hi > .01) { ctx.globalAlpha = a * hi * .9; rrect(x - 12, y - 19, WS.w - 28, 38, 10, al(hc0, .55), al(hc0, .14), 1.2); ctx.globalAlpha = a }
+    rrect(x, y - 10, 14, 20, 3, k === REC && rec > 0 ? C.gold : C.t2);
+    T(f, x + 26, y + 1, { s: 22, c: hi > .5 ? (k === REC && rec > 0 && ev < .01 ? C.gold : C.t1) : C.t2 });
+    if (k === REC && t > B.ends + .3) glow(x + 120, y, 150, C.gold, .22 * ramp(t, B.ends + .3, .8));   // the record outlives the session
+    if (chk > 0) { ctx.globalAlpha = a * chk; const cx = WS.x + WS.w - 34; dot(cx, y, 15, al(C.green, .2)); ctx.strokeStyle = C.green; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx - 7, y); ctx.lineTo(cx - 2, y + 6); ctx.lineTo(cx + 8, y - 6); ctx.stroke(); ctx.globalAlpha = a }
+  });
+  ctx.globalAlpha = 1;
+}
+
+function terminal(t, a) {
+  if (a <= .01) return;
+  const ctx = getCtx(); ctx.globalAlpha = a; gpanel(TM.x, TM.y, TM.w, TM.h, 22);
+  T('bash', TM.x + TM.w - 24, TM.y + 30, { s: 16, al: 'right', c: C.t3, ls: 2 });
+  const c = [...CMDS].reverse().find(x => t >= x.at);
+  const y0 = TM.y + 46;
+  if (!c) { T('$', TM.x + 26, y0, { s: 22, w: 600, c: C.green }); if (Math.sin(t * 8) > 0) T('▍', TM.x + 52, y0, { s: 22 }); ctx.globalAlpha = 1; return }
+  const n = Math.min(c.s.length, Math.floor((t - c.at) * 34)), typing = n < c.s.length;
+  T('$', TM.x + 26, y0, { s: 22, w: 600, c: C.green }); T(c.s.slice(0, n) + (typing || Math.sin(t * 8) > 0 ? '▍' : ''), TM.x + 52, y0, { s: 22, c: C.t1 });
+  if (t >= c.outAt) c.out.forEach(([s, col, w], i) => {
+    const k = ramp(t, c.outAt + i * .3, .25), y = y0 + 44 + i * 38; if (k <= 0) return;
+    ctx.globalAlpha = a * k;
+    if (s === 'bars') { ctx.fillStyle = C.t3; [380, 260, 320].forEach((w2, j) => ctx.fillRect(TM.x + 52, y - 8 + j * 22, w2, 3)); }
+    else if (w) { T(s, TM.x + 52, y, { s: 22, w: 600, c: C[col] }); ctx.fillStyle = al(C[col], .7); ctx.fillRect(TM.x + 80, y - 2, w, 4) }
+    else {
+      if (c === CMDS[5] && i === 1 && t < B.check) return;
+      const lit = (c === CMDS[4] && t > B.result - .3 && t < B.design) ? 1 : 0;
+      if (lit) { ctx.globalAlpha = a * k * .9; rrect(TM.x + 40, y - 18, 160, 36, 10, al(C.green, .6), al(C.green, .14)); ctx.globalAlpha = a * k }
+      T(s, TM.x + 52, y, { s: 22, w: 600, c: C[col] });
+    }
+    ctx.globalAlpha = a;
+  });
+  ctx.globalAlpha = 1;
+}
+
+function chat(t, a) {
+  const ctx = getCtx(), past = ramp(t, B.history - .3, .6);          // the transcript turns into chat history
+  ctx.globalAlpha = a * (1 - .45 * past); gpanel(CH.x, CH.y, CH.w, CH.h, 22, 1, past > .5 ? [6, 8] : null);
+  T(t >= B.findings + 1 ? 'chat history' : 'chat', CH.x + 24, CH.y + 34, { s: 21, w: 600, c: past > .5 ? C.t3 : C.t1 });
+  ctx.globalAlpha = a;
+  BUBBLES.forEach((b, i) => {
+    const s = SLOT(b.slot), kin = b.in < 0 ? 1 : ramp(t, b.in - .1, .4), gone = ramp(t, B.disappear + i * .16, .35);
+    if (kin <= .01) return;
+    const [, label, col] = stateAt(b, t), bad = col === 'coral', jit = bad ? Math.sin(t * 9 + i * 2.1) * 3 : 0;
+    if (gone < 1) {
+      ctx.globalAlpha = a * kin * (1 - gone);
+      const x = s.x + jit, y = s.y + (1 - kin) * 14;
+      rrect(x, y, s.w, s.h, 14, al(C[col], bad ? .5 : .7), 'oklch(0.22 0.03 248 / .78)', 1.4);
+      ctx.fillStyle = C.t3; ctx.fillRect(x + 18, y + 22, 84, 4); ctx.fillRect(x + 18, y + 34, 56, 4);
+      T(label, x + s.w - 16, y + s.h / 2 + 1, { s: 20, w: 600, al: 'right', c: C[col] });
+    }
+    if (gone > 0 && gone < 1) {                                          // the bubble breaks into fragments that fade
+      const d = t - (B.disappear + i * .16);
+      reseed(9001 + i * 131);
+      for (let f = 0; f < 16; f++) {
+        const ang = rnd(TAU), sp = rnd(40, 150), fx = s.x + rnd(20, s.w - 20), fy = s.y + rnd(8, s.h - 8);
+        ctx.globalAlpha = a * Math.max(0, 1 - d / .9); dot(fx + Math.cos(ang) * sp * d, fy + Math.sin(ang) * sp * d + 30 * d * d, 2.2, C.coral);
+      }
+    }
+  });
+  ctx.globalAlpha = 1;
+}
+
+// the gaps in what the agent knows: coral question marks that become lookups when it can read the tree
+const GAPS = [[-118, -36], [112, -62], [104, 58]];
+function gaps(t) {
+  const ctx = getCtx();
+  GAPS.forEach(([dx, dy], i) => {
+    const kin = ramp(t, B.gaps[i] - .1, .35), res = ramp(t, B.lookup + i * .14, .5); if (kin <= .01) return;
+    const x = A[0] + dx, y = A[1] + dy + Math.sin(t * 2 + i) * 4;
+    if (res < 1) { ctx.globalAlpha = kin * (1 - res); T('?', x, y, { s: 40, w: 600, al: 'center', c: C.coral, f: FONT.s }); glow(x, y, 40, C.coral, .35 * kin * (1 - res)) }
+    const fly = clamp((t - B.lookup - i * .14) / .55, 0, 1);         // a read leaves a file row and fills the gap
+    if (fly > 0 && fly < 1) { const [rx, ry] = row([0, 1, 3][i]), e = 1 - Math.pow(1 - fly, 3); ctx.globalAlpha = 1; dot(lerp(rx + 200, x, e), lerp(ry, y, e), 4, C.blue, 4) }
+    const done = ramp(t, B.lookup + i * .14 + .5, .3) * (1 - ramp(t, B.lookup + 1.8, .6));
+    if (done > 0) { ctx.globalAlpha = done; dot(x, y, 5, C.blue, 4) }
+  });
+  ctx.globalAlpha = 1;
+}
+
+const H0 = 'A filesystem<br><em>and a shell.</em>', H1 = 'Claims meet<br><em>evidence.</em>', H2 = 'Chat history,<br><em>or a record?</em>';
+const SWAPS = [[B.meet - .2, H0, H1], [B.findings - .5, H1, H2]];
+const h = document.getElementById('h'), seg = document.getElementById('seg'), thumb = document.getElementById('thumb');
+const segs = [...seg.querySelectorAll('span')];
+
+// An element at rest carries no filter, transform or opacity: a leftover blur(0px) composites differently
+// depending on the frames rendered before it, so a settled frame must be plain (reel 01).
+function settle(el, k, transform, blur) {
+  if (k >= 1) { el.style.opacity = ''; el.style.filter = ''; el.style.transform = ''; return }
+  el.style.opacity = k; el.style.filter = k > 0 ? `blur(${(1 - k) * blur}px)` : ''; el.style.transform = transform(k);
+}
+
+// ── Caption with Intention: word-level CWI from OpenCaptions, rendered as a pure function of t ──
+const REEL = JSON.parse(document.getElementById('reel-data').textContent), CAPCFG = REEL.captions;
+const capEl = document.getElementById('cap');
+// FCC: at most 42 characters per caption; split long events at word boundaries, preferring punctuation.
+const FUNC = /^(a|an|the|of|to|in|on|and|or|but|for|with|by|its|it|is|be|can|that)$/i;
+function chunkEvents(doc) {
+  const out = [];
+  for (const e of doc.captions) {
+    let cur = [];
+    const len = ws => ws.map(w => w.text).join(' ').length;
+    for (const w of e.words) {
+      if (cur.length && len([...cur, w]) > CAPCFG.maxEventChars) {
+        let cut = cur.length;                                   // break after the last punctuation if it is not too early
+        for (let i = cur.length - 1; i >= Math.ceil(cur.length / 2); i--) if (/[.,;:?!]$/.test(cur[i].text)) { cut = i + 1; break }
+        while (cut > 1 && FUNC.test(cur[cut - 1].text)) cut--;  // never end a caption on "the", "a", "of", "and" …
+        out.push({ speaker: e.speaker_id, words: cur.slice(0, cut) }); cur = cur.slice(cut);
+      }
+      cur.push(w);
+    }
+    if (cur.length) out.push({ speaker: e.speaker_id, words: cur });
+  }
+  out.forEach((ev, i) => { ev.start = ev.words[0].start; ev.until = i + 1 < out.length ? out[i + 1].words[0].start : ev.words.at(-1).end + .6 });
+  // back-to-back captions share one card: the text swaps, the card does not fade out and in (no blank frame)
+  out.forEach((ev, i) => { ev.chainOut = i + 1 < out.length && out[i + 1].start - ev.words.at(-1).end < .5; ev.chainIn = i > 0 && out[i - 1].chainOut });
+  return out;
+}
+const CAPS = window.CWI && !new URLSearchParams(location.search).has('captions') ? chunkEvents(window.CWI) : [];
+const spk = id => CAPCFG.speakerColor?.[id] || window.CWI?.cast.find(c => c.id === id)?.color || '#fff';
+let capShown = -1;
+function captions(t) {
+  if (!CAPS.length) { capEl.style.display = 'none'; return }
+  let i = -1; for (let k = 0; k < CAPS.length; k++) if (t >= CAPS[k].start - .12) i = k;
+  const ev = CAPS[i];
+  if (!ev || t > ev.until) { capEl.style.opacity = '0'; capShown = -1; return }
+  if (capShown !== i) {                                         // rebuild only when the event changes; style is set from t below
+    capEl.innerHTML = ev.words.map(w => `<span class="w${w.emphasis ? ' em' : ''}">${w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join(' ');
+    capShown = i;
+    ev.words.forEach((w, j) => {                               // measure at the word's own weight and size, then reserve the overhang
+      if (!w.emphasis) return;
+      const el = capEl.children[j];
+      el.style.fontWeight = String(Math.round(w.weight / 100) * 100); el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+      el.style.margin = `0 ${Math.ceil(el.getBoundingClientRect().width * .08)}px`;
+    });
+  }
+  const inK = ev.chainIn ? 1 : ramp(t, ev.start - .12, .18), outK = ev.chainOut ? 1 : 1 - ramp(t, ev.until - .14, .14), k = Math.min(inK, outK);
+  capEl.style.opacity = k >= 1 ? '' : String(k);
+  const col = spk(ev.speaker), spans = capEl.children;
+  ev.words.forEach((w, j) => {
+    const el = spans[j], a = w.animation || {}, d = (a.delay_ms ?? 100) / 1000, dur = (a.duration_ms ?? 600) / 1000;
+    const p = ease((t - w.start - d) / dur);                  // CWI: white → speaker colour, 600 ms ease after 100 ms
+    const rise = ease((t - w.start + .05) / .22);              // entrance: the word lifts into place as it is spoken
+    const bump = w.emphasis ? Math.sin(Math.PI * clamp((t - w.start) / .45, 0, 1)) : 0;  // 15% bounce on emphasis
+    el.style.fontWeight = String(Math.round(w.weight / 100) * 100);
+    el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+    el.style.color = p >= 1 ? col : p <= 0 ? '#fff' : `color-mix(in oklab, ${col} ${(p * 100).toFixed(1)}%, #fff)`;
+    el.style.opacity = rise >= 1 ? '' : (.38 + .62 * rise).toFixed(3);
+    el.style.transform = bump > 0 ? `scale(${(1 + .15 * bump).toFixed(4)})` : rise >= 1 ? '' : `translateY(${((1 - rise) * 10).toFixed(2)}px)`;
+    el.style.textShadow = (w.emphasis && t >= w.start) ? `0 0 ${(20 * Math.max(bump, .35)).toFixed(1)}px ${col}, 0 0 40px color-mix(in oklab, ${col} 25%, transparent)` : '';
+  });
+}
+
+window.renderAt = function (t) {
+  document.documentElement.style.setProperty('--ua', ((t * 40) % 360).toFixed(1) + 'deg');
+  captions(t);
+  background(t);
+  setCtx(cvc); cvc.clearRect(0, 0, 1080, 1920);
+  const ctx = cvc, m = ramp(t, B.fs - .1, .9);                       // chat only → filesystem + shell, on "filesystem"
+  const away = ramp(t, B.ends, .7), ra = m * (1 - away);              // the session's own wiring goes when it ends
+  const tA = ramp(t, B.shell - .15, .6) * (1 - .62 * away + .62 * ramp(t, CMDS[5].at - .3, .4));
+
+  // wiring between the agent and its workspace: reads, answers, bash, the write-back (deck "thesis" ribbons)
+  const readP = vc([WS.x + WS.w * .55, WS.y + WS.h], [A[0] - 46, A[1] - 6]);
+  const ansP = vc([A[0] + 46, A[1] - 6], [CH.x + CH.w * .45, CH.y + CH.h]);
+  const outP = vc([A[0] - 14, A[1] + 46], [A[0] - 14, TM.y]), backP = vc([A[0] + 14, TM.y], [A[0] + 14, A[1] + 46]);
+  const recP = bend([A[0] - 30, A[1] - 34], [WS.x + WS.w - 30, row(REC)[1] + 16], .12);
+  ctx.globalAlpha = 1;
+  ribbon(readP, 6, 26, 10, C.blue, C.blue, .4 * ra, t, 4, 1);
+  ribbon(ansP, 7, 10, 40, C.blue, t >= B.lookup ? C.green : C.coral, .38 * (1 - away), t, 5, 1);
+  ribbon(outP, 3, 6, 6, C.blue, C.green, .45 * tA * (1 - away), t, 2, 1); ribbon(backP, 3, 6, 6, C.green, C.green, .32 * tA * (1 - away), t + 1, 2, 1);
+  const recK = ramp(t, B.leave - .2, .5) * (1 - away);
+  ribbon(recP, 1, 0, 0, C.gold, C.gold, .55 * recK, t, 0, 1.4, [3, 6]);
+  ctx.globalAlpha = ra; flow(t, 6, 1.1, 1, B.fs, u => { const [x, y] = bz(readP, u); dot(x, y, 2.2, C.blue, 3) }); ctx.globalAlpha = 1;
+  ctx.globalAlpha = 1 - away; flow(t, 2.6, 1.3, 2, -9, (u, k) => {
+    const bad = t < B.lookup && rnd() < .6, j = bad ? Math.sin(t * 9 + k) * 18 * u : 0, [x, y] = bz(ansP, u);
+    if (bad && u > .7) return;                                          // an unchecked claim dissolves before it lands
+    dot(x + j, y, 2.4, bad ? C.coral : t >= B.claims ? C.green : C.blue, 3.4);
+  }); ctx.globalAlpha = 1;
+  ctx.globalAlpha = tA * (1 - away); flow(t, 4, .7, 3, B.shell, (u, k) => { const [x, y] = bz(k % 2 ? backP : outP, u); dot(x, y, 2.2, k % 2 ? C.green : C.blue, 3.4) }); ctx.globalAlpha = 1;
+  ctx.globalAlpha = win(t, B.leave, B.record + 2, .3); flow(t, 4, .8, 4, B.leave - .1, u => { const [x, y] = bz(recP, u); dot(x, y, 3, C.gold, 4) }); ctx.globalAlpha = 1;
+  T('bash', A[0] + 30, (A[1] + 46 + TM.y) / 2, { s: 16, c: C.t3, a: tA * (1 - away) });
+
+  workspace(t, m);
+  terminal(t, tA);
+  chat(t, 1);
+  gaps(t);
+
+  // claims meet evidence: a statement points to a file, a claim that a change works points to a test and its result
+  const evA = 1 - ramp(t, B.ends - .4, .6);
+  link(hc([SLOT(1).x, SLOT(1).y + 29], [row(1)[0] + 222, row(1)[1]]), t, B.pointFile, .55, C.green, evA);
+  link(vc([SLOT(2).x + SLOT(2).w / 2, SLOT(2).y + SLOT(2).h], [TM.x + 200, TM.y + 90]), t, B.pointTest, .55, C.green, evA);
+
+  // the agent: present for the session, gone when it ends; then the next agent arrives and reads the record
+  const pos1 = u => { if (u > B.ends + 1) return null; const o = clamp((u - B.ends) / 1, 0, 1); return [lerp(A[0], A[0] + 460, o * o), lerp(A[1], A[1] - 420, o * o)] };
+  if (t < B.ends + 1) travel(pos1, t, C.blue, 1 - ramp(t, B.ends, 1));
+  const s2 = B.next - .6, pos2 = u => { if (u < s2) return null; const k = 1 - Math.pow(1 - clamp((u - s2) / .85, 0, 1), 3); return [lerp(A[0] - 560, A[0], k), lerp(A[1] - 200, A[1], k)] };
+  if (t >= s2) travel(pos2, t, C.violet, ramp(t, s2, .3));
+  const lab = Math.max(1 - away, ramp(t, s2 + .6, .4));
+  T(t >= s2 ? 'next agent' : 'agent', A[0] + 58, A[1] + 1, { s: 19, w: 600, c: t >= s2 ? C.violet : C.t2, a: lab });
+  const findP = bend([WS.x + WS.w - 62, row(REC)[1] + 19], [A[0] - 40, A[1] - 20], -.18);
+  link(findP, t, B.find, .45, C.gold, 1, 2.2);
+  ctx.globalAlpha = ramp(t, B.find + .45, .3); flow(t, 5, .6, 5, B.find + .4, u => { const [x, y] = bz(findP, u); dot(x, y, 2.6, C.gold, 4) }); ctx.globalAlpha = 1;
+
+  // the segmented control flips with "filesystem"; the headline swaps on "meet" and on "findings"
+  const w0 = segs[0].offsetWidth, w1 = segs[1].offsetWidth;
+  thumb.style.left = `${7 + m * w0}px`; thumb.style.width = `${lerp(w0, w1, m)}px`;
+  segs[0].classList.toggle('on', m < .5); segs[1].classList.toggle('on', m >= .5);
+  let html = H0, vis = 1, dir = 1;
+  for (const [at, a, b] of SWAPS) { const sw = ramp(t, at, .7); if (sw <= 0) break; html = sw < .5 ? a : b; vis = sw < .5 ? 1 - sw * 2 : (sw - .5) * 2; dir = sw < .5 ? -1 : 1 }
+  if (h.innerHTML !== html) h.innerHTML = html;
+  settle(h, vis, k => `translateY(${(1 - k) * 16 * dir}px)`, 10);
+  const sOut = ramp(t, B.meet, .6); seg.style.opacity = sOut <= 0 ? '' : String(1 - sOut);
+};
+
+const Q = new URLSearchParams(location.search);
+FONTS_READY.then(() => Promise.all([100, 200, 300, 400, 500, 600, 700, 800, 900].map(w => document.fonts.load(`${w} 54px "Roboto Flex"`)))).then(() => document.fonts.ready).then(() => {
+  window.renderAt(+(Q.get('t') || 0));
+  window.__ready = true;
+  if (!Q.has('t')) {
+    const t0 = performance.now();
+    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % (window.SERIES?.total_dur || B.end)); requestAnimationFrame(loop) };
+    requestAnimationFrame(loop);
+  }
+});
+</script>
+<!-- Series Part 1/5 (BRO-3817): the River hook, the end card and the series timeline. Without the generated
+     audio/r02-thesis.series.js the overlay does nothing and the reel plays as the plain keynote slice. -->
+<script src="audio/r02-thesis.series.js" onerror="this.remove()"></script>
+<script src="series-overlay.js"></script>
+</body>
+</html>
