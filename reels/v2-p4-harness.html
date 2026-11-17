@@ -84,6 +84,13 @@ canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
   background:linear-gradient(180deg,oklch(0.3 0.03 248 / .62),oklch(0.18 0.03 250 / .7));box-shadow:inset 0 1px 0 oklch(1 0 0 / .18)}
 #cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
 </style>
+<style>
+#example { position:absolute; left:170px; top:650px; width:700px; min-height:390px; padding:42px; z-index:8; background:#243748; border:2px solid #70899a; border-radius:28px; box-shadow:0 25px 60px #08121b99; }
+#example .tag { font: 500 32px/1.2 var(--sans); color:#f4d38a; margin-bottom:32px; }
+#example .main { font: 600 48px/1.22 var(--mono); color:#fff; overflow-wrap:anywhere; }
+#example .detail { font: 500 38px/1.25 var(--sans); color:#b8d5e3; margin-top:26px; overflow-wrap:anywhere; }
+#example .progress { height:8px; margin-top:36px; background:#8cc6ed; border-radius:4px; }
+</style>
 </head>
 <body>
 <canvas id="bg" width="1080" height="1920"></canvas>
@@ -103,6 +110,7 @@ canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
 <div class="glass endl" id="endA"><p></p></div>
 <div class="glass endl" id="endB"><p></p></div>
 
+<div id="example"><div class="tag"></div><div class="main"></div><div class="detail"></div><div class="progress"></div></div>
 <div id="cap"></div>
 
 <script>
@@ -278,6 +286,27 @@ window.renderAt = function (t) {
   const aK = win(t, TL.exEnd - .02, TL.endSwap, .2, .2), bK2 = ramp(t, TL.endSwap - .02, .25);
   show($('endA'), aK, () => `translateY(${(Math.sin((t - TL.cta) * 1.3) * 10).toFixed(1)}px)`);
   show($('endB'), bK2, () => `translateY(${(Math.sin((t - TL.endSwap) * 1.3) * 10).toFixed(1)}px)`);
+};
+
+// Concrete example replaces the schematic stage; timing and captions remain unchanged.
+const exampleBeats = [[0, "Illustrative · switch agent", "Claude Code → Codex", "Search notes"] , [0.6, "Illustrative · search failed", "search-notes: command not found", "Notes search is broken"], [2.8, "Illustrative · Claude Code", "search-notes workspace", "3 notes"], [5.7, "Illustrative · integration", "Move search-notes", "outside the agent loop"], [8.3, "Illustrative · shared CLI", "search-notes workspace", "3 notes"], [11.4, "Illustrative · Codex", "search-notes workspace", "3 notes"], [14.5, "Illustrative · same CLI", "search-notes workspace", "3 notes"], [17.0, "Playbook · inspection", "cat docs/runtime-boundary.md", "Illustrative: search-notes · proposed"]];
+const originalRenderAt = window.renderAt;
+window.renderAt = function(t) {
+  originalRenderAt(t);
+  for (const id of "rig,wireA,wireB,bnd,spark,ringA,ringB,chip,bl,pulse,pill".split(',')) $(id).style.visibility = 'hidden';
+  const el = $('example');
+  el.style.visibility = t < S.take.dur ? 'visible' : 'hidden';
+  if (t < S.take.dur) {
+    let i = 0; while (i + 1 < exampleBeats.length && t >= exampleBeats[i + 1][0]) i++;
+    const [start, tag, main, detail] = exampleBeats[i];
+    el.querySelector('.tag').textContent = tag;
+    el.querySelector('.main').textContent = main;
+    el.querySelector('.detail').textContent = detail;
+    const end = i + 1 < exampleBeats.length ? exampleBeats[i + 1][0] : S.take.dur;
+    el.querySelector('.progress').style.width = `${Math.max(0, Math.min(100, 100*(t-start)/(end-start)))}%`;
+    el.style.transform = `translateY(${(Math.sin(t*1.6)*7).toFixed(2)}px)`;
+    if (i === 0 && t < 1) el.style.transform += ` scale(${(1 - .035 * Math.min(1,t/.6)).toFixed(3)})`;
+  }
 };
 
 const Q = new URLSearchParams(location.search);
