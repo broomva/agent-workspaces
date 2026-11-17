@@ -6,7 +6,7 @@
 // Series mode (BRO-3817) switches on when reels/audio/<id>.series.json exists (written by reels/tts.mjs): the reel becomes
 // spoken hook + 0.25 s gap + keynote slice + spoken CTA + end-card hold. The page gets window.SERIES before it loads
 // and reels/series-overlay.js draws the cold open and the end card and maps the reel's own renderAt to body time.
-// Without that file a reel renders exactly as before.
+// A reel that is not a part in series.json renders exactly as before without that file; a part without it fails closed.
 // Frames are window.renderAt(t) screenshots. Narration is a slice of the keynote audio. Captions are
 // OpenCaptions (Caption with Intention) documents: generated once, stored in reels/captions/ (json + a
 // script the page loads), and drawn by the page itself, word by word (content-engine opencaptions skill,
