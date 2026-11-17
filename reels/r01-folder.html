@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agent Workspaces · Reel 01 · A folder is not a workspace</title>
+<meta name="viewport" content="width=1080">
+<!-- Vertical-native reel (1080x1920) on the keynote's render kit (reels/engine.js, extracted from deck/index.html).
+     Every frame is a pure function of time: window.renderAt(t). Open without ?t= to preview in real time. -->
+<style>
+@font-face{font-family:'Inter';font-weight:300 700;src:url(../deck/fonts/Inter-400.woff2) format('woff2')}
+@font-face{font-family:'Raleway';font-weight:200 600;src:url(../deck/fonts/Raleway-300.woff2) format('woff2')}
+/* Roboto Flex at the nine CWI weights (pitch → weight), static instances of the variable font */
+@font-face{font-family:'Roboto Flex';font-weight:100;src:url(../deck/fonts/RobotoFlex-Thin.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:200;src:url(../deck/fonts/RobotoFlex-ExtraLight.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:300;src:url(../deck/fonts/RobotoFlex-Light.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:400;src:url(../deck/fonts/RobotoFlex-Regular.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:500;src:url(../deck/fonts/RobotoFlex-Medium.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:600;src:url(../deck/fonts/RobotoFlex-SemiBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:700;src:url(../deck/fonts/RobotoFlex-Bold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:800;src:url(../deck/fonts/RobotoFlex-ExtraBold.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:900;src:url(../deck/fonts/RobotoFlex-Black.ttf) format('truetype')}
+@font-face{font-family:'JetBrains Mono';font-weight:300 700;src:url(../deck/fonts/JetBrainsMono-400.woff2) format('woff2')}
+:root{
+  --deep:oklch(0.155 0.028 250);--surface:oklch(0.205 0.03 245);--elev:oklch(0.245 0.03 245);
+  --t1:oklch(0.975 0.004 250);--t2:oklch(0.83 0.015 248);--t3:oklch(0.65 0.022 248);
+  --line:oklch(0.78 0.03 245 / .12);--line2:oklch(0.78 0.03 245 / .24);
+  --ai:oklch(0.62 0.19 256);--blue:oklch(0.71 0.15 252);--violet:oklch(0.79 0.035 235);
+  --cyan:oklch(0.81 0.12 225);--green:oklch(0.76 0.19 148);--warm:oklch(0.79 0.16 65);--coral:oklch(0.67 0.21 28);--gold:oklch(0.86 0.12 88);
+  --display:'Raleway',sans-serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+  /* 9:16 geometry from the content-engine layout contract (skills: video/content-engine/layout/vertical-9x16.json,
+     profile reels-organic, measured from a real Reel): safe zone x 143-938 y 277-1643, title band y 121-436,
+     caption band x 220-860 y 1288-1463, right action rail x > 872 below y 922 */
+  --sl:143px;--sw:795px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--deep);color:var(--t1)}
+body{position:relative;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+/* ambient light, moved from renderAt (no wall-clock CSS animation, so frames stay pure) */
+.ambient{position:absolute;inset:-20%;pointer-events:none;filter:blur(90px);opacity:.55}
+.ambient i{position:absolute;width:62vmax;height:62vmax;border-radius:50%}
+.ambient i:nth-child(1){left:-12%;top:8%;background:radial-gradient(circle,color-mix(in oklab,var(--blue) 45%,transparent),transparent 62%)}
+.ambient i:nth-child(2){right:-18%;top:34%;background:radial-gradient(circle,color-mix(in oklab,var(--violet) 32%,transparent),transparent 60%)}
+.ambient i:nth-child(3){left:18%;bottom:-6%;background:radial-gradient(circle,color-mix(in oklab,var(--ai) 34%,transparent),transparent 60%)}
+canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.kick{position:absolute;left:var(--sl);top:140px;width:var(--sw);display:flex;justify-content:space-between;align-items:center;
+  font:500 21px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+.kick b{font-weight:500;display:flex;align-items:center;gap:16px}
+.kick b::before{content:"";width:40px;height:1.5px;background:currentColor;opacity:.7}
+.kick span{font-size:16px;color:var(--t3);letter-spacing:.14em}
+h1{position:absolute;left:calc(var(--sl) + 8px);top:172px;width:var(--sw);font:300 100px/1.02 var(--display);letter-spacing:-.034em;
+  text-shadow:0 2px 30px oklch(0.155 0.028 250 / .6)}
+h1 em{font-style:normal;font-weight:400;color:var(--blue)}
+
+/* liquid glass cards (deck): thin tint so the live field reads through a light blur, vertical thickness gradient,
+   bright top edge, cyan caustic along the bottom, and a travelling liquid-metal rim (--ua advanced per frame) */
+.glass{position:absolute;isolation:isolate;border-radius:24px;
+  background:linear-gradient(180deg,oklch(0.36 0.03 248 / .3),oklch(0.2 0.03 250 / .26) 55%,oklch(0.17 0.03 250 / .34));
+  -webkit-backdrop-filter:blur(9px) saturate(220%) brightness(1.12);backdrop-filter:blur(9px) saturate(220%) brightness(1.12);
+  box-shadow:0 30px 80px -30px oklch(0.04 0.02 250 / .85),0 8px 22px -12px oklch(0.04 0.02 250 / .6),inset 0 1px 0 oklch(1 0 0 / .2),
+    inset 0 14px 28px -18px oklch(1 0 0 / .1),inset 0 -22px 34px -26px oklch(0.8 0.12 222 / .22),inset 0 0 0 1px oklch(1 0 0 / .045)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;pointer-events:none;opacity:.75;
+  background:conic-gradient(from var(--ua,0deg),
+  oklch(0.4 0.012 250 / .5) 0deg,oklch(0.62 0.014 245 / .6) 48deg,oklch(0.97 0.01 240 / .92) 70deg,oklch(0.82 0.12 215 / .8) 77deg,oklch(0.62 0.014 245 / .55) 98deg,
+  oklch(0.32 0.01 250 / .4) 168deg,oklch(0.56 0.014 245 / .55) 228deg,oklch(0.92 0.01 240 / .82) 250deg,oklch(0.86 0.1 85 / .55) 256deg,oklch(0.5 0.014 245 / .5) 278deg,oklch(0.4 0.012 250 / .5) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+/* liquid glass capsule (deck .seg): dark thick glass, lit top edge, raised chip thumb */
+.seg{position:absolute;left:var(--sl);top:420px;display:flex;padding:7px;border-radius:999px;isolation:isolate;
+  background:linear-gradient(180deg,oklch(0.29 0.022 250 / .66),oklch(0.185 0.024 250 / .74));
+  -webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);
+  box-shadow:0 22px 60px -20px oklch(0.03 0.02 250 / .92),0 3px 8px -3px oklch(0 0 0 / .55),inset 0 1px 0 oklch(1 0 0 / .16),inset 0 -1px 0 oklch(0 0 0 / .4)}
+.seg::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.2px;pointer-events:none;opacity:.9;
+  background:conic-gradient(from var(--ua,0deg),oklch(0.4 0.012 250 / .55) 0deg,oklch(0.6 0.014 245 / .6) 48deg,oklch(0.97 0.01 240 / .95) 70deg,oklch(0.82 0.12 215 / .85) 76deg,oklch(0.78 0.13 250 / .7) 80deg,oklch(0.62 0.014 245 / .55) 98deg,
+  oklch(0.32 0.01 250 / .45) 168deg,oklch(0.55 0.014 245 / .55) 228deg,oklch(0.92 0.01 240 / .85) 250deg,oklch(0.86 0.1 85 / .65) 256deg,oklch(0.5 0.014 245 / .5) 278deg,oklch(0.4 0.012 250 / .55) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.seg span{position:relative;z-index:1;padding:15px 26px;font:500 24px/1 var(--sans);color:var(--t3);white-space:nowrap}
+.seg span.on{color:var(--t1)}
+.seg .thumb{position:absolute;top:7px;bottom:7px;border-radius:999px;
+  background:linear-gradient(180deg,oklch(0.42 0.03 248 / .75),oklch(0.28 0.03 250 / .7));
+  box-shadow:inset 0 1px 0 oklch(1 0 0 / .28),inset 0 -1px 0 oklch(0 0 0 / .3),0 6px 16px -6px oklch(0.03 0.02 250 / .8)}
+.chip{top:420px;padding:16px 22px;font:400 25px/1 var(--sans);color:var(--t1);white-space:nowrap;border-radius:999px}
+.chip i{font-style:normal;color:var(--blue)}
+/* Caption with Intention, drawn in the page (content-engine opencaptions skill, CWI-Remotion bridge):
+   one caption event at a time on a liquid-glass card in the 9:16 caption band (content-engine
+   layout/vertical-9x16.json, reels-organic: y 0.671-0.762), words styled per CWI word. */
+.cap{position:absolute;left:540px;bottom:460px;transform:translateX(-50%);max-width:640px;width:max-content;
+  padding:12px 28px 14px;border-radius:30px;text-align:center;font-size:50px;font-family:'Roboto Flex',var(--sans);line-height:1.12;letter-spacing:-.01em;text-wrap:balance}
+.cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
+/* emphasised words get side room equal to the 15% bounce overhang (7.5% of their width each side), set when the caption is built */
+.ctr{top:1150px;padding:18px 26px;display:flex;align-items:baseline;gap:16px}
+.ctr small{font:500 16px/1 var(--mono);letter-spacing:.18em;color:var(--t3)}
+.ctr b{font:500 38px/1 var(--mono);letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="ambient"><i></i><i></i><i></i></div>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<canvas id="cv" width="1080" height="1920"></canvas>
+<div class="kick"><b>01 · Workspaces</b><span>AI voice</span></div>
+<h1 id="h"></h1>
+<div class="seg" id="seg"><i class="thumb" id="thumb"></i><span>Agent workspace</span><span>Agentic workspace</span></div>
+<div class="glass chip" style="left:143px">easier to <i>orient</i></div>
+<div class="glass chip" style="left:419px">safer to <i>act</i></div>
+<div class="glass chip" style="left:659px">cheaper to <i>verify</i></div>
+<div class="glass cap" id="cap"></div>
+<div class="glass ctr" style="left:196px"><small>SESSIONS</small><b id="cS">000</b></div>
+<div class="glass ctr" style="left:560px"><small>RETAINED</small><b id="cR">000</b></div>
+
+<script id="reel-data" type="application/json">{
+  "id": "r01-folder",
+  "title": "A folder is not a workspace",
+  "audio": { "src": "../deck/narration/river.mp3", "start": 144.64, "end": 185.6 },
+  "disclosure": "AI-generated narration using ElevenLabs River stock voice, selected by the author; not a recording or clone of Carlos Escobar.",
+  "captions": { "font": "Roboto Flex", "size": 64, "maxChars": 22, "marginL": 220, "marginR": 220, "marginV": 457,
+    "baseSize": 50, "maxEventChars": 42, "speakerColor": { "S0": "oklch(0.8 0.12 245)" } }
+}</script>
+<script src="engine.js"></script>
+<script src="captions/r01-folder.cwi.js"></script>
+<script>
+// Timeline in seconds from the reel start, keyed to the narration's word timings.
+const TL = {
+  dock0: 0.74, files: 2.32, leave0: 3.0,
+  layers: [5.0, 5.94, 6.7, 7.46, 8.18], layersOut: 9.6,
+  loopA: 10.6, loopAEvery: 1.6, loopAN: 5,
+  flip: 18.76, lit: { 0: 20.24, 3: 21.34, 4: 22.86 },
+  loopB: 23.4, loopBEvery: 1.05, loopBN: 15,
+  pulse: 29.86, swap: 32.1, chips: [37.0, 38.48, 39.62], end: 40.96
+};
+const O = [540, 880];                                   // stage centre on the contract's safe-zone centre line
+const RINGS = [['PRIMER', 92], ['POLICY', 136], ['SKILLS', 180], ['MEMORY', 224], ['RECORD', 268]];
+const R_MEM = RINGS[3][1], R_REC = RINGS[4][1];
+const ease = x => { x = clamp(x, 0, 1); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 };
+const ramp = (t, a, d) => ease((t - a) / d);
+const bgc = document.getElementById('bg').getContext('2d'), cvc = document.getElementById('cv').getContext('2d');
+const amb = [...document.querySelectorAll('.ambient i')];
+
+// background: the deck's liquid-metal ASCII flow, a little denser for a phone screen
+function background(t) {
+  setCtx(bgc); bgc.clearRect(0, 0, 1080, 1920);
+  const A = atlas(13, 'oklch(0.78 0.06 245)'); bgc.globalAlpha = .2;
+  asciiField(0, 0, 1080, 1920, 17, A, (X, Y) => {
+    const f = Math.sin(X * .011 + Math.sin(Y * .008 + t * .19) * 1.7 + t * .13) * .5 + .5,
+      g = Math.sin(Y * .015 - t * .11 + Math.sin(X * .005 + t * .07) * 2.2) * .5 + .5;
+    return Math.min(.72, Math.pow(f * g, 2.2) * 1.25);
+  });
+  bgc.globalAlpha = 1;
+  amb.forEach((el, i) => el.style.transform = `translate(${Math.sin(t * .05 + i * 2) * 60}px,${Math.cos(t * .04 + i) * 80}px) scale(${1 + .05 * Math.sin(t * .07 + i)})`);
+}
+
+// ring label: centred at 12 o'clock on its own ring, on a small Midnight chip so the ring line never runs through it
+function ringLabel(s, R, c, a = 1) {
+  if (a <= .01) return;
+  const ctx = getCtx(), x = O[0], y = O[1] - R; ctx.font = `600 17px ${FONT.m}`; ctx.letterSpacing = '2px';
+  const w = ctx.measureText(s).width + 18; ctx.globalAlpha = a * .92; ctx.fillStyle = 'oklch(0.17 0.03 250)';
+  ctx.beginPath(); ctx.roundRect(x - w / 2, y - 13, w, 26, 13); ctx.fill();
+  ctx.globalAlpha = a; ctx.fillStyle = c; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, x + 1, y + 1);
+  ctx.letterSpacing = '0px'; ctx.globalAlpha = 1;
+}
+
+function folder(t, a) {
+  if (a <= .01) return;
+  const ctx = getCtx(); ctx.save(); ctx.globalAlpha = a; ctx.translate(O[0], O[1]); ctx.scale(2.1, 2.1);
+  const x = -60, y = -44; ctx.strokeStyle = C.t2; ctx.lineWidth = 1.3;
+  ctx.beginPath(); ctx.moveTo(x, y + 12); ctx.lineTo(x, y + 88); ctx.lineTo(x + 120, y + 88); ctx.lineTo(x + 120, y + 12); ctx.lineTo(x + 56, y + 12); ctx.lineTo(x + 46, y); ctx.lineTo(x + 4, y); ctx.closePath(); ctx.stroke();
+  for (let k = 0; k < 3; k++) {                         // the files the first agent puts there
+    const f = ramp(t, TL.files + k * .16, .4); if (f <= 0) continue;
+    ctx.globalAlpha = a * f * .8; ctx.fillStyle = C.t3; ctx.fillRect(x + 18, y + 34 + k * 16 - (1 - f) * 14, 70 - k * 14, 3);
+  }
+  ctx.restore();
+  ctx.globalAlpha = a; ctx.font = `500 22px ${FONT.m}`; ctx.fillStyle = C.t2; ctx.textAlign = 'center'; ctx.fillText('project/', O[0], O[1] + 140); ctx.globalAlpha = 1;
+}
+
+// an orb with a fading ASCII glyph trail along its recent path
+function travel(pos, t, s, c, a) {
+  const ctx = getCtx(), A = atlas(16, c);
+  for (let k = 8; k >= 1; k--) {
+    const p = pos(t - k * .045); if (!p) continue;
+    ctx.globalAlpha = a * (1 - k / 9) * .7; glyph(A, Math.max(1, 9 - k), p[0] - 5, p[1] - 10);
+  }
+  ctx.globalAlpha = 1; const p = pos(t); if (p) orb(p[0], p[1], 34, c, t * 1.6, a);
+}
+
+// beat 0: one agent session in a bare folder; its context evaporates when it leaves
+const DOCK = [O[0], O[1] + 6];                          // inside the folder
+function sessionA(t, s, work = .9) {
+  const posA = u => {
+    if (u < s || u > s + 1 + work + .9) return null;
+    const inP = clamp((u - s) / 1, 0, 1), outP = clamp((u - s - 1 - work) / .9, 0, 1);
+    if (outP > 0) return [lerp(DOCK[0], DOCK[0] + 520, outP * outP), lerp(DOCK[1], DOCK[1] - 420, outP * outP)];
+    const k = 1 - Math.pow(1 - inP, 3);
+    return [lerp(DOCK[0] - 560, DOCK[0], k), lerp(DOCK[1] - 300, DOCK[1], k)];
+  };
+  const out = clamp((t - s - 1 - work) / .9, 0, 1);
+  if (t >= s && out < 1) travel(posA, t, s, C.violet, 1 - out);
+  const p = DOCK;                                        // context gathers around the folder, then fragments
+  if (t < s + .9 || t > s + 1 + work + 1.2) return;
+  const build = clamp((t - s - 1) / work, 0, 1), boom = clamp((t - s - 1 - work) / 1.2, 0, 1);
+  reseed(Math.round(s * 977));
+  const ctx = getCtx();
+  for (let i = 0; i < 22; i++) {
+    const a0 = rnd(TAU), r = rnd(150, 200), sp = rnd(.25, .5);
+    if (i / 22 > build) continue;
+    const ang = a0 + t * sp, rr = r + boom * rnd(60, 160);
+    ctx.globalAlpha = (1 - boom); dot(p[0] + Math.cos(ang) * rr, p[1] + Math.sin(ang) * rr + boom * 40, 2, C.violet, 2.5);
+  }
+  ctx.globalAlpha = 1;
+}
+
+// beat 1: the folder becomes a workspace of liquid-metal rings; sessions dock and leave deposits
+function rings(t) {
+  const k0 = ramp(t, TL.flip, 1.3); if (k0 <= .01) return;
+  const ctx = getCtx(), swell = t > TL.pulse ? .8 * Math.max(0, 1 - (t - TL.pulse) / 2.4) : 0;
+  RINGS.forEach(([n, r], i) => {
+    const k = ramp(t, TL.flip + .2 + i * .14, .9), R = r * (.55 + .45 * k); if (k <= .01) return;
+    const lit = TL.lit[i] !== undefined && t >= TL.lit[i] && t < TL.lit[i] + 1.8;
+    ctx.globalAlpha = 1;
+    if (i === 3) { ctx.strokeStyle = al(C.green, .55 * k); ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(O[0], O[1], R, 0, TAU); ctx.stroke() }
+    else if (i === 4) { ctx.strokeStyle = al(C.t3, .5 * k); ctx.lineWidth = 1.2; ctx.setLineDash([2, 7]); ctx.beginPath(); ctx.arc(O[0], O[1], R, 0, TAU); ctx.stroke(); ctx.setLineDash([]) }
+    metalRing(O[0], O[1], R, t + i * .9, lit ? 2.6 : 1.7, k * (lit ? 1 : .55 + swell * .4), R, .9 + i * .12);
+    ringLabel(n, R, i === 3 ? C.green : lit ? C.blue : C.t2, k);
+  });
+  glow(O[0], O[1], 150 + swell * 80, C.act, .35 * k0);
+  orb(O[0], O[1], 46 + swell * 18, C.act, t * 1.2, k0);
+}
+const GOLD = 2.39996;
+function sessionB(t, j) {
+  const s = TL.loopB + j * TL.loopBEvery, ang = -1.9 + ((j * GOLD) % 2.7), dock = 62;
+  const posB = u => {
+    if (u < s || u > s + 2.3) return null;
+    const inP = clamp((u - s) / .9, 0, 1), outP = clamp((u - s - 1.4) / .9, 0, 1);
+    const r = outP > 0 ? lerp(dock, 720, outP * outP) : lerp(720, dock, 1 - Math.pow(1 - inP, 3));
+    return [O[0] + Math.cos(ang) * r, O[1] + Math.sin(ang) * r];
+  };
+  const out = clamp((t - s - 1.4) / .9, 0, 1);
+  if (t >= s && out < 1) travel(posB, t, s, C.act, 1 - out);
+  return { launch: s + 1.0, at: s + 1.5, ang };
+}
+function deposits(t, list) {
+  const ctx = getCtx(); let n = 0;
+  for (const d of list) {
+    const fly = clamp((t - d.launch) / (d.at - d.launch), 0, 1);  // the deposit leaves the core and travels to MEMORY
+    if (fly > 0 && fly < 1) {
+      const e = 1 - Math.pow(1 - fly, 3), r = lerp(62, R_MEM, e), a = d.ang + Math.PI * .02 + t * .02;
+      dot(O[0] + Math.cos(a) * r, O[1] + Math.sin(a) * r, 3.2, C.green, 4);
+    }
+    const k = clamp((t - d.at) / .5, 0, 1); if (k <= 0) continue; n++;
+    const a = d.ang + Math.PI * .02 + t * .02, pulse = t > TL.pulse && t < TL.pulse + 2 ? 1 + .8 * Math.max(0, Math.sin((t - TL.pulse) * 5)) : 1;
+    dot(O[0] + Math.cos(a) * R_MEM, O[1] + Math.sin(a) * R_MEM, 3 * pulse, C.green, 3.5 * k);
+    ctx.strokeStyle = al(C.t2, .8 * k); ctx.lineWidth = 2.4; ctx.beginPath(); ctx.arc(O[0], O[1], R_REC, d.ang, d.ang + .035); ctx.stroke();
+    if (k < 1) glow(O[0] + Math.cos(a) * R_MEM, O[1] + Math.sin(a) * R_MEM, 40, C.green, .5 * (1 - k));
+  }
+  return n;
+}
+
+const H0 = 'A folder is not<br><em>a workspace.</em>', H1 = 'Value is<br><em>continuity.</em>';
+const h = document.getElementById('h'), seg = document.getElementById('seg'), thumb = document.getElementById('thumb');
+const segs = [...seg.querySelectorAll('span')], chips = [...document.querySelectorAll('.chip')];
+const cS = document.getElementById('cS'), cR = document.getElementById('cR'), pad = n => String(n).padStart(3, '0');
+
+// An element at rest carries no filter, transform or opacity: a leftover blur(0px) composites differently
+// depending on the frames rendered before it (motion-lab --verify-all, 1-level diffs), so a settled frame must be plain.
+function settle(el, k, transform, blur) {
+  if (k >= 1) { el.style.opacity = ''; el.style.filter = ''; el.style.transform = ''; return }
+  el.style.opacity = k; el.style.filter = k > 0 ? `blur(${(1 - k) * blur}px)` : ''; el.style.transform = transform(k);
+}
+
+
+// ── Caption with Intention: word-level CWI from OpenCaptions, rendered as a pure function of t ──
+const REEL = JSON.parse(document.getElementById('reel-data').textContent), CAPCFG = REEL.captions;
+const capEl = document.getElementById('cap');
+// FCC: at most 42 characters per caption; split long events at word boundaries, preferring punctuation.
+const FUNC = /^(a|an|the|of|to|in|on|and|or|but|for|with|by|its|it|is|be|can|that)$/i;
+function chunkEvents(doc) {
+  const out = [];
+  for (const e of doc.captions) {
+    let cur = [];
+    const len = ws => ws.map(w => w.text).join(' ').length;
+    for (const w of e.words) {
+      if (cur.length && len([...cur, w]) > CAPCFG.maxEventChars) {
+        let cut = cur.length;                                   // break after the last punctuation if it is not too early
+        for (let i = cur.length - 1; i >= Math.ceil(cur.length / 2); i--) if (/[.,;:?!]$/.test(cur[i].text)) { cut = i + 1; break }
+        while (cut > 1 && FUNC.test(cur[cut - 1].text)) cut--;  // never end a caption on "the", "a", "of", "and" …
+        out.push({ speaker: e.speaker_id, words: cur.slice(0, cut) }); cur = cur.slice(cut);
+      }
+      cur.push(w);
+    }
+    if (cur.length) out.push({ speaker: e.speaker_id, words: cur });
+  }
+  out.forEach((ev, i) => { ev.start = ev.words[0].start; ev.until = i + 1 < out.length ? out[i + 1].words[0].start : ev.words.at(-1).end + .6 });
+  // back-to-back captions share one card: the text swaps, the card does not fade out and in (no blank frame)
+  out.forEach((ev, i) => { ev.chainOut = i + 1 < out.length && out[i + 1].start - ev.words.at(-1).end < .5; ev.chainIn = i > 0 && out[i - 1].chainOut });
+  return out;
+}
+const CAPS = window.CWI && !new URLSearchParams(location.search).has('captions') ? chunkEvents(window.CWI) : [];
+const spk = id => CAPCFG.speakerColor?.[id] || window.CWI?.cast.find(c => c.id === id)?.color || '#fff';
+let capShown = -1;
+function captions(t) {
+  if (!CAPS.length) { capEl.style.display = 'none'; return }
+  let i = -1; for (let k = 0; k < CAPS.length; k++) if (t >= CAPS[k].start - .12) i = k;
+  const ev = CAPS[i];
+  if (!ev || t > ev.until) { capEl.style.opacity = '0'; capShown = -1; return }
+  if (capShown !== i) {                                         // rebuild only when the event changes; style is set from t below
+    capEl.innerHTML = ev.words.map(w => `<span class="w${w.emphasis ? ' em' : ''}">${w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join(' ');
+    capShown = i;
+    ev.words.forEach((w, j) => {                               // measure at the word's own weight and size, then reserve the overhang
+      if (!w.emphasis) return;
+      const el = capEl.children[j];
+      el.style.fontWeight = String(Math.round(w.weight / 100) * 100); el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+      el.style.margin = `0 ${Math.ceil(el.getBoundingClientRect().width * .08)}px`;
+    });
+  }
+  const inK = ev.chainIn ? 1 : ramp(t, ev.start - .12, .18), outK = ev.chainOut ? 1 : 1 - ramp(t, ev.until - .14, .14), k = Math.min(inK, outK);
+  capEl.style.opacity = k >= 1 ? '' : String(k);
+  const col = spk(ev.speaker), spans = capEl.children;
+  ev.words.forEach((w, j) => {
+    const el = spans[j], a = w.animation || {}, d = (a.delay_ms ?? 100) / 1000, dur = (a.duration_ms ?? 600) / 1000;
+    const p = ease((t - w.start - d) / dur);                  // CWI: white → speaker colour, 600 ms ease after 100 ms
+    const rise = ease((t - w.start + .05) / .22);              // entrance: the word lifts into place as it is spoken
+    const bump = w.emphasis ? Math.sin(Math.PI * clamp((t - w.start) / .45, 0, 1)) : 0;  // 15% bounce on emphasis
+    el.style.fontWeight = String(Math.round(w.weight / 100) * 100);
+    el.style.fontSize = `${(CAPCFG.baseSize * w.size).toFixed(1)}px`;
+    el.style.color = p >= 1 ? col : p <= 0 ? '#fff' : `color-mix(in oklab, ${col} ${(p * 100).toFixed(1)}%, #fff)`;
+    el.style.opacity = rise >= 1 ? '' : (.38 + .62 * rise).toFixed(3);
+    el.style.transform = bump > 0 ? `scale(${(1 + .15 * bump).toFixed(4)})` : rise >= 1 ? '' : `translateY(${((1 - rise) * 10).toFixed(2)}px)`;
+    el.style.textShadow = (w.emphasis && t >= w.start) ? `0 0 ${(20 * Math.max(bump, .35)).toFixed(1)}px ${col}, 0 0 40px color-mix(in oklab, ${col} 25%, transparent)` : '';
+  });
+}
+
+window.renderAt = function (t) {
+  document.documentElement.style.setProperty('--ua', ((t * 40) % 360).toFixed(1) + 'deg');
+  captions(t);
+  background(t);
+  setCtx(cvc); cvc.clearRect(0, 0, 1080, 1920);
+  const flip = ramp(t, TL.flip, 1.1);
+  // beat 0: the folder, one agent, its files, and the five layers a folder does not have
+  folder(t, 1 - flip);
+  if (t < TL.leave0 + 1) travel(u => {
+    if (u > TL.leave0 + 1) return null;
+    const i = 1 - Math.pow(1 - clamp(u / .8, 0, 1), 3), o = clamp((u - TL.leave0) / 1, 0, 1);
+    if (o > 0) return [lerp(DOCK[0], DOCK[0] + 520, o * o), lerp(DOCK[1], DOCK[1] - 420, o * o)];
+    return [lerp(DOCK[0] - 560, DOCK[0], i), lerp(DOCK[1] - 300, DOCK[1], i)];
+  }, t, 0, C.violet, 1 - clamp((t - TL.leave0) / 1, 0, 1));
+  const ghostOut = 1 - ramp(t, TL.layersOut, .8);
+  TL.layers.forEach((at, i) => {
+    const k = ramp(t, at - .15, .45) * ghostOut; if (k <= .01) return;
+    const R = RINGS[i][1] + 20, now = t - at < .6;
+    metalRing(O[0], O[1], R, t + i, now ? 2.2 : 1.2, k * (now ? .95 : .4), R, 1.2);
+    ringLabel(RINGS[i][0], R, now ? C.blue : C.t2, k);
+  });
+  let sessions = t >= TL.dock0 ? 1 : 0;
+  for (let j = 0; j < TL.loopAN; j++) { const s = TL.loopA + j * TL.loopAEvery; sessionA(t, s); if (t >= s + 1) sessions++ }
+  // beat 1: the same sessions in an agentic workspace
+  rings(t);
+  const deps = [];
+  for (let j = 0; j < TL.loopBN; j++) { const d = sessionB(t, j); deps.push(d); if (t >= TL.loopB + j * TL.loopBEvery + .9) sessions++ }
+  const kept = deposits(t, deps);
+  cS.textContent = pad(sessions); cR.textContent = pad(kept); cR.style.color = kept ? 'var(--green)' : 'var(--coral)';
+  // segmented control flips with the narration; the headline swaps on "continuity"; chips on orient / act / verify
+  const w0 = segs[0].offsetWidth, w1 = segs[1].offsetWidth;
+  thumb.style.left = `${7 + flip * w0}px`; thumb.style.width = `${lerp(w0, w1, flip)}px`;
+  segs[0].classList.toggle('on', flip < .5); segs[1].classList.toggle('on', flip >= .5);
+  const sw = ramp(t, TL.swap, .7), html = sw < .5 ? H0 : H1;
+  if (h.innerHTML !== html) h.innerHTML = html;
+  const vis = sw < .5 ? 1 - sw * 2 : (sw - .5) * 2;
+  settle(h, vis, k => `translateY(${(1 - k) * (sw < .5 ? -16 : 16)}px)`, 10);
+  seg.style.opacity = 1 - ramp(t, TL.swap + .2, .6);
+  chips.forEach((c, i) => settle(c, ramp(t, TL.chips[i] - .2, .55), k => `translateY(${(1 - k) * 22}px) scale(${.94 + .06 * k})`, 8));
+};
+
+const Q = new URLSearchParams(location.search);
+FONTS_READY.then(() => Promise.all([100, 200, 300, 400, 500, 600, 700, 800, 900].map(w => document.fonts.load(`${w} 54px "Roboto Flex"`)))).then(() => document.fonts.ready).then(() => {
+  window.renderAt(+(Q.get('t') || 0));
+  window.__ready = true;
+  if (!Q.has('t')) {
+    const t0 = performance.now();
+    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % TL.end); requestAnimationFrame(loop) };
+    requestAnimationFrame(loop);
+  }
+});
+</script>
+</body>
+</html>
