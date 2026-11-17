@@ -59,7 +59,11 @@ async function line(stem, text, meta) {
   if (existsSync(mp3) && existsSync(rec) && existsSync(ali)) {
     const r = JSON.parse(readFileSync(rec, 'utf8'));
     if (r.requestSha256 === requestSha256) {
+      // reuse only what the receipt vouches for: the audio bytes, the alignment bytes, and an alignment that spells the line
       if (r.audioSha256 !== sha(readFileSync(mp3))) throw new Error(`${stem}.mp3 does not match its receipt; refusing to reuse it`);
+      if (!r.alignmentSha256) throw new Error(`${stem}.receipt.json records no alignmentSha256; refusing to reuse ${stem}.alignment.json`);
+      if (r.alignmentSha256 !== sha(readFileSync(ali))) throw new Error(`${stem}.alignment.json does not match its receipt; refusing to reuse it`);
+      alignmentChars(ali, text);
       console.log(`reused   ${stem} (${text.length} chars, receipt matches)`);
       return { mp3, ali };
     }
@@ -75,22 +79,28 @@ async function line(stem, text, meta) {
   delete result.audio_base64;
   if (audio.length < 1000) throw new Error(`${stem}: ElevenLabs returned ${audio.length} bytes of audio`);
   writeFileSync(mp3, audio);
-  writeFileSync(ali, `${JSON.stringify(result, null, 2)}\n`);
+  const aliText = `${JSON.stringify(result, null, 2)}\n`;
+  writeFileSync(ali, aliText);
   const response = Object.fromEntries(['request-id', 'character-cost'].filter(h => res.headers.get(h)).map(h => [h, res.headers.get(h)]));
   writeFileSync(rec, `${JSON.stringify({
     ...meta, voice_id: VOICE_ID, model_id: MODEL_ID, endpoint: 'with-timestamps', outputFormat: 'mp3_44100_128',
-    requestSha256, audioSha256: sha(audio), characters: text.length, generatedAt: new Date().toISOString(), response,
+    requestSha256, audioSha256: sha(audio), alignmentSha256: sha(aliText), characters: text.length, generatedAt: new Date().toISOString(), response,
   }, null, 2)}\n`);
   charactersUsed += text.length;
   console.log(`generated ${stem}: ${text.length} characters${response['character-cost'] ? ` (billed ${response['character-cost']})` : ''}`);
   return { mp3, ali };
 }
 
+// The character alignment must spell the line exactly; the timeline's words come from it, so a mismatch is an error.
+function alignmentChars(aliFile, text) {
+  const data = JSON.parse(readFileSync(aliFile, 'utf8')), a = data.alignment || data.normalized_alignment;
+  if (!a || a.characters?.join('') !== text) throw new Error(`${path.basename(aliFile)} does not spell "${text}"; refusing to build a timeline from it`);
+  return a;
+}
 // Word timings from the character alignment: a word starts at its first character and ends at its last.
 function words(aliFile, text, dur) {
-  const data = JSON.parse(readFileSync(aliFile, 'utf8')), a = data.alignment || data.normalized_alignment;
+  const a = alignmentChars(aliFile, text);
   const ch = a.characters, s = a.character_start_times_seconds, e = a.character_end_times_seconds;
-  if (ch.join('') !== text) console.warn(`alignment text differs from the line in ${path.basename(aliFile)}; using the alignment`);
   const out = []; let cur = null;
   ch.forEach((c, i) => {
     if (/\s/.test(c)) { if (cur) out.push(cur); cur = null; return }

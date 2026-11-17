@@ -9,6 +9,8 @@
   "outputFormat": "mp3_44100_128",
   "requestSha256": "b415d2ddaed8172a0017b9371a94f1c173936860ef252469cd9acb650a0a9c53",
   "audioSha256": "b5c1f84f5a4e098ec087574586615c5f57f7305c9409f009b690c61450640336",
+  "alignmentSha256": "b6292c28bbc6a76c660a14fa859007ef53119fe101906faea3dcf1fdd5f60533",
+  "alignmentSha256RecordedAt": "2026-11-17 (backfilled from the committed alignment; generatedAt is unchanged)",
   "characters": 58,
   "generatedAt": "2026-11-17T03:28:10.387Z",
   "response": {
