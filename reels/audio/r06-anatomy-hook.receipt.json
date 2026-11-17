@@ -1,0 +1,18 @@
+{
+  "line": "hook",
+  "field": "spokenHook",
+  "part": 3,
+  "reel": "r06-anatomy",
+  "voice_id": "SAz9YHcvj6GT2YYXdXww",
+  "model_id": "eleven_v4",
+  "endpoint": "with-timestamps",
+  "outputFormat": "mp3_44100_128",
+  "requestSha256": "b415d2ddaed8172a0017b9371a94f1c173936860ef252469cd9acb650a0a9c53",
+  "audioSha256": "b5c1f84f5a4e098ec087574586615c5f57f7305c9409f009b690c61450640336",
+  "characters": 58,
+  "generatedAt": "2026-11-17T03:28:10.387Z",
+  "response": {
+    "request-id": "sWlk5BXC9JPIJSuSvrzQ",
+    "character-cost": "26"
+  }
+}
