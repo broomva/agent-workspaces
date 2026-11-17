@@ -1,0 +1,16 @@
+{
+  "line": "cta",
+  "field": "funnel.spokenCta",
+  "voice_id": "SAz9YHcvj6GT2YYXdXww",
+  "model_id": "eleven_v4",
+  "endpoint": "with-timestamps",
+  "outputFormat": "mp3_44100_128",
+  "requestSha256": "3734a57476c85ad478c0c77edc9dc19562063af7194ba1b281c029d2a1af0ca2",
+  "audioSha256": "169cdd1b739f345d4d73d85ca6e782f8aa7fca780743819dfc0df005b2c0b5c0",
+  "characters": 57,
+  "generatedAt": "2026-11-17T03:16:03.318Z",
+  "response": {
+    "request-id": "5zku8RGAmpsmOQaep8zv",
+    "character-cost": "25"
+  }
+}
