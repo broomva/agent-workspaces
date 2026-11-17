@@ -4,6 +4,8 @@
 
 [Live presentation](https://broomva.tech/agent-workspaces) · [Reuse and attribution](ATTRIBUTION.md) · [Contributing](CONTRIBUTING.md)
 
+[Act I playbook](playbooks/act-1.md): step-by-step prompts and verification checks from the reel series.
+
 ## Run and check
 
 Open `deck/index.html` directly in a modern Chromium browser or Safari. All fonts are local; viewing needs no install, private workspace, account or network. Use the arrow keys to advance, `G` for the guide, `N` for notes, `L` for the ledger, `P` for presenter view, `T` for day mode, `O` for tone and `M` for still mode. Presenter synchronization uses BroadcastChannel; if your browser isolates local files, serve this directory with a local HTTP server. See [script.md](script.md) for the talk track.
