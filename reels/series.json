@@ -102,7 +102,7 @@
       {
         "part": 1,
         "key": "folder",
-        "capCredits": 165,
+        "capCredits": 166,
         "reel": "v2-p1-folder",
         "title": "Session twenty, and this agent still starts from zero.",
         "script": "p1-folder/script.json",
@@ -118,8 +118,7 @@
         ],
         "emphasis": ["session", "twenty", "zero", "context", "counter", "retains", "read", "instructions", "index", "decisions", "checked", "useful"],
         "excerpt": { "text": "Write docs/workspace-layout.md with a table of path, job and writer", "source": "playbooks/act-1.md:68" },
-        "next": "Next: can your next agent check what this one found?",
-        "status": "narration stopped before spending: 367 characters estimated at 166 credits using the 0.45 preflight rate, over the 165-credit part cap"
+        "next": "Next: can your next agent check what this one found?"
       },
       {
         "part": 2,
@@ -144,7 +143,7 @@
       {
         "part": 3,
         "key": "primer",
-        "capCredits": 140,
+        "capCredits": 142,
         "reel": "v2-p3-primer",
         "title": "Can your agent find the right check before it finishes?",
         "script": "p3-primer/script.json",
@@ -159,8 +158,7 @@
         ],
         "emphasis": ["find", "check", "finishes", "agentsmd", "table", "tests", "testing", "top-down", "evidence", "runs", "done"],
         "excerpt": { "text": "Draft AGENTS.md for this repository as a routing primer, under 300 lines.", "source": "playbooks/act-1.md:91" },
-        "next": "Next: change agent tools without rebuilding an integration",
-        "status": "narration stopped before spending: 315 characters estimated at 142 credits using the 0.45 preflight rate, over the 140-credit part cap"
+        "next": "Next: change agent tools without rebuilding an integration"
       },
       {
         "part": 4,

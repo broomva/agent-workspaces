@@ -1,0 +1,23 @@
+{
+  "line": "take",
+  "field": "v2.parts[].spoken",
+  "part": 1,
+  "reel": "v2-p1-folder",
+  "script": "sha256:394af3fe399296d6aff46b745e2e11d8a2af1ca8cb4c0eae3a44870cdb891214",
+  "voice_id": "SAz9YHcvj6GT2YYXdXww",
+  "model_id": "eleven_v4",
+  "endpoint": "with-timestamps",
+  "outputFormat": "mp3_44100_128",
+  "requestSha256": "38bbd853366e831d7fb5601a81962df1095cf7fe209a0a61182d764b93d26fa9",
+  "audioSha256": "6bb7bdb496f2ebe6073eac3e4adbbfaf490444d53b6e745bd13584c7c24dc6f6",
+  "alignmentSha256": "daa03e8d2c7f15f71dc53a30619da8be2abffdd2c1c31c6288f26be9c6530007",
+  "characters": 367,
+  "estimateCredits": 166,
+  "capCredits": 166,
+  "creditsPerCharacter": 0.45,
+  "generatedAt": "2026-11-17T18:42:31.784Z",
+  "response": {
+    "request-id": "986tD9Q4jJ8swRsLJUm7",
+    "character-cost": "161"
+  }
+}
