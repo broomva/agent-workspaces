@@ -104,7 +104,7 @@ Read primer, policy and procedures before acting. Write knowledge, records and p
   for h in '## Philosophy' '## Non-negotiable boundaries' '## When / read' '## Completion checks'; do
     grep -Fxq "$h" AGENTS.md || { echo "missing heading in AGENTS.md: $h"; exit 1; }
   done
-  awk '/^## When \/ read$/{t=1;next} /^## /{t=0} t' AGENTS.md | grep -o '](\([^)#]*\)' | sed 's/^](//' | grep -v '://' | grep -v '^$' | grep -q . || { echo "the When / read table has no local route"; exit 1; }
+  awk '/^## When \/ read$/{t=1;next} /^## /{t=0} t && /^ *\|/' AGENTS.md | grep -o '](\([^)#]*\)' | sed 's/^](//' | grep -v '://' | grep -v '^$' | grep -q . || { echo "the When / read table has no local route"; exit 1; }
   grep -o '](\([^)#]*\)' AGENTS.md | sed 's/^](//' | grep -v '://' | grep -v '^$' | while read -r p; do
     test -e "$p" || { echo "broken route in AGENTS.md: $p"; exit 1; }
   done || exit 1
@@ -168,7 +168,7 @@ Review the design, then give the implement prompt.
     test -s "$f" || { echo "missing: $f"; exit 1; }
   done
   for d in bronze silver; do
-    ls "$d" | grep -v '^README.md$' | grep -q . || { echo "no sample file in $d/ besides README.md"; exit 1; }
+    find "$d" -type f ! -name README.md | grep -q . || { echo "no sample file in $d/ besides README.md"; exit 1; }
   done
   for h in '## Bronze' '## Silver' '## Gold' '## Ledger'; do
     grep -Fxq "$h" docs/medallion.md || { echo "missing heading in docs/medallion.md: $h"; exit 1; }
@@ -198,7 +198,7 @@ The quote verifier and its tests need neither subagents nor a ledger, so build a
   for f in skills/review/SKILL.md docs/review-verification.md; do
     test -s "$f" || { echo "missing: $f"; exit 1; }
   done
-  grep -q '^TEST: *[^[:space:]]' docs/review-verification.md || { echo "no TEST: line with a command in docs/review-verification.md"; exit 1; }
+  awk '/^TEST: /{n++; if ($0 !~ /^TEST: *[^[:space:]]/) bad=1} END{exit !(n == 1 && !bad)}' docs/review-verification.md || { echo "docs/review-verification.md needs exactly one TEST: line, with a command"; exit 1; }
   grep -m1 '^TEST: ' docs/review-verification.md | sed 's/^TEST: /running: /'
   grep -m1 '^TEST: ' docs/review-verification.md | sed 's/^TEST: //' | sh || { echo "the recorded verifier tests failed"; exit 1; }
 ) && echo "step 6: ok"
