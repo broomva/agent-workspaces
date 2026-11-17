@@ -1,0 +1,18 @@
+{
+  "line": "hook",
+  "field": "spokenHook",
+  "part": 5,
+  "reel": "r08-medallion",
+  "voice_id": "SAz9YHcvj6GT2YYXdXww",
+  "model_id": "eleven_v4",
+  "endpoint": "with-timestamps",
+  "outputFormat": "mp3_44100_128",
+  "requestSha256": "17ce61bd632fe915ee14ff214716f66e3b7c02fb40c9014201d2b8b1c98c6af2",
+  "audioSha256": "b46b9423acee224f93e4dd827ee7a2b5f2c284d50895dc6f5644538c14b1b6da",
+  "characters": 69,
+  "generatedAt": "2026-11-17T04:09:50.556Z",
+  "response": {
+    "request-id": "pfwXdiqnZv4G0yThM9aa",
+    "character-cost": "30"
+  }
+}
