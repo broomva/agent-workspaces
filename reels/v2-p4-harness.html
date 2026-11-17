@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agent Workspaces · Act I v2 · Part 4 · Can you change agent tools without rebuilding an integration?</title>
+<meta name="viewport" content="width=1080">
+<!-- Act I v2, Part 4 (BRO-3825), storyboarded from the script card's scene notes (content-flow
+     accounts/broomva.tech/runs/2026-11-17-act1-v2/p4-harness/script.json). Vertical-native 1080x1920.
+     window.REEL_V2 (reels/audio/v2/v2-p4-harness.timeline.js, written by `bun reels/tts.mjs --v2`) carries the River
+     line and word timings of the gapped take; every beat below is keyed to them. Every frame is a pure function of t:
+     window.renderAt(t). Geometry: the content-engine 9:16 contract (reels-organic): title band y 121-436, caption band
+     x 220-860 y 1288-1463, action rail x > 872 below y 922 kept empty; the stage (y 460-1270) never holds still for 3 s.
+     One readable element at a time in the stage, beside the "Illustrative" label the scene notes keep visible for the
+     whole swap; all meaningful text is at least 44 px. The harnesses are not named (the swap is an illustration). -->
+<style>
+@font-face{font-family:'Inter';font-weight:300 700;src:url(../deck/fonts/Inter-400.woff2) format('woff2')}
+@font-face{font-family:'Raleway';font-weight:200 600;src:url(../deck/fonts/Raleway-300.woff2) format('woff2')}
+@font-face{font-family:'Roboto Flex';font-weight:400;src:url(../deck/fonts/RobotoFlex-Regular.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:700;src:url(../deck/fonts/RobotoFlex-Bold.ttf) format('truetype')}
+@font-face{font-family:'JetBrains Mono';font-weight:300 700;src:url(../deck/fonts/JetBrainsMono-400.woff2) format('woff2')}
+:root{
+  --deep:oklch(0.155 0.028 250);--t1:oklch(0.975 0.004 250);--t2:oklch(0.83 0.015 248);--t3:oklch(0.65 0.022 248);
+  --blue:oklch(0.71 0.15 252);--green:oklch(0.76 0.19 148);--amber:oklch(0.82 0.15 75);--violet:oklch(0.72 0.16 300);
+  --display:'Raleway',sans-serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--deep);color:var(--t1)}
+body{position:relative;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.abs{position:absolute}
+.glass{position:absolute;border-radius:28px;
+  background:linear-gradient(180deg,oklch(0.36 0.03 248 / .5),oklch(0.22 0.03 250 / .55) 55%,oklch(0.19 0.03 250 / .62));
+  box-shadow:0 30px 80px -30px oklch(0.04 0.02 250 / .85),inset 0 1px 0 oklch(1 0 0 / .2),inset 0 0 0 1.5px oklch(1 0 0 / .07)}
+/* headline: complete and at full brightness from frame 0, inside the title band (y 121-436) */
+#h{position:absolute;left:151px;top:190px;width:800px;font:300 84px/1.06 var(--display);letter-spacing:-.03em;color:var(--t1)}
+#h em{font-style:normal;font-weight:400;color:var(--blue)}
+/* the label the scene notes keep visible on the swap */
+#pill{position:absolute;left:540px;top:478px;transform:translateX(-50%);padding:6px 26px 8px;border-radius:30px;
+  font:500 44px/1.1 var(--sans);letter-spacing:.01em;color:var(--amber);box-shadow:inset 0 0 0 2.5px oklch(0.82 0.15 75 / .75);
+  background:oklch(0.82 0.15 75 / .1)}
+/* a harness: the loop that makes model and tool calls */
+.ring{position:absolute;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%}
+.ring .track{position:absolute;inset:0;border-radius:50%;border:10px solid oklch(0.71 0.15 252 / .55)}
+.ring.b .track{border-color:oklch(0.72 0.16 300 / .6)}
+.ring .node{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:var(--deep);
+  box-shadow:inset 0 0 0 6px oklch(0.71 0.15 252 / .8)}
+.ring.b .node{box-shadow:inset 0 0 0 6px oklch(0.72 0.16 300 / .85)}
+.ring .dot{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:var(--t1);
+  box-shadow:0 0 26px oklch(0.85 0.1 250 / .9)}
+.ring .lab{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;font:500 52px/1 var(--sans);
+  letter-spacing:-.01em;color:var(--t1)}
+.ring.b .lab{font-size:44px}
+/* the integration: one named CLI command */
+#chip{position:absolute;left:540px;top:1090px;height:96px;margin-top:-48px;transform:translateX(-50%);padding:0 34px;border-radius:24px;
+  display:flex;align-items:center;white-space:nowrap;font:500 46px/1 var(--mono);letter-spacing:-.02em;color:var(--t1);
+  background:linear-gradient(180deg,oklch(0.17 0.02 250 / .92),oklch(0.13 0.02 250 / .95));box-shadow:inset 0 0 0 2px oklch(0.78 0.03 245 / .35)}
+#chip span{white-space:pre}
+#chip .res{color:var(--t2)}
+#chip.ok{box-shadow:inset 0 0 0 2.5px oklch(0.76 0.19 148 / .8),0 0 40px oklch(0.76 0.19 148 / .35)}
+#chip.ok .res{color:var(--green)}
+#chip.lost .res{color:var(--amber)}
+/* cold open: the old setup, one glass rig around the harness and its command; it breaks at 0.6 s */
+#rig{left:190px;top:575px;width:670px;height:595px}
+#rig .fl{position:absolute;inset:0;border-radius:28px;background:oklch(0.82 0.15 75 / .55)}
+/* the wire from the harness to the command, and the boundary it crosses */
+.wire{position:absolute;left:537px;width:6px;border-radius:3px;background:oklch(0.78 0.03 245 / .6)}
+#bnd{position:absolute;left:220px;top:982px;width:640px;height:8px;border-radius:4px;background:oklch(0.76 0.19 148 / .7);
+  box-shadow:0 0 30px oklch(0.76 0.19 148 / .45)}
+#bl{position:absolute;left:540px;top:1090px;transform:translate(-50%,-50%);white-space:nowrap;font:600 60px/1 var(--sans);color:var(--green)}
+#spark{position:absolute;left:540px;top:968px;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;
+  background:radial-gradient(circle,oklch(0.9 0.15 75 / .9),oklch(0.82 0.15 75 / 0) 70%)}
+#pulse{position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:var(--t1);box-shadow:0 0 30px var(--violet)}
+/* playbook excerpt, alone */
+#ex{left:170px;top:600px;width:700px;padding:56px 54px 92px}
+#ex p{font:400 54px/1.22 var(--display);letter-spacing:-.015em;color:var(--t1)}
+#ex .rule{position:absolute;left:54px;bottom:46px;height:6px;border-radius:3px;background:var(--amber)}
+/* end card: one line at a time */
+.endl{left:170px;top:660px;width:700px;min-height:400px;padding:60px 54px;display:flex;align-items:center}
+.endl p{font:300 62px/1.18 var(--display);letter-spacing:-.02em;color:var(--t1)}
+.endl p b{font-weight:400;color:var(--blue)}
+/* Caption with Intention, in the caption band: one event at a time, word by word from the River alignment */
+#cap{position:absolute;left:540px;bottom:482px;transform:translateX(-50%);max-width:640px;width:max-content;padding:12px 28px 14px;
+  border-radius:30px;text-align:center;font:400 50px/1.12 'Roboto Flex',var(--sans);letter-spacing:-.01em;text-wrap:balance;
+  background:linear-gradient(180deg,oklch(0.3 0.03 248 / .62),oklch(0.18 0.03 250 / .7));box-shadow:inset 0 1px 0 oklch(1 0 0 / .18)}
+#cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
+</style>
+</head>
+<body>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<h1 id="h">Change the agent.<br><em>Keep the integration?</em></h1>
+<div id="pill">Illustrative</div>
+
+<div class="glass" id="rig"><i class="fl"></i></div>
+<div class="wire" id="wireA"></div><div class="wire" id="wireB"></div>
+<div id="bnd"></div><div id="spark"></div>
+<div class="ring a" id="ringA"><i class="track"></i><i class="node"></i><i class="node"></i><i class="dot"></i><span class="lab"></span></div>
+<div class="ring b" id="ringB"><i class="track"></i><i class="node"></i><i class="node"></i><i class="dot"></i><span class="lab"></span></div>
+<div id="chip"><span class="cmd">search-notes</span><span class="res"></span></div>
+<div id="bl"></div>
+<div id="pulse"></div>
+
+<div class="glass" id="ex"><p></p><i class="rule"></i></div>
+<div class="glass endl" id="endA"><p></p></div>
+<div class="glass endl" id="endB"><p></p></div>
+
+<div id="cap"></div>
+
+<script>
+const S = window.REEL_V2;
+if (!S) throw new Error('window.REEL_V2 is missing: run bun reels/tts.mjs --v2 --reel v2-p4-harness, or render with reels/render.mjs');
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k, TAU = Math.PI * 2;
+const ease = x => { x = clamp(x, 0, 1); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 };
+const ramp = (t, a, d) => ease((t - a) / d);
+const win = (t, a, b, fi = .3, fo = .3) => Math.min(ramp(t, a, fi), 1 - ramp(t, b - fo, fo));   // in at a, out by b
+const L = S.take.lines, W = S.take.words;
+const nth = (text, n) => W.filter(w => w.text.replace(/[^\w-]/g, '').toLowerCase() === text)[n];
+const TL = {
+  cut: 0.6,                                     // the old harness disconnects (script card: cold_open.event_at_s)
+  loop: L[1].start, harness: nth('harness', 0).start, model: nth('model', 0).start, tool: nth('tool', 0).start,
+  keep: L[2].start, outside: nth('outside', 0).start,
+  put: L[3].start, cli: nth('cli', 0).start, mcp: nth('mcp', 0).start, boundary: nth('boundary', 0).start,
+  then: L[4].start, changing: nth('changing', 0).start, rebuilding: nth('rebuilding', 1).start, capability: nth('capability', 0).start,
+  takeEnd: S.take.dur, ex: S.excerpt.at, exEnd: S.excerpt.at + S.excerpt.hold, cta: S.cta.at, endSwap: S.cta.at + 2.4, total: S.total_dur,
+};
+window.__TL = TL;
+
+// ── background: soft lights orbit the stage, so the stage is never still (dead_stretch), and a faint drifting grid ──
+const bg = $('bg').getContext('2d');
+function background(t) {
+  bg.clearRect(0, 0, 1080, 1920);
+  bg.fillStyle = 'oklch(0.155 0.028 250)'; bg.fillRect(0, 0, 1080, 1920);
+  const lights = [[0.58, 0.7, 'oklch(0.55 0.16 252 / .55)', 470], [-0.43, 3.1, 'oklch(0.5 0.14 300 / .45)', 420], [0.33, 5.0, 'oklch(0.6 0.12 200 / .3)', 380]];
+  for (const [w, ph, c, r] of lights) {
+    const x = 540 + Math.cos(t * w + ph) * 250, y = 860 + Math.sin(t * w * 1.3 + ph) * 290;
+    const g = bg.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, c); g.addColorStop(1, 'oklch(0.155 0.028 250 / 0)');
+    bg.fillStyle = g; bg.fillRect(0, 0, 1080, 1920);
+  }
+  bg.fillStyle = 'oklch(0.78 0.03 245 / .07)';
+  const off = (t * 22) % 60;
+  for (let y = 470 - off; y < 1290; y += 60) for (let x = 170; x < 870; x += 60) { bg.beginPath(); bg.arc(x, y, 2.4, 0, TAU); bg.fill() }
+}
+
+$('ex').querySelector('p').textContent = S.excerpt.text;
+$('endA').querySelector('p').textContent = S.end.card[0];
+$('endB').querySelector('p').innerHTML = S.end.card[1].replace(/^(Next[^:]*:)/, '<b>$1</b>');
+
+// An element at rest carries no transform, filter or opacity (a leftover blur(0) composites differently).
+function show(el, k, tf = () => '', blur = 0) {
+  el.style.visibility = k > 0.001 ? '' : 'hidden';
+  el.style.opacity = k >= 1 ? '' : String(clamp(k, 0, 1));
+  const f = tf(k); el.style.transform = f || '';
+  el.style.filter = blur > 0 ? `blur(${blur.toFixed(2)}px)` : '';
+}
+
+// ── captions: CWI-shaped events from the River alignment, drawn word by word ──
+const capEl = $('cap'), CAPS = S.captions.captions, COL = 'oklch(0.8 0.12 245)', KW = 'oklch(0.86 0.12 88)';
+CAPS.forEach((ev, i) => {
+  ev.until = i + 1 < CAPS.length && CAPS[i + 1].start - ev.end < 1 ? CAPS[i + 1].start : ev.end + .5;
+  ev.chainOut = i + 1 < CAPS.length && CAPS[i + 1].start - ev.end < .5; ev.chainIn = i > 0 && CAPS[i - 1].chainOut;
+});
+let capShown = -1;
+function captions(t) {
+  let i = -1; for (let k = 0; k < CAPS.length; k++) if (t >= CAPS[k].start - .12) i = k;
+  const ev = CAPS[i];
+  // the playbook excerpt holds alone: no caption from the end of the take to the CTA's first word
+  if (!ev || t > ev.until || (t >= S.excerpt.at && t < S.cta.at)) { capEl.style.visibility = 'hidden'; return }
+  capEl.style.visibility = '';
+  if (capShown !== i) {
+    capEl.innerHTML = ev.words.map(w => `<span class="w">${w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join(' ');
+    capShown = i;
+    ev.words.forEach((w, j) => { if (w.emphasis) capEl.children[j].style.margin = `0 ${Math.ceil(capEl.children[j].getBoundingClientRect().width * .08)}px` });
+  }
+  const inK = ev.chainIn ? 1 : ramp(t, ev.start - .12, .18), outK = ev.chainOut ? 1 : 1 - ramp(t, ev.until - .14, .14), k = Math.min(inK, outK);
+  capEl.style.opacity = k >= 1 ? '' : String(k);
+  ev.words.forEach((w, j) => {
+    const el = capEl.children[j], col = w.text.includes(S.cta.keyword) ? KW : COL;
+    const p = ease((t - w.start - .1) / .6);
+    const rise = ease((t - w.start + .05) / .22);
+    const bump = w.emphasis ? Math.sin(Math.PI * clamp((t - w.start) / .45, 0, 1)) : 0;
+    el.style.fontWeight = String(w.weight); el.style.fontSize = `${(50 * w.size).toFixed(1)}px`;
+    el.style.color = p >= 1 ? col : p <= 0 ? '#fff' : `color-mix(in oklab, ${col} ${(p * 100).toFixed(1)}%, #fff)`;
+    el.style.opacity = rise >= 1 ? '' : (.38 + .62 * rise).toFixed(3);
+    el.style.transform = bump > 0 ? `scale(${(1 + .15 * bump).toFixed(4)})` : rise >= 1 ? '' : `translateY(${((1 - rise) * 10).toFixed(2)}px)`;
+    el.style.textShadow = w.emphasis && t >= w.start ? `0 0 ${(20 * Math.max(bump, .35)).toFixed(1)}px ${col}` : '';
+  });
+}
+
+// a ring: position, scale, the call dot's angle, which node flashes, and its centre label
+function ring(el, k, x, y, sc, ang, flash, label) {
+  show(el, k, () => `scale(${sc.toFixed(4)})`);
+  el.style.left = `${x.toFixed(1)}px`; el.style.top = `${y.toFixed(1)}px`;
+  const [top, bot] = el.querySelectorAll('.node'), dot = el.querySelector('.dot');
+  top.style.left = '150px'; top.style.top = '0px'; bot.style.left = '150px'; bot.style.top = '300px';
+  dot.style.left = `${(150 + Math.sin(ang) * 150).toFixed(1)}px`; dot.style.top = `${(150 - Math.cos(ang) * 150).toFixed(1)}px`;
+  top.style.background = flash === 'model' ? 'var(--t1)' : ''; bot.style.background = flash === 'tool' ? 'var(--t1)' : '';
+  const lab = el.querySelector('.lab');
+  lab.textContent = label ? label[0] : ''; lab.style.opacity = label ? String(clamp(label[1], 0, 1)) : '0';
+}
+const wire = (el, y0, y1, k, color) => {
+  el.style.top = `${y0}px`; el.style.height = `${Math.max(0, y1 - y0)}px`;
+  el.style.visibility = k > .001 && y1 > y0 ? '' : 'hidden'; el.style.opacity = k >= 1 ? '' : String(k); el.style.background = color || '';
+};
+
+window.renderAt = function (t) {
+  background(t);
+  captions(t);
+  show($('h'), 1 - ramp(t, TL.loop - .1, .45), k => k < 1 ? `translateY(${((1 - k) * -18).toFixed(1)}px)` : '');
+  // the "Illustrative" label stays for the whole swap (the take), and is gone before the excerpt holds alone
+  show($('pill'), 1 - ramp(t, TL.takeEnd - .15, .15), () => 'translateX(-50%)');
+
+  // ── harness A: the old one. Cold open: wired to search-notes; at 0.6 s the wire snaps and the outcome is unknown ──
+  const aOut = ramp(t, TL.changing - .35, .6);                    // slides out left when the harness changes
+  const grow = win(t, TL.loop - .2, TL.keep + .2, .45, .45);      // larger while the loop is explained
+  const aY = 740, aX = 540 - 420 * aOut;
+  const spin = t * 2.4;                                         // the call dot circles the loop
+  let flash = null, label = null;
+  if (t >= TL.harness - .1 && t < TL.model - .05) label = ['harness', ramp(t, TL.harness - .1, .2) * (1 - ramp(t, TL.model - .2, .15))];
+  if (t >= TL.model - .05 && t < TL.tool - .05) { flash = 'model'; label = ['model call', ramp(t, TL.model - .05, .15) * (1 - ramp(t, TL.tool - .2, .15))] }
+  if (t >= TL.tool - .05 && t < TL.keep) { flash = 'tool'; label = ['tool call', ramp(t, TL.tool - .05, .15) * (1 - ramp(t, TL.keep - .25, .2))] }
+  const dotAng = flash === 'model' ? 0 : flash === 'tool' ? Math.PI : spin;   // the dot sits on the node being called
+  ring($('ringA'), 1 - aOut, aX, aY, 1 + .15 * grow, dotAng, flash, label);
+
+  // ── the command chip: wired below the loop at frame 0, then gone while the loop is explained, then it is kept
+  //    outside the loop (inside first, moving out on "outside"), on the CLI/MCP boundary, and finally run by harness B ──
+  const chip = $('chip'), cmd = chip.querySelector('.cmd'), res = chip.querySelector('.res');
+  const lost = t >= TL.cut + .25, ok = t >= TL.rebuilding + .35;
+  res.textContent = t < TL.cut + .25 ? ' → 3 notes' : ok ? ' → 3 notes' : t < TL.loop ? ' → ?' : '';
+  chip.className = ok ? 'ok' : lost && t < TL.loop ? 'lost' : '';
+  const shake = t > TL.cut && t < TL.cut + .45 ? Math.sin((t - TL.cut) * 60) * 8 * (1 - (t - TL.cut) / .45) : 0;
+  const coldK = 1 - ramp(t, TL.loop - .1, .35);
+  const inK = ramp(t, TL.keep + .1, .3), outM = ramp(t, TL.outside - .1, .7);
+  const cy = t < TL.keep ? 1090 : lerp(aY, 1090, outM);
+  const labelOn = (t >= TL.cli - .1 && t < TL.boundary - .1);    // the boundary's own label shows; the chip's text dims
+  const chipK = t < TL.keep ? coldK : inK;
+  show(chip, chipK, () => `translateX(calc(-50% + ${shake.toFixed(1)}px))${t >= TL.keep && outM < 1 ? ` scale(${lerp(.82, 1, outM).toFixed(4)})` : ''}`);
+  chip.style.top = `${cy.toFixed(1)}px`;
+  cmd.style.opacity = res.style.opacity = labelOn ? String(1 - ramp(t, TL.cli - .1, .2) * (1 - ramp(t, TL.boundary - .3, .2))) : '';
+
+  // the wire: harness A → chip at frame 0; snaps at 0.6 s (two ends pull apart, a spark)
+  // the rig flashes amber at the cut and falls away, leaving the harness and the command apart
+  const fl = clamp(1 - Math.abs(t - TL.cut - .02) / .14, 0, 1), rigOut = ramp(t, TL.cut + .08, .4);
+  show($('rig'), 1 - rigOut, k => k < 1 ? `translateY(${((1 - k) * 70).toFixed(1)}px) scale(${(1 - .04 * (1 - k)).toFixed(4)})` : '');
+  $('rig').querySelector('.fl').style.opacity = fl.toFixed(3);
+  const snap = ramp(t, TL.cut, .3);
+  wire($('wireA'), aY + 150, lerp(1042, 930, snap), coldK, null);   // the cut end retracts toward the loop
+  const sk = clamp(1 - Math.abs(t - TL.cut - .12) / .3, 0, 1);
+  show($('spark'), sk, () => `scale(${(.6 + .8 * sk).toFixed(4)})`);
+
+  // the boundary (CLI or MCP server): appears on "Put it behind…", labelled once per word, then the chip docks under it
+  const bK = Math.min(ramp(t, TL.put - .1, .4), 1 - ramp(t, TL.takeEnd - .15, .15));
+  show($('bnd'), bK, k => k < 1 ? `scaleX(${k.toFixed(4)})` : '');
+  const bl = $('bl');
+  const cli = win(t, TL.cli - .05, TL.mcp - .05, .15, .15), mcp = win(t, TL.mcp - .05, TL.boundary - .1, .15, .2);
+  bl.textContent = t < TL.mcp - .05 ? 'CLI' : 'MCP server';
+  show(bl, Math.max(cli, mcp), () => 'translate(-50%,-50%)');
+
+  // ── harness B: the new one, slides in from the right and runs the same command through the same boundary ──
+  const bIn = ramp(t, TL.changing - .2, .7), bOut = ramp(t, TL.takeEnd - .15, .15);
+  const bLab = win(t, TL.changing + .1, TL.rebuilding - .1, .2, .2);
+  ring($('ringB'), bIn * (1 - bOut), 540 + 420 * (1 - bIn), aY, 1 + .12 * bLab, spin + 1.3, null, bLab > 0 ? ['new harness', bLab] : null);
+  if (bLab > 0) cmd.style.opacity = res.style.opacity = String(1 - bLab);
+  const wB = ramp(t, TL.rebuilding - .5, .35);
+  wire($('wireB'), aY + 150, 1042, wB * (1 - bOut), 'oklch(0.72 0.16 300 / .75)');
+  // the call travels from harness B through the boundary to the command
+  const pt = clamp((t - TL.rebuilding + .2) / .5, 0, 1);
+  show($('pulse'), pt > 0 && pt < 1 ? 1 : 0);
+  $('pulse').style.left = '540px'; $('pulse').style.top = `${lerp(aY + 150, 1060, ease(pt)).toFixed(1)}px`;
+  if (ok) chip.style.transform = 'translateX(-50%)';                // the same result, at rest (a pop would reach the rail)
+  if (t >= TL.takeEnd - .15) show(chip, 1 - ramp(t, TL.takeEnd - .15, .15), () => 'translateX(-50%)');
+
+  // the playbook excerpt, alone, for its full hold; an amber rule reads across it
+  const exK = win(t, TL.ex - .1, TL.exEnd + .12, .1, .12);
+  show($('ex'), exK);
+  $('ex').querySelector('.rule').style.width = `${(592 * clamp((t - TL.ex) / S.excerpt.hold, 0, 1)).toFixed(1)}px`;
+
+  // end card: what the CTA delivers, then the next part's question; each gently floats
+  const aK = win(t, TL.exEnd - .02, TL.endSwap, .2, .2), bK2 = ramp(t, TL.endSwap - .02, .25);
+  show($('endA'), aK, () => `translateY(${(Math.sin((t - TL.cta) * 1.3) * 10).toFixed(1)}px)`);
+  show($('endB'), bK2, () => `translateY(${(Math.sin((t - TL.endSwap) * 1.3) * 10).toFixed(1)}px)`);
+};
+
+const Q = new URLSearchParams(location.search);
+Promise.all(['300 84px Raleway', '400 84px Raleway', '400 50px "Roboto Flex"', '700 50px "Roboto Flex"', '500 48px "JetBrains Mono"', '500 52px Inter', '600 60px Inter']
+  .map(f => document.fonts.load(f).catch(() => null))).then(() => document.fonts.ready).then(() => {
+  window.renderAt(+(Q.get('t') || 0));
+  window.__ready = true;
+  if (!Q.has('t')) {
+    const t0 = performance.now();
+    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % S.total_dur); requestAnimationFrame(loop) };
+    requestAnimationFrame(loop);
+  }
+});
+</script>
+</body>
+</html>

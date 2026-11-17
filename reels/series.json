@@ -99,7 +99,27 @@
     "$lineGapSeconds": "the script cards plan 0.35 s between spoken lines (body start_s = words / 2.6 + 0.35); one River take runs them together, so tts.mjs --v2 inserts the gap at each line boundary at zero cost (<reel>.gapped.wav)",
     "endHoldSeconds": 2.5,
     "parts": [
-      { "part": 1, "key": "folder", "reel": "v2-p1-folder", "script": "p1-folder/script.json", "scriptSha256": null, "status": "script in cf-script review" },
+      {
+        "part": 1,
+        "key": "folder",
+        "reel": "v2-p1-folder",
+        "title": "Session twenty, and this agent still starts from zero.",
+        "script": "p1-folder/script.json",
+        "scriptSha256": "sha256:394af3fe399296d6aff46b745e2e11d8a2af1ca8cb4c0eae3a44870cdb891214",
+        "headline": "The same context. Rebuilt again.",
+        "spoken": [
+          "Session twenty, and this agent still starts from zero.",
+          "Each new session has to piece its context together.",
+          "The counter rises. What it retains stays at zero.",
+          "What could the next session read before it starts?",
+          "Give it shared instructions, a knowledge index, and a record of decisions.",
+          "Then it starts from what's already been checked, and leaves something useful behind."
+        ],
+        "emphasis": ["session", "twenty", "zero", "context", "counter", "retains", "read", "instructions", "index", "decisions", "checked", "useful"],
+        "excerpt": { "text": "Write docs/workspace-layout.md with a table of path, job and writer", "source": "playbooks/act-1.md:68" },
+        "next": "Next: can your next agent check what this one found?",
+        "status": "narration stopped before spending: the take is 367 characters, about 161 credits at 0.44/character, over the 135-credit part cap; needs an owner decision"
+      },
       {
         "part": 2,
         "key": "findings",
@@ -120,9 +140,64 @@
         "excerpt": { "text": "Cite each claim as path:line or as the command you ran.", "source": "playbooks/act-1.md:41" },
         "next": "Next: where does your agent look before it touches a file?"
       },
-      { "part": 3, "key": "primer", "reel": "v2-p3-primer", "script": "p3-primer/script.json", "scriptSha256": null, "status": "script in cf-script review" },
-      { "part": 4, "key": "harness", "reel": "v2-p4-harness", "script": "p4-harness/script.json", "scriptSha256": null, "status": "script in cf-script review" },
-      { "part": 5, "key": "provenance", "reel": "v2-p5-provenance", "script": "p5-provenance/script.json", "scriptSha256": null, "status": "script in cf-script review" }
+      {
+        "part": 3,
+        "key": "primer",
+        "reel": "v2-p3-primer",
+        "title": "Can your agent find the right check before it finishes?",
+        "script": "p3-primer/script.json",
+        "scriptSha256": "sha256:31dd15c65c4cc9c62d131d54bcce272f6d4f3d509e6acc4c49f3f9b51e14c51f",
+        "headline": "One route. One check.",
+        "spoken": [
+          "Can your agent find the right check before it finishes?",
+          "Start with AGENTS.md: a short table of when, and what to read.",
+          "Changing tests? The table routes the agent to the testing doc.",
+          "Read top-down before writing. Write evidence back as you work.",
+          "Then it runs the check the primer names, before calling the work done."
+        ],
+        "emphasis": ["find", "check", "finishes", "agentsmd", "table", "tests", "testing", "top-down", "evidence", "runs", "done"],
+        "excerpt": { "text": "Draft AGENTS.md for this repository as a routing primer, under 300 lines.", "source": "playbooks/act-1.md:91" },
+        "next": "Next: change agent tools without rebuilding an integration",
+        "status": "narration stopped before spending: the take is 315 characters, about 139 credits at 0.44/character, over the 135-credit part cap; needs an owner decision"
+      },
+      {
+        "part": 4,
+        "key": "harness",
+        "reel": "v2-p4-harness",
+        "title": "Can you change agent tools without rebuilding an integration?",
+        "script": "p4-harness/script.json",
+        "scriptSha256": "sha256:5fe2b2f4bac34d9ddd88e5c05ff7a5700774df5135a54aee6566d8314b53cf40",
+        "headline": "Change the agent. Keep the integration?",
+        "spoken": [
+          "Can you change agent tools without rebuilding an integration?",
+          "The harness is the loop making model and tool calls.",
+          "Keep the integration outside that loop.",
+          "Put it behind a CLI or an MCP server, where that boundary makes sense.",
+          "Then changing harnesses need not mean rebuilding every capability."
+        ],
+        "emphasis": ["change", "tools", "integration", "harness", "loop", "model", "tool", "outside", "cli", "mcp", "boundary", "harnesses", "capability"],
+        "excerpt": { "text": "say whether the same capability could live behind an MCP server or a CLI that any harness can call", "source": "playbooks/act-1.md:125" },
+        "next": "Next: where did this answer come from?"
+      },
+      {
+        "part": 5,
+        "key": "provenance",
+        "reel": "v2-p5-provenance",
+        "title": "Can you trace this agent result back to its source?",
+        "script": "p5-provenance/script.json",
+        "scriptSha256": "sha256:3a4d2daca060529d67283007359d43602c12df071aab2077364a241052c20501",
+        "headline": "Where did this answer come from?",
+        "spoken": [
+          "Can you trace this agent result back to its source?",
+          "Keep three folders.",
+          "Bronze holds the source. Silver holds what was extracted. Gold holds the accepted result.",
+          "Your agent can search, read, and compare these files.",
+          "Keep links between them, so a result can be traced back to its inputs."
+        ],
+        "emphasis": ["trace", "source", "three", "folders", "bronze", "silver", "gold", "search", "read", "compare", "links", "traced", "inputs"],
+        "excerpt": { "text": "silver: typed records citing file, page and span in bronze", "source": "playbooks/act-1.md:161" },
+        "next": "Next, Act II: what actually loads into your agent's context?"
+      }
     ],
     "postCopy": {
       "firstLine": "{title}",

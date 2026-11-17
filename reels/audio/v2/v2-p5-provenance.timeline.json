@@ -1,0 +1,990 @@
+{
+  "version": 2,
+  "part": 5,
+  "total": 5,
+  "reel": "v2-p5-provenance",
+  "title": "Can you trace this agent result back to its source?",
+  "series": "Agent Workspaces",
+  "act": "I",
+  "script": "sha256:3a4d2daca060529d67283007359d43602c12df071aab2077364a241052c20501",
+  "headline": "Where did this answer come from?",
+  "disclosure": "AI-generated narration using ElevenLabs River stock voice, selected by the author; not a recording or clone of Carlos Escobar.",
+  "take": {
+    "text": "Can you trace this agent result back to its source? Keep three folders. Bronze holds the source. Silver holds what was extracted. Gold holds the accepted result. Your agent can search, read, and compare these files. Keep links between them, so a result can be traced back to its inputs.",
+    "at": 0,
+    "dur": 20.04,
+    "audio": "v2/v2-p5-provenance.gapped.wav",
+    "source": "v2/v2-p5-provenance.mp3",
+    "gaps": {
+      "seconds": 0.35,
+      "cuts": [
+        {
+          "afterLine": 1,
+          "sourceSample": 126120,
+          "sourceAt": 2.8599
+        },
+        {
+          "afterLine": 2,
+          "sourceSample": 214528,
+          "sourceAt": 4.8646
+        },
+        {
+          "afterLine": 3,
+          "sourceSample": 495312,
+          "sourceAt": 11.2316
+        },
+        {
+          "afterLine": 4,
+          "sourceSample": 649316,
+          "sourceAt": 14.7237
+        }
+      ]
+    },
+    "words": [
+      {
+        "text": "Can",
+        "start": 0,
+        "end": 0.16
+      },
+      {
+        "text": "you",
+        "start": 0.24,
+        "end": 0.32
+      },
+      {
+        "text": "trace",
+        "start": 0.4,
+        "end": 0.72
+      },
+      {
+        "text": "this",
+        "start": 0.8,
+        "end": 0.88
+      },
+      {
+        "text": "agent",
+        "start": 0.96,
+        "end": 1.28
+      },
+      {
+        "text": "result",
+        "start": 1.48,
+        "end": 1.68
+      },
+      {
+        "text": "back",
+        "start": 1.76,
+        "end": 1.92
+      },
+      {
+        "text": "to",
+        "start": 2,
+        "end": 2.08
+      },
+      {
+        "text": "its",
+        "start": 2.16,
+        "end": 2.24
+      },
+      {
+        "text": "source?",
+        "start": 2.32,
+        "end": 2.8
+      },
+      {
+        "text": "Keep",
+        "start": 3.63,
+        "end": 3.79
+      },
+      {
+        "text": "three",
+        "start": 3.95,
+        "end": 4.19
+      },
+      {
+        "text": "folders.",
+        "start": 4.27,
+        "end": 5.03
+      },
+      {
+        "text": "Bronze",
+        "start": 5.58,
+        "end": 6.06
+      },
+      {
+        "text": "holds",
+        "start": 6.18,
+        "end": 6.3
+      },
+      {
+        "text": "the",
+        "start": 6.38,
+        "end": 6.46
+      },
+      {
+        "text": "source.",
+        "start": 6.54,
+        "end": 7.02
+      },
+      {
+        "text": "Silver",
+        "start": 7.42,
+        "end": 7.82
+      },
+      {
+        "text": "holds",
+        "start": 7.9,
+        "end": 8.14
+      },
+      {
+        "text": "what",
+        "start": 8.22,
+        "end": 8.3
+      },
+      {
+        "text": "was",
+        "start": 8.38,
+        "end": 8.46
+      },
+      {
+        "text": "extracted.",
+        "start": 8.7,
+        "end": 9.18
+      },
+      {
+        "text": "Gold",
+        "start": 9.58,
+        "end": 9.98
+      },
+      {
+        "text": "holds",
+        "start": 10.14,
+        "end": 10.38
+      },
+      {
+        "text": "the",
+        "start": 10.42,
+        "end": 10.46
+      },
+      {
+        "text": "accepted",
+        "start": 10.54,
+        "end": 11.02
+      },
+      {
+        "text": "result.",
+        "start": 11.26,
+        "end": 11.74
+      },
+      {
+        "text": "Your",
+        "start": 12.33,
+        "end": 12.41
+      },
+      {
+        "text": "agent",
+        "start": 12.49,
+        "end": 12.81
+      },
+      {
+        "text": "can",
+        "start": 12.89,
+        "end": 12.97
+      },
+      {
+        "text": "search,",
+        "start": 13.05,
+        "end": 13.69
+      },
+      {
+        "text": "read,",
+        "start": 13.85,
+        "end": 14.09
+      },
+      {
+        "text": "and",
+        "start": 14.17,
+        "end": 14.25
+      },
+      {
+        "text": "compare",
+        "start": 14.33,
+        "end": 14.73
+      },
+      {
+        "text": "these",
+        "start": 14.81,
+        "end": 14.97
+      },
+      {
+        "text": "files.",
+        "start": 15.05,
+        "end": 15.65
+      },
+      {
+        "text": "Keep",
+        "start": 16.2,
+        "end": 16.36
+      },
+      {
+        "text": "links",
+        "start": 16.44,
+        "end": 16.68
+      },
+      {
+        "text": "between",
+        "start": 16.76,
+        "end": 17.08
+      },
+      {
+        "text": "them,",
+        "start": 17.2,
+        "end": 17.4
+      },
+      {
+        "text": "so",
+        "start": 17.48,
+        "end": 17.56
+      },
+      {
+        "text": "a",
+        "start": 17.6,
+        "end": 17.64
+      },
+      {
+        "text": "result",
+        "start": 17.72,
+        "end": 18.04
+      },
+      {
+        "text": "can",
+        "start": 18.12,
+        "end": 18.2
+      },
+      {
+        "text": "be",
+        "start": 18.24,
+        "end": 18.28
+      },
+      {
+        "text": "traced",
+        "start": 18.36,
+        "end": 18.68
+      },
+      {
+        "text": "back",
+        "start": 18.76,
+        "end": 19
+      },
+      {
+        "text": "to",
+        "start": 19.08,
+        "end": 19.16
+      },
+      {
+        "text": "its",
+        "start": 19.24,
+        "end": 19.32
+      },
+      {
+        "text": "inputs.",
+        "start": 19.56,
+        "end": 20.04
+      }
+    ],
+    "lines": [
+      {
+        "text": "Can you trace this agent result back to its source?",
+        "start": 0,
+        "end": 2.8
+      },
+      {
+        "text": "Keep three folders.",
+        "start": 3.63,
+        "end": 5.03
+      },
+      {
+        "text": "Bronze holds the source. Silver holds what was extracted. Gold holds the accepted result.",
+        "start": 5.58,
+        "end": 11.74
+      },
+      {
+        "text": "Your agent can search, read, and compare these files.",
+        "start": 12.33,
+        "end": 15.65
+      },
+      {
+        "text": "Keep links between them, so a result can be traced back to its inputs.",
+        "start": 16.2,
+        "end": 20.04
+      }
+    ]
+  },
+  "excerpt": {
+    "text": "silver: typed records citing file, page and span in bronze",
+    "source": "playbooks/act-1.md:161",
+    "at": 20.04,
+    "hold": 2.5
+  },
+  "cta": {
+    "text": "Comment WORKSPACE for the agent-workspace setup prompts and verification checks.",
+    "keyword": "WORKSPACE",
+    "at": 22.54,
+    "dur": 4.64,
+    "audio": "v2/v2-cta.mp3",
+    "words": [
+      {
+        "text": "Comment",
+        "start": 22.54,
+        "end": 22.94
+      },
+      {
+        "text": "WORKSPACE",
+        "start": 23.02,
+        "end": 23.58
+      },
+      {
+        "text": "for",
+        "start": 23.66,
+        "end": 23.74
+      },
+      {
+        "text": "the",
+        "start": 23.82,
+        "end": 23.9
+      },
+      {
+        "text": "agent-workspace",
+        "start": 23.98,
+        "end": 24.86
+      },
+      {
+        "text": "setup",
+        "start": 24.94,
+        "end": 25.18
+      },
+      {
+        "text": "prompts",
+        "start": 25.26,
+        "end": 25.66
+      },
+      {
+        "text": "and",
+        "start": 25.74,
+        "end": 25.82
+      },
+      {
+        "text": "verification",
+        "start": 25.9,
+        "end": 26.54
+      },
+      {
+        "text": "checks.",
+        "start": 26.62,
+        "end": 27.18
+      }
+    ]
+  },
+  "end": {
+    "at": 22.54,
+    "card": [
+      "Build your layout · route AGENTS.md · check what survives",
+      "Next, Act II: what actually loads into your agent's context?"
+    ],
+    "hold": 2.5
+  },
+  "captions": {
+    "version": "1.0",
+    "metadata": {
+      "duration": 29.68,
+      "language": "en",
+      "generator": "reels/tts.mjs --v2 (River character alignment)"
+    },
+    "cast": [
+      {
+        "id": "S0",
+        "name": "River",
+        "color": "#6B8AFF"
+      }
+    ],
+    "captions": [
+      {
+        "id": "e01",
+        "speaker_id": "S0",
+        "start": 0,
+        "end": 1.28,
+        "words": [
+          {
+            "text": "Can",
+            "start": 0,
+            "end": 0.16,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "you",
+            "start": 0.24,
+            "end": 0.32,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "trace",
+            "start": 0.4,
+            "end": 0.72,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "this",
+            "start": 0.8,
+            "end": 0.88,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "agent",
+            "start": 0.96,
+            "end": 1.28,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e02",
+        "speaker_id": "S0",
+        "start": 1.48,
+        "end": 2.8,
+        "words": [
+          {
+            "text": "result",
+            "start": 1.48,
+            "end": 1.68,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "back",
+            "start": 1.76,
+            "end": 1.92,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "to",
+            "start": 2,
+            "end": 2.08,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "its",
+            "start": 2.16,
+            "end": 2.24,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "source?",
+            "start": 2.32,
+            "end": 2.8,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e03",
+        "speaker_id": "S0",
+        "start": 3.63,
+        "end": 5.03,
+        "words": [
+          {
+            "text": "Keep",
+            "start": 3.63,
+            "end": 3.79,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "three",
+            "start": 3.95,
+            "end": 4.19,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "folders.",
+            "start": 4.27,
+            "end": 5.03,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e04",
+        "speaker_id": "S0",
+        "start": 5.58,
+        "end": 8.3,
+        "words": [
+          {
+            "text": "Bronze",
+            "start": 5.58,
+            "end": 6.06,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "holds",
+            "start": 6.18,
+            "end": 6.3,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "the",
+            "start": 6.38,
+            "end": 6.46,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "source.",
+            "start": 6.54,
+            "end": 7.02,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "Silver",
+            "start": 7.42,
+            "end": 7.82,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "holds",
+            "start": 7.9,
+            "end": 8.14,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "what",
+            "start": 8.22,
+            "end": 8.3,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e05",
+        "speaker_id": "S0",
+        "start": 8.38,
+        "end": 9.18,
+        "words": [
+          {
+            "text": "was",
+            "start": 8.38,
+            "end": 8.46,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "extracted.",
+            "start": 8.7,
+            "end": 9.18,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e06",
+        "speaker_id": "S0",
+        "start": 9.58,
+        "end": 11.74,
+        "words": [
+          {
+            "text": "Gold",
+            "start": 9.58,
+            "end": 9.98,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "holds",
+            "start": 10.14,
+            "end": 10.38,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "the",
+            "start": 10.42,
+            "end": 10.46,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "accepted",
+            "start": 10.54,
+            "end": 11.02,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "result.",
+            "start": 11.26,
+            "end": 11.74,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e07",
+        "speaker_id": "S0",
+        "start": 12.33,
+        "end": 14.09,
+        "words": [
+          {
+            "text": "Your",
+            "start": 12.33,
+            "end": 12.41,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "agent",
+            "start": 12.49,
+            "end": 12.81,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "can",
+            "start": 12.89,
+            "end": 12.97,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "search,",
+            "start": 13.05,
+            "end": 13.69,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "read,",
+            "start": 13.85,
+            "end": 14.09,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e08",
+        "speaker_id": "S0",
+        "start": 14.17,
+        "end": 15.65,
+        "words": [
+          {
+            "text": "and",
+            "start": 14.17,
+            "end": 14.25,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "compare",
+            "start": 14.33,
+            "end": 14.73,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "these",
+            "start": 14.81,
+            "end": 14.97,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "files.",
+            "start": 15.05,
+            "end": 15.65,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e09",
+        "speaker_id": "S0",
+        "start": 16.2,
+        "end": 18.04,
+        "words": [
+          {
+            "text": "Keep",
+            "start": 16.2,
+            "end": 16.36,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "links",
+            "start": 16.44,
+            "end": 16.68,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "between",
+            "start": 16.76,
+            "end": 17.08,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "them,",
+            "start": 17.2,
+            "end": 17.4,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "so",
+            "start": 17.48,
+            "end": 17.56,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "a",
+            "start": 17.6,
+            "end": 17.64,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "result",
+            "start": 17.72,
+            "end": 18.04,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e10",
+        "speaker_id": "S0",
+        "start": 18.12,
+        "end": 20.04,
+        "words": [
+          {
+            "text": "can",
+            "start": 18.12,
+            "end": 18.2,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "be",
+            "start": 18.24,
+            "end": 18.28,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "traced",
+            "start": 18.36,
+            "end": 18.68,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "back",
+            "start": 18.76,
+            "end": 19,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "to",
+            "start": 19.08,
+            "end": 19.16,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "its",
+            "start": 19.24,
+            "end": 19.32,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "inputs.",
+            "start": 19.56,
+            "end": 20.04,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e01",
+        "speaker_id": "S0",
+        "start": 22.54,
+        "end": 24.86,
+        "words": [
+          {
+            "text": "Comment",
+            "start": 22.54,
+            "end": 22.94,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "WORKSPACE",
+            "start": 23.02,
+            "end": 23.58,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "for",
+            "start": 23.66,
+            "end": 23.74,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "the",
+            "start": 23.82,
+            "end": 23.9,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "agent-workspace",
+            "start": 23.98,
+            "end": 24.86,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e02",
+        "speaker_id": "S0",
+        "start": 24.94,
+        "end": 27.18,
+        "words": [
+          {
+            "text": "setup",
+            "start": 24.94,
+            "end": 25.18,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "prompts",
+            "start": 25.26,
+            "end": 25.66,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "and",
+            "start": 25.74,
+            "end": 25.82,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "verification",
+            "start": 25.9,
+            "end": 26.54,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "checks.",
+            "start": 26.62,
+            "end": 27.18,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      }
+    ]
+  },
+  "total_dur": 29.68
+}

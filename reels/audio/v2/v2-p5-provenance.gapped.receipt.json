@@ -1,0 +1,45 @@
+{
+  "line": "take",
+  "derived": "planned inter-line gaps inserted (zero credits; no request sent)",
+  "part": 5,
+  "reel": "v2-p5-provenance",
+  "script": "sha256:3a4d2daca060529d67283007359d43602c12df071aab2077364a241052c20501",
+  "voice_id": "SAz9YHcvj6GT2YYXdXww",
+  "model_id": "eleven_v4",
+  "requestSha256": "05351db8f5a32f45489740db8fa629abf76143d32eeb6392a12fb2e994551bb3",
+  "audioSha256": "9898a555fe7045fbe946dce84c412a4cb9ffdc93876a72ae55f56471d88a073f",
+  "alignmentSha256": "9a24791420aeb3f68f30b67944bd6bfb9b6ef8f53a09d9fb7b6c42926f1a49ac",
+  "format": "wav pcm_s16le mono 44100",
+  "lineGapSeconds": 0.35,
+  "cuts": [
+    {
+      "afterLine": 1,
+      "sourceSample": 126120,
+      "sourceAt": 2.8599
+    },
+    {
+      "afterLine": 2,
+      "sourceSample": 214528,
+      "sourceAt": 4.8646
+    },
+    {
+      "afterLine": 3,
+      "sourceSample": 495312,
+      "sourceAt": 11.2316
+    },
+    {
+      "afterLine": 4,
+      "sourceSample": 649316,
+      "sourceAt": 14.7237
+    }
+  ],
+  "credits": 0,
+  "source": {
+    "receipt": "v2-p5-provenance.receipt.json",
+    "receiptSha256": "72c049b382da4c8c5e0e4808bcb4141c8757daf20d0b579a5f00d73b726d9ae5",
+    "audioSha256": "4babf5258ad1f0994ac5260b0f49338ec583108d5e194b4b82c512e77f3621fe",
+    "alignmentSha256": "3aca7739ca3345c8dd7645764e3e08614bb19c9aa564790614f40e46b686e00e",
+    "requestId": "ej8y2EVf1nTma67l7Jf7",
+    "characterCost": "126"
+  }
+}
