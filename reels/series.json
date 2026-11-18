@@ -121,6 +121,26 @@
         "next": "Next: can your next agent check what this one found?"
       },
       {
+        "part": 1,
+        "key": "folder",
+        "capCredits": 166,
+        "reel": "v6-p1-folder",
+        "title": "Session twenty in an empty folder still asks where tests run.",
+        "script": "p1-folder/script.v7.json",
+        "scriptSha256": "sha256:82a414dd3aa0affe7f7955f4bd91946f7c1baf0618a1b193864146df621db74f",
+        "headline": "20 sessions. Same question.",
+        "spoken": [
+          "Session twenty in an empty folder still asks where tests run.",
+          "Nothing was written down, so the next one asks again.",
+          "Give it shared instructions, a knowledge index, and a record of decisions.",
+          "Then each session can start from what's already been checked.",
+          "The next one reads where tests run, runs them, and writes down what it found."
+        ],
+        "emphasis": ["session", "tests", "nothing", "read", "instructions", "index", "decisions", "checked", "useful"],
+        "excerpt": { "text": "Write docs/workspace-layout.md with a table of path, job and writer", "source": "playbooks/act-1.md:68" },
+        "next": "Next: can your next agent check what this one found?"
+      },
+      {
         "part": 2,
         "key": "findings",
         "reel": "v2-p2-findings",
