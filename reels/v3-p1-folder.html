@@ -1,0 +1,217 @@
+<!doctype html>
+<!--
+GOAL:    Part 1 of Agent Workspaces Act I. A viewer watches an agent rebuild the same context every
+         session, then sees three real files fix it, then gets the playbook offer. Readable muted.
+OUTPUT:  one self-contained HTML file, plain DOM + JS, 1080x1920 (9:16). Style frame A (owner-approved
+         2026-11-18): terminal on paper. Audio is the approved narration, muxed after the render.
+TIME:    34.2 s x 30 fps = 1026 frames. No loop. Beats from the narration's word timings:
+         collapse 0.6; session ticks on "rises" 8.54 / 9.20 / 9.86; zero thud on "zero" 11.02;
+         files on "instructions" 15.96, "index" 17.64, "decisions" 18.92; counter fills to 9/9 by
+         "checked" 22.39; record written back on "behind" 23.91; excerpt 24.55-27.05;
+         CTA 27.05-31.69; end card 31.69-34.19.
+LOOK:    page #F2EFE8, ink #111111, terminal #141615, text #E8E6E1, dim #8A8F8B, one accent #FF5A1F.
+         Headline Helvetica Neue 800 84 px, tracking -0.03em. Terminal Menlo 40 px / 64 px.
+         Counter DIN Condensed 170 px. Captions Helvetica Neue 800 52 px on #111 pill.
+LAYOUT:  content-engine reels-organic: headline in the title band (y 121-436); all text x 150-860
+         below y 922 (action rail x >= 872); captions centred in the band y 1288-1463; nothing in
+         y >= 1686.
+MOTION:  type-on 3 chars per frame; session change = lines collapse to the top edge over 6 frames
+         (ease-in-expo); the zero answers each tick with a horizontal shake (spring zeta 0.35, 10 px,
+         no scale); file lines enter from 24 px below over 8 frames (ease-out-expo); counter counts
+         up linearly. No CSS transitions, no clock, no randomness.
+BANNED:  glow, gradients, particles, dark void, floating small cards, everything at once,
+         centred-everything, text moving while it is read.
+QA:      contact sheet every 30 frames; stills at each beat; content-flow gates on the muxed file.
+-->
+<html><head><meta charset="utf-8"><style>
+  html,body{-webkit-font-smoothing:antialiased;margin:0;width:1080px;height:1920px;overflow:hidden;background:#F2EFE8;color:#111}
+  #head{position:absolute;left:150px;top:150px;width:760px;font:800 84px/1.04 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.03em}
+  #head b{color:#FF5A1F;font-weight:800}
+  #term{position:absolute;left:100px;top:470px;width:780px;height:790px;background:#141615;border-radius:28px;overflow:hidden}
+  #bar{height:74px;display:flex;align-items:center;padding:0 30px 0 62px;gap:12px;border-bottom:2px solid #262927}
+  .dot{width:18px;height:18px;border-radius:50%;background:#3A3E3C}
+  #ttl{margin-left:16px;font:600 32px Menlo,monospace;color:#9AA09C;white-space:nowrap}
+  #ttl span{color:#FF5A1F}
+  #lines{will-change:transform;transform-origin:50% 0;position:absolute;left:50px;top:104px;right:20px;font:400 44px/68px Menlo,monospace;color:#E8E6E1;white-space:pre}
+  .dim{color:#8A8F8B}.acc{color:#FF5A1F}.ok{color:#FF5A1F}
+  .hl{background:#FF5A1F;color:#141615}
+  .hl .acc,.hl .dim{color:#141615}
+  #big{position:absolute;left:172px;top:520px;width:690px;display:none}
+  #cap{position:absolute;left:220px;top:1300px;width:640px;display:flex;justify-content:center}
+  #cap div{background:#111;color:#F2EFE8;font:800 52px/1.12 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.02em;padding:16px 24px;border-radius:16px;text-align:center}
+  #cap em{font-style:normal;color:#FF5A1F}
+  #ret{position:absolute;left:150px;top:1468px;font:800 32px "Helvetica Neue",Helvetica,sans-serif;letter-spacing:0.1em}
+  #ret span{display:block;margin-top:6px;font:700 140px/0.85 "DIN Condensed","Helvetica Neue",sans-serif;color:#FF5A1F}
+  #ret i{font-style:normal;color:#111;font-size:76px}
+  .cta1{font:800 64px/1.1 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.02em}
+  .cta2{font:700 180px/0.9 "DIN Condensed","Helvetica Neue",sans-serif;color:#FF5A1F;margin:12px 0 18px}
+  .cta3{font:800 52px/1.15 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.02em}
+  .chip{display:inline-block;margin-top:34px;padding:14px 22px;border:3px solid #111;border-radius:14px;font:700 36px Menlo,monospace;white-space:nowrap}
+  .end1{font:800 70px/1.12 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.03em}
+  .end1 b{color:#FF5A1F}
+  .end2{margin-top:56px;font:800 48px/1.18 "Helvetica Neue",Helvetica,sans-serif;color:#FF5A1F;letter-spacing:-0.02em}
+  .end3{margin-top:56px;font:400 30px/1.3 Menlo,monospace;color:#5E625F}
+</style></head><body>
+<div id="head"></div>
+<div id="term"><div id="bar"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div id="ttl"></div></div><div id="lines"></div></div>
+<div id="big"></div>
+<div id="cap"><div id="capt"></div></div>
+<div id="ret">CONTEXT RETAINED<span id="rv"></span></div>
+<script>
+const FPS = 30;
+const WORDS = {"take": [["Session", 0, 0.4], ["twenty,", 0.48, 1.28], ["and", 1.36, 1.44], ["this", 1.52, 1.6], ["agent", 1.68, 2], ["still", 2.16, 2.48], ["starts", 2.56, 2.88], ["from", 2.96, 3.04], ["zero.", 3.2, 4.08], ["Each", 4.55, 4.67], ["new", 4.75, 4.83], ["session", 4.91, 5.31], ["has", 5.43, 5.55], ["to", 5.63, 5.71], ["piece", 5.83, 5.95], ["its", 6.07, 6.19], ["context", 6.43, 6.67], ["together.", 6.75, 7.55], ["The", 7.98, 8.06], ["counter", 8.26, 8.46], ["rises.", 8.54, 9.5], ["What", 9.58, 9.66], ["it", 9.7, 9.74], ["retains", 9.86, 10.46], ["stays", 10.54, 10.78], ["at", 10.86, 10.94], ["zero.", 11.02, 11.82], ["What", 12.25, 12.33], ["could", 12.41, 12.49], ["the", 12.57, 12.73], ["next", 12.85, 12.97], ["session", 13.17, 13.37], ["read", 13.45, 13.53], ["before", 13.69, 13.85], ["it", 13.93, 14.01], ["starts?", 14.25, 14.89], ["Give", 15.32, 15.4], ["it", 15.48, 15.56], ["shared", 15.72, 15.88], ["instructions,", 15.96, 16.84], ["a", 16.92, 17], ["knowledge", 17.08, 17.4], ["index,", 17.64, 18.04], ["and", 18.16, 18.28], ["a", 18.36, 18.4], ["record", 18.44, 18.76], ["of", 18.8, 18.84], ["decisions.", 18.92, 19.88], ["Then", 20.31, 20.71], ["it", 20.79, 20.87], ["starts", 20.95, 21.19], ["from", 21.27, 21.35], ["what's", 21.43, 21.59], ["already", 21.67, 21.99], ["been", 22.07, 22.23], ["checked,", 22.39, 22.71], ["and", 22.79, 22.87], ["leaves", 22.91, 23.11], ["something", 23.27, 23.43], ["useful", 23.51, 23.83], ["behind.", 23.91, 24.55]], "cta": [["Comment", 27.05, 27.45], ["WORKSPACE", 27.53, 28.09], ["for", 28.17, 28.25], ["the", 28.33, 28.41], ["agent-workspace", 28.49, 29.37], ["setup", 29.45, 29.69], ["prompts", 29.77, 30.17], ["and", 30.25, 30.33], ["verification", 30.41, 31.05], ["checks.", 31.13, 31.69]]};
+function bez(x1,y1,x2,y2){return function(x){if(x<=0)return 0;if(x>=1)return 1;let lo=0,hi=1,t=x;for(let i=0;i<40;i++){t=(lo+hi)/2;const cx=3*x1*t*(1-t)*(1-t)+3*x2*t*t*(1-t)+t*t*t;if(cx<x)lo=t;else hi=t;}return 3*y1*t*(1-t)*(1-t)+3*y2*t*t*(1-t)+t*t*t;};}
+const ENTER = bez(0.16,1,0.3,1), EXIT = bez(0.7,0,0.84,0);
+function spring(t,zeta=0.7,f=2){if(t<=0)return 0;const w=2*Math.PI*f;const wd=w*Math.sqrt(1-zeta*zeta);return 1-Math.exp(-zeta*w*t)*(Math.cos(wd*t)+((zeta*w)/wd)*Math.sin(wd*t));}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+// ---- beats (seconds, from the narration's word timings) ----
+const T = { collapse: 0.6, tick: [8.54, 9.20, 9.86], zero: 11.02, ask: 12.25,
+            files: [15.96, 17.64, 18.92], start: 20.31, checked: 22.39, behind: 23.91,
+            excerpt: 24.55, cta: 27.05, end: 31.69 };
+
+// ---- terminal scripts: [prefix, rest, restClass]; typed 3 chars/frame from a start time ----
+const REBUILD = [['$ ','agent start','plain','dim'],['AGENTS.md ...... ','missing','acc'],['notes/ ......... ','missing','acc'],
+                 ['? where do tests run','',''],['? which style rules','',''],['? what did we decide','','']];
+function typed(lines, sinceFrames, cps){
+  let left = sinceFrames * cps, out = [];
+  for (const [a,b,cls,pcls] of lines){
+    if (left <= 0) break;
+    const full = a + b, shown = full.slice(0, Math.min(full.length, left));
+    left -= full.length + 4 * cps;                     // a 4-frame beat between lines
+    let h;
+    if (pcls === 'dim') h = '<span class="dim">' + esc(shown.slice(0,2)) + '</span>' + esc(shown.slice(2));
+    else if (shown.length > a.length) h = esc(a) + '<span class="' + cls + '">' + esc(shown.slice(a.length)) + '</span>';
+    else h = esc(shown);
+    out.push(h);
+  }
+  return out;
+}
+function bar(n){ return '<span class="acc">' + '█'.repeat(n) + '░'.repeat(9-n) + ' ' + n + '/9</span>'; }
+const f2t = f => f / FPS;
+
+// ---- captions: chunks of up to 4 words inside each spoken line, current word in accent ----
+const LINE_BREAKS = new Set(['zero.','together.','rises.','starts?','decisions.','behind.','checks.']);
+function chunks(words){
+  const out = []; let cur = [];
+  for (const w of words){ cur.push(w); if (cur.length === 4 || LINE_BREAKS.has(w[0]) || /,$/.test(w[0])) { out.push(cur); cur = []; } }
+  if (cur.length) out.push(cur); return out;
+}
+const CH = chunks(WORDS.take).concat(chunks(WORDS.cta));
+function caption(t){
+  for (let i = 0; i < CH.length; i++){
+    const c = CH[i], start = c[0][1], next = i + 1 < CH.length ? CH[i+1][0][1] : 1e9;
+    const endHold = c[c.length-1][2] + 0.35;
+    if (t >= start && t < Math.min(next, Math.max(endHold, start + 0.6)))
+      return c.map(w => (t >= w[1] && t < w[2] + 0.12) ? '<em>' + esc(w[0]) + '</em>' : esc(w[0])).join(' ');
+  }
+  return '';
+}
+
+window.renderAt = function(t){
+  const f = Math.round(t * FPS);
+  const head = document.getElementById('head'), L = document.getElementById('lines'), ttl = document.getElementById('ttl');
+  const term = document.getElementById('term'), big = document.getElementById('big'), ret = document.getElementById('ret');
+  let lines = [], session = null, title = '', headline = 'The same context.<br><b>Rebuilt again.</b>';
+  let collapse = 0, retained = 0, shake = 0, showTerm = true, showRet = true;
+
+  const fC = Math.round(T.collapse * FPS);
+  if (t < T.collapse) {                                           // S1a: session 20, full screen
+    session = 20; lines = typed(REBUILD, 999, 3); lines.push('rebuilding ' + bar(7));
+  } else if (t < T.tick[0]) {                                     // S1b/S2: session 21 rebuilds again
+    session = 21;
+    const since = f - fC;
+    if (since < 6) { collapse = EXIT(since / 6); lines = typed(REBUILD, 999, 3); lines.push('rebuilding ' + bar(7)); }
+    else {
+      lines = typed(REBUILD, since - 6, 3);
+      const fill = clamp(Math.floor((t - 3.6) / 0.62), 0, 6);  // the bar crawls while L2 plays
+      if (t > 3.4) lines.push('rebuilding ' + bar(fill));
+      if (t >= 4.08) {                                           // piecing it together: one row at a time
+        const row = 1 + Math.floor((t - 4.08) / 0.55) % 5;
+        if (lines[row] !== undefined) lines[row] = '<span class="hl">' + lines[row] + '</span>';
+      }
+    }
+  } else if (t < T.ask) {                                         // S3: the counter rises, retained stays 0
+    let k = 0; for (const x of T.tick) if (t >= x) k++;
+    session = 21 + k;
+    const since = f - Math.round(T.tick[k-1] * FPS);
+    if (since < 5) { collapse = EXIT(since / 5); lines = typed(REBUILD, 999, 3); }
+    else lines = typed(REBUILD, since - 5, 5);
+    const zs = t - T.zero, ks = t - T.tick[k-1];
+    const s = ks >= 0 && ks < 0.6 ? ks : (zs >= 0 && zs < 0.8 ? zs : -1);
+    if (s >= 0) shake = 10 * Math.exp(-6 * s) * Math.sin(2 * Math.PI * 7 * s);
+  } else if (t < T.files[0] - 0.4) {                              // S4: what could it read first?
+    session = 25; headline = 'What could it<br><b>read first?</b>';
+    const since = f - Math.round(T.ask * FPS);
+    if (since < 6) { collapse = EXIT(since / 6); lines = typed(REBUILD, 999, 3); }
+    else {
+      lines = typed([['$ ','agent start','plain','dim'], ['reading before start:','',''], ['  (nothing to read)','','']], since - 6, 3);
+      if (Math.floor(t * 2) % 2 === 0 && since > 30) lines.push('▌');
+    }
+  } else if (t < T.start) {                                       // S5: three files, on the words
+    title = 'repo · write it down once'; headline = 'Give it something<br><b>to read first.</b>';
+    lines = ['<span class="dim">$ git add</span>'];
+    const files = [['+ AGENTS.md','shared instructions'],['+ research/entities/','knowledge index'],['+ docs/conversations/','record of decisions']];
+    files.forEach((fl, i) => {
+      if (t >= T.files[i]) {
+        const p = ENTER(clamp((t - T.files[i]) * FPS / 8, 0, 1));
+        lines.push('<span style="opacity:' + p.toFixed(3) + '"><span class="acc">' + esc(fl[0]) + '</span></span>');
+        lines.push('<span style="opacity:' + p.toFixed(3) + '"><span class="dim">  ' + esc(fl[1]) + '</span></span>');
+      }
+    });
+  } else if (t < T.excerpt) {                                     // S6: session 26 starts from what's checked
+    session = 26; headline = 'Now it starts from<br><b>what’s checked.</b>';
+    const since = f - Math.round(T.start * FPS);
+    const READ = [['$ ','agent start','plain','dim'],['AGENTS.md ......... ','read ✓','acc'],['research/entities/  ','read ✓','acc'],
+                  ['Conversations.md .. ','read ✓','acc']];
+    if (since < 6) { collapse = EXIT(since / 6); lines = ['<span class="dim">$ git add</span>']; }
+    else lines = typed(READ, since - 6, 3);
+    retained = clamp(Math.floor((t - 20.7) / ((T.checked - 20.7) / 9)), 0, 9);
+    if (t >= T.behind) {
+      const p = ENTER(clamp((t - T.behind) * FPS / 8, 0, 1));
+      lines.push('<span style="opacity:' + p.toFixed(3) + '">wrote back ......  <span class="acc">record ✓</span></span>');
+    }
+  } else if (t < T.cta) {                                         // S7: the playbook excerpt, held to be read
+    title = 'playbooks/act-1.md · step 2'; headline = 'Your first prompt:';
+    lines = ['<span class="dim">&gt;</span> Write', 'docs/workspace-layout.md', 'with a table of', 'path, job and writer', '', '<span class="dim">then check it exists</span>'];
+    showRet = false;
+  } else if (t < T.end) {                                         // S8: the ask
+    showTerm = false; showRet = false; headline = 'Want the<br><b>setup prompts?</b>';
+    const at = (s0) => { const p = ENTER(clamp((t - s0) * FPS / 10, 0, 1)); return 'style="opacity:' + p.toFixed(3) + ';transform:translateY(' + (40 * (1 - p)).toFixed(1) + 'px)"'; };
+    const ul = ENTER(clamp((t - 30.6) * FPS / 20, 0, 1));
+    big.innerHTML = '<div class="cta1" ' + at(27.05) + '>Comment</div>' +
+      '<div class="cta2" ' + at(27.53) + '>WORKSPACE</div>' +
+      '<div style="height:12px;background:#FF5A1F;width:' + (ul * 100).toFixed(2) + '%;margin:-6px 0 24px"></div>' +
+      '<div class="cta3" ' + at(28.17) + '>for the agent-workspace setup prompts and verification checks.</div>' +
+      '<div class="chip" ' + at(29.6) + '>5 steps, each checked</div>';
+  } else {                                                        // S9: end card
+    showTerm = false; showRet = false; headline = 'Agent Workspaces<br><b>Act I · 1 of 5</b>';
+    big.innerHTML = '<div class="end1">Build your layout ·<br>route <b>AGENTS.md</b> ·<br>check what survives</div>' +
+                    '<div class="end2">Next: can your next agent check what this one found?</div>' +
+                    '<div class="end3">AI-generated narration<br>(ElevenLabs stock voice)</div>';
+  }
+
+  head.innerHTML = headline;
+  term.style.display = showTerm ? 'block' : 'none';
+  big.style.display = showTerm ? 'none' : 'block';
+  ret.style.display = showRet ? 'block' : 'none';
+  ttl.innerHTML = session !== null ? 'agent · session <span>' + session + '</span>' : esc(title);
+  L.innerHTML = lines.join('\n');
+  L.style.transform = 'scaleY(' + (1 - collapse).toFixed(4) + ')';
+  document.getElementById('rv').innerHTML = retained + '<i> / 9</i>';
+  document.getElementById('rv').style.transform = 'translateX(' + shake.toFixed(2) + 'px)';
+  const capText = t >= T.cta ? '' : caption(t);              // the CTA's own big type carries those words (creative review)
+  document.getElementById('capt').innerHTML = capText;
+  document.getElementById('cap').style.display = capText ? 'flex' : 'none';
+};
+const q = new URLSearchParams(location.search).get('t');
+window.renderAt(q === null ? 0 : parseFloat(q));
+const warm = document.createElement('div');
+warm.setAttribute('aria-hidden', 'true');
+warm.style.cssText = 'position:absolute;left:-6000px;top:0';
+warm.innerHTML = '<div style="font:800 52px Helvetica Neue">' + CH.map(c => c.map(w => w[0]).join(' ')).join('<br>') + '</div>' +
+  '<div style="font:700 200px DIN Condensed">WORKSPACE 0123456789</div><div style="font:400 40px Menlo">█░▌✓ abc</div>';
+document.body.appendChild(warm);
+document.fonts.ready.then(() => { warm.remove(); window.renderAt(q === null ? 0 : parseFloat(q)); window.__ready = true; });
+</script></body></html>
