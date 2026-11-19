@@ -1,1 +1,0 @@
-{"gate": "render", "format": "reel-9x16", "render_sha256": null, "measured": {"body_wpm": 147.24}, "threshold": {"body_wpm": [140.0, 200.0]}, "result": "pass", "evidence": ["body pace 147.24 wpm (band 140–200)"]}
