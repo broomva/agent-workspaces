@@ -12,6 +12,7 @@ import { createHash } from "node:crypto";
 import {
   cpSync,
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -363,28 +364,41 @@ refuses(
     ),
     "quietestCut accepted a window under 10 ms",
   );
-  const ins = Math.round(0.35 * SR),
-    out = insertGaps(pcm, [sample], ins);
-  const zeros = out.subarray(sample, sample + ins).every((v) => v === 0);
+  // insertion on loud signal (no silence to hide in): two cuts; every sample outside the fades is the source's, shifted
+  const sig = loud(2 * SR, 11),
+    ins = Math.round(0.35 * SR),
+    cuts = [30011, 61003],
+    out = insertGaps(sig, cuts, ins);
+  const same = (o, from, to, shift) => {
+    for (let i = from; i < to; i++) if (out[i + shift] !== sig[i]) return false;
+    return true;
+  };
+  const zeroAt = (h) => out.subarray(h, h + ins).every((v) => v === 0);
   expect(
-    "exactly round(0.35 s × 44100) zero samples go in at the cut",
-    out.length === pcm.length + ins &&
-      zeros &&
-      out[sample + ins + FADE] === pcm[sample + FADE] &&
-      out[sample - 1 - FADE] === pcm[sample - 1 - FADE],
-    `length ${out.length}, zeros ${zeros}`,
+    "exactly round(0.35 s × 44100) zero samples go in at each cut; the rest is the source, shifted",
+    out.length === sig.length + 2 * ins &&
+      zeroAt(cuts[0]) &&
+      zeroAt(cuts[1] + ins) &&
+      same(out, 0, cuts[0] - FADE, 0) &&
+      same(out, cuts[0] + FADE, cuts[1] - FADE, ins) &&
+      same(out, cuts[1] + FADE, sig.length, 2 * ins) &&
+      out[cuts[0] - 1] === 0 &&
+      out[cuts[0] + ins] === 0,
+    `length ${out.length}`,
   );
-  // two lines "ab cd": the boundary space (index 2) keeps its start and ends after the gap; line 2 moves by one gap
+  // three lines "ab cd ef": line n moves by (n - 1) gaps; each boundary space keeps its start and ends after its gap
   const { starts, ends } = shiftAlignment(
-    [0, 0.1, 0.2, 0.5, 0.6],
-    [0.1, 0.2, 0.5, 0.6, 0.7],
-    [0, 3],
+    [0, 0.1, 0.2, 0.5, 0.6, 0.7, 1.0, 1.1],
+    [0.1, 0.2, 0.5, 0.6, 0.7, 1.0, 1.1, 1.2],
+    [0, 3, 6],
     0.35,
   );
   expect(
     "the alignment shifts line n by (n - 1) gaps",
-    JSON.stringify(starts) === JSON.stringify([0, 0.1, 0.2, 0.85, 0.95]) &&
-      JSON.stringify(ends) === JSON.stringify([0.1, 0.2, 0.85, 0.95, 1.05]),
+    JSON.stringify(starts) ===
+      JSON.stringify([0, 0.1, 0.2, 0.85, 0.95, 1.05, 1.7, 1.8]) &&
+      JSON.stringify(ends) ===
+        JSON.stringify([0.1, 0.2, 0.85, 0.95, 1.05, 1.7, 1.8, 1.9]),
     `${starts} / ${ends}`,
   );
 }
@@ -450,6 +464,12 @@ refuses(
     try {
       const tlFile = path.join(dir, "reels", "audio", "v2", `${reel}.timeline.json`);
       const before = readFileSync(tlFile, "utf8");
+      const scratch = path.join(dir, "media"); // never write into the real store
+      mkdirSync(scratch);
+      for (const r of ["v2-cta", reel]) {
+        const h = json(path.join(v2, `${r}.receipt.json`)).audioSha256;
+        cpSync(path.join(media, `${h}.mp3`), path.join(scratch, `${h}.mp3`));
+      }
       const r = spawnSync(
         "bun",
         [path.join(dir, "reels", "tts.mjs"), "--v2", "--reel", reel, "--offline"],
@@ -458,7 +478,7 @@ refuses(
           env: {
             ...process.env,
             ELEVENLABS_ENV_FILE: path.join(dir, "no-such-key-file"),
-            CF_MEDIA_DIR: media,
+            CF_MEDIA_DIR: scratch,
           },
         },
       );

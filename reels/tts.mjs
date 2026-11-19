@@ -73,7 +73,8 @@ async function line(stem, text, meta, budget = null) {
   if (budget && !existsSync(mp3) && existsSync(rec)) {     // v2 media lives in the content-flow store, not in git
     const r0 = JSON.parse(readFileSync(rec, 'utf8')), stored = r0.audioSha256 && path.join(MEDIA, `${r0.audioSha256}.mp3`);
     if (stored && existsSync(stored)) {
-      if (!DRY) { copyFileSync(stored, mp3); console.log(`restored ${stem}.mp3 from the media store`) }
+      if (DRY) { console.log(`would restore ${stem}.mp3 from the media store (no request)`); return null }
+      copyFileSync(stored, mp3); console.log(`restored ${stem}.mp3 from the media store`);
     } else if (r0.requestSha256 === requestSha256) {
       // the receipt vouches for this exact request, so the take was paid for: never pay for it again by accident
       const why = `${stem}.mp3 (sha256:${r0.audioSha256}) is not in the media store ${MEDIA}, and its receipt matches this request: the take was already paid for`;
@@ -97,7 +98,7 @@ async function line(stem, text, meta, budget = null) {
   const estimate = budget ? Math.ceil(text.length * budget.rate) : null;
   if (budget && estimate > budget.cap) throw new Error(`Stopped before spending on ${stem}: ${text.length} characters × ${budget.rate} ≈ ${estimate} credits, over its cap of ${budget.cap}. Nothing was sent.`);
   if (DRY) { console.log(`would generate ${stem}: ${text.length} characters${budget ? ` ≈ ${estimate} credits (cap ${budget.cap})` : ''}`); return null }
-  if (OFFLINE) throw new Error(`${stem} needs new audio (its text changed in series.json); run bun reels/tts.mjs --reel <id> first`);
+  if (OFFLINE) throw new Error(`${stem} needs new audio (no receipt vouches for this text); run bun reels/tts.mjs ${V2 ? '--v2 ' : ''}--reel <id> first`);
   const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/with-timestamps?output_format=mp3_44100_128`, {
     method: 'POST', headers: { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   });
