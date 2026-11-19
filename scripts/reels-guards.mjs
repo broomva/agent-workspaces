@@ -417,6 +417,7 @@ refuses(
   const v2 = path.join(root, "reels", "audio", "v2");
   const sha = (f) => createHash("sha256").update(readFileSync(f)).digest("hex");
   const json = (f) => JSON.parse(readFileSync(f, "utf8"));
+  const seriesV2 = json(path.join(root, "reels", "series.json")).v2;
   const parts = readdirSync(v2)
     .filter((n) => n.endsWith(".timeline.json"))
     .map((n) => n.slice(0, -".timeline.json".length));
@@ -436,6 +437,32 @@ refuses(
     if (gapped.source?.audioSha256 !== take.audioSha256)
       bad.push("the gapped receipt names another take");
     if (gapped.credits !== 0) bad.push("the gapped take claims credits");
+    const P = seriesV2.parts.find((p) => p.reel === reel);
+    if (!P) bad.push("series.json v2.parts has no such part");
+    else {
+      const ta = json(f(".alignment.json")),
+        a = ta.alignment || ta.normalized_alignment,
+        firsts = [];
+      let at = 0;
+      for (const l of P.spoken) {
+        firsts.push(at);
+        at += l.length + 1;
+      }
+      const want = shiftAlignment(
+        a.character_start_times_seconds,
+        a.character_end_times_seconds,
+        firsts,
+        gapped.lineGapSeconds,
+      );
+      const got = json(f(".gapped.alignment.json")).alignment;
+      if (
+        JSON.stringify(got.character_start_times_seconds) !==
+          JSON.stringify(want.starts) ||
+        JSON.stringify(got.character_end_times_seconds) !==
+          JSON.stringify(want.ends)
+      )
+        bad.push("the gapped alignment is not the take's alignment shifted by its gaps");
+    }
     if (!(take.estimateCredits <= take.capCredits))
       bad.push(`the take's estimate ${take.estimateCredits} is over its cap ${take.capCredits}`);
     if (tl.take.audio !== `v2/${reel}.gapped.wav`)
@@ -498,6 +525,100 @@ refuses(
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  }
+}
+
+// v2 runs in a disposable copy with no v2 media, an empty media store and no key file.
+const v2Fixture = () => {
+  const dir = fresh();
+  const v2dir = path.join(dir, "reels", "audio", "v2");
+  for (const n of readdirSync(v2dir))
+    if (/\.(mp3|wav)$/.test(n)) rmSync(path.join(v2dir, n));
+  return { dir, v2dir };
+};
+const v2tts = (dir, reel, ...extra) =>
+  spawnSync(
+    "bun",
+    [path.join(dir, "reels", "tts.mjs"), "--v2", "--reel", reel, ...extra],
+    {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        ELEVENLABS_ENV_FILE: path.join(dir, "no-such-key-file"),
+        CF_MEDIA_DIR: path.join(dir, "empty-media"),
+      },
+    },
+  );
+
+// A missing rate or cap would make every cap comparison false (NaN > cap): it is refused before any request.
+for (const [what, edit] of [
+  ["the rate", (s) => delete s.v2.budget.creditsPerCharacter],
+  ["the CTA cap", (s) => delete s.v2.budget.ctaCapCredits],
+  ["the part cap", (s) => delete s.v2.budget.partCapCredits],
+]) {
+  const { dir } = v2Fixture();
+  try {
+    editJson(path.join(dir, "reels", "series.json"), edit);
+    const r = v2tts(dir, "v2-p2-findings");
+    expect(
+      `v2 refuses a budget without ${what}`,
+      r.status !== 0 && /must be a positive number.*Nothing was sent/.test(r.stderr),
+      r.stderr,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+// With both takes reusable, a v2 --dry-run still writes nothing (no gapped take, no timeline). The takes are stand-in
+// bytes whose receipts are re-signed to vouch for them, so this runs without media.
+{
+  const { dir, v2dir } = v2Fixture();
+  try {
+    for (const stem of ["v2-cta", "v2-p2-findings"]) {
+      const bytes = Buffer.from(`stand-in take ${stem}`);
+      writeFileSync(path.join(v2dir, `${stem}.mp3`), bytes);
+      editJson(path.join(v2dir, `${stem}.receipt.json`), (r) => {
+        r.audioSha256 = createHash("sha256").update(bytes).digest("hex");
+      });
+    }
+    const before = snapshot(dir),
+      r = v2tts(dir, "v2-p2-findings", "--dry-run"),
+      after = snapshot(dir);
+    expect(
+      "v2 --dry-run with reusable takes writes nothing",
+      r.status === 0 &&
+        /dry run writes nothing/.test(r.stdout) &&
+        JSON.stringify(before) === JSON.stringify(after),
+      r.stderr + r.stdout,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+// series.json drift, without media: for every v2 part with a receipt, a dry run on an empty store must find its take
+// "already paid for", which holds only while the receipt's request digest matches the part's current text.
+{
+  const { dir, v2dir } = v2Fixture();
+  try {
+    const series = JSON.parse(
+      readFileSync(path.join(dir, "reels", "series.json"), "utf8"),
+    );
+    for (const P of series.v2.parts.filter((p) =>
+      existsSync(path.join(v2dir, `${p.reel}.receipt.json`)),
+    )) {
+      const r = v2tts(dir, P.reel, "--dry-run");
+      expect(
+        `v2 ${P.reel}: its receipt vouches for its current text in series.json`,
+        r.status === 0 &&
+          r.stdout.includes(`missing  v2/${P.reel}.mp3`) &&
+          r.stdout.includes("missing  v2/v2-cta.mp3"),
+        r.stderr + r.stdout,
+      );
+    }
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
   }
 }
 

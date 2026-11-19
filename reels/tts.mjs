@@ -211,6 +211,8 @@ async function v2() {
   if (!P?.spoken) { console.error(`no v2 part with reel "${want}" and spoken lines in series.json v2.parts`); process.exit(2) }
   const D = path.join(AUDIO, 'v2'); if (!DRY) mkdirSync(D, { recursive: true });
   const rate = V.budget.creditsPerCharacter, partCap = P.capCredits ?? V.budget.partCapCredits, takeText = P.spoken.join(' ');
+  for (const [name, v] of [['v2.budget.creditsPerCharacter', rate], ['v2.budget.ctaCapCredits', V.budget.ctaCapCredits], [`the cap for ${P.reel}`, partCap]])
+    if (!(Number.isFinite(v) && v > 0)) throw new Error(`series.json ${name} must be a positive number, got ${JSON.stringify(v)}; without it no cap holds. Nothing was sent.`);
   // pre-flight: both lines are checked against their caps before either request, so a run never spends half
   for (const [what, text, cap] of [['the shared CTA', V.cta.spoken, V.budget.ctaCapCredits], [P.reel, takeText, partCap]])
     if (Math.ceil(text.length * rate) > cap)
@@ -219,7 +221,7 @@ async function v2() {
     { rate, cap: V.budget.ctaCapCredits });
   const take = await line(`v2/${P.reel}`, takeText, { line: 'take', field: 'v2.parts[].spoken', part: P.part, reel: P.reel, script: P.scriptSha256 },
     { rate, cap: partCap });
-  if (!cta || !take) { console.log(`${P.reel}: timeline would be rebuilt (dry run writes nothing)`); return summary() }
+  if (DRY || !cta || !take) { console.log(`${P.reel}: timeline would be rebuilt (dry run writes nothing)`); return summary() }
   const gapped = gapTake(take, P, takeText, V.lineGapSeconds, D);
   const takeDur = gapped.dur, ctaDur = duration(cta.mp3);
   const tw = words(gapped.ali, takeText, takeDur), cw = words(cta.ali, V.cta.spoken, ctaDur);
