@@ -1,0 +1,1094 @@
+{
+  "version": 2,
+  "part": 1,
+  "total": 5,
+  "reel": "v6-p1-folder",
+  "title": "Session twenty in an empty folder still asks where tests run.",
+  "series": "Agent Workspaces",
+  "act": "I",
+  "script": "sha256:82a414dd3aa0affe7f7955f4bd91946f7c1baf0618a1b193864146df621db74f",
+  "headline": "20 sessions. Same question.",
+  "disclosure": "AI-generated narration using ElevenLabs River stock voice, selected by the author; not a recording or clone of Carlos Escobar.",
+  "take": {
+    "text": "Session twenty in an empty folder still asks where tests run. Nothing was written down, so the next one asks again. Give it shared instructions, a knowledge index, and a record of decisions. Then each session can start from what's already been checked. The next one reads where tests run, runs them, and writes down what it found.",
+    "at": 0,
+    "dur": 21.8,
+    "audio": "v2/v6-p1-folder.gapped.wav",
+    "source": "v2/v6-p1-folder.mp3",
+    "gaps": {
+      "seconds": 0.35,
+      "cuts": [
+        {
+          "afterLine": 1,
+          "sourceSample": 188460,
+          "sourceAt": 4.2735
+        },
+        {
+          "afterLine": 2,
+          "sourceSample": 325492,
+          "sourceAt": 7.3808
+        },
+        {
+          "afterLine": 3,
+          "sourceSample": 546076,
+          "sourceAt": 12.3827
+        },
+        {
+          "afterLine": 4,
+          "sourceSample": 692080,
+          "sourceAt": 15.6934
+        }
+      ]
+    },
+    "words": [
+      {
+        "text": "Session",
+        "start": 0,
+        "end": 0.4
+      },
+      {
+        "text": "twenty",
+        "start": 0.48,
+        "end": 0.88
+      },
+      {
+        "text": "in",
+        "start": 0.96,
+        "end": 1.04
+      },
+      {
+        "text": "an",
+        "start": 1.08,
+        "end": 1.12
+      },
+      {
+        "text": "empty",
+        "start": 1.2,
+        "end": 1.52
+      },
+      {
+        "text": "folder",
+        "start": 1.6,
+        "end": 2
+      },
+      {
+        "text": "still",
+        "start": 2.16,
+        "end": 2.4
+      },
+      {
+        "text": "asks",
+        "start": 2.56,
+        "end": 2.88
+      },
+      {
+        "text": "where",
+        "start": 2.96,
+        "end": 3.04
+      },
+      {
+        "text": "tests",
+        "start": 3.12,
+        "end": 3.44
+      },
+      {
+        "text": "run.",
+        "start": 3.52,
+        "end": 4.04
+      },
+      {
+        "text": "Nothing",
+        "start": 4.67,
+        "end": 4.91
+      },
+      {
+        "text": "was",
+        "start": 4.99,
+        "end": 5.07
+      },
+      {
+        "text": "written",
+        "start": 5.19,
+        "end": 5.31
+      },
+      {
+        "text": "down,",
+        "start": 5.39,
+        "end": 5.95
+      },
+      {
+        "text": "so",
+        "start": 6.07,
+        "end": 6.19
+      },
+      {
+        "text": "the",
+        "start": 6.27,
+        "end": 6.31
+      },
+      {
+        "text": "next",
+        "start": 6.35,
+        "end": 6.59
+      },
+      {
+        "text": "one",
+        "start": 6.67,
+        "end": 6.83
+      },
+      {
+        "text": "asks",
+        "start": 6.91,
+        "end": 7.15
+      },
+      {
+        "text": "again.",
+        "start": 7.23,
+        "end": 7.63
+      },
+      {
+        "text": "Give",
+        "start": 8.62,
+        "end": 8.7
+      },
+      {
+        "text": "it",
+        "start": 8.78,
+        "end": 8.86
+      },
+      {
+        "text": "shared",
+        "start": 8.94,
+        "end": 9.18
+      },
+      {
+        "text": "instructions,",
+        "start": 9.26,
+        "end": 10.14
+      },
+      {
+        "text": "a",
+        "start": 10.18,
+        "end": 10.22
+      },
+      {
+        "text": "knowledge",
+        "start": 10.3,
+        "end": 10.62
+      },
+      {
+        "text": "index,",
+        "start": 10.86,
+        "end": 11.26
+      },
+      {
+        "text": "and",
+        "start": 11.38,
+        "end": 11.5
+      },
+      {
+        "text": "a",
+        "start": 11.58,
+        "end": 11.66
+      },
+      {
+        "text": "record",
+        "start": 11.74,
+        "end": 11.98
+      },
+      {
+        "text": "of",
+        "start": 12.02,
+        "end": 12.06
+      },
+      {
+        "text": "decisions.",
+        "start": 12.14,
+        "end": 12.94
+      },
+      {
+        "text": "Then",
+        "start": 13.53,
+        "end": 13.85
+      },
+      {
+        "text": "each",
+        "start": 14.01,
+        "end": 14.17
+      },
+      {
+        "text": "session",
+        "start": 14.25,
+        "end": 14.57
+      },
+      {
+        "text": "can",
+        "start": 14.65,
+        "end": 14.81
+      },
+      {
+        "text": "start",
+        "start": 14.89,
+        "end": 15.13
+      },
+      {
+        "text": "from",
+        "start": 15.21,
+        "end": 15.29
+      },
+      {
+        "text": "what's",
+        "start": 15.37,
+        "end": 15.53
+      },
+      {
+        "text": "already",
+        "start": 15.69,
+        "end": 15.85
+      },
+      {
+        "text": "been",
+        "start": 15.93,
+        "end": 16.01
+      },
+      {
+        "text": "checked.",
+        "start": 16.09,
+        "end": 16.49
+      },
+      {
+        "text": "The",
+        "start": 17.24,
+        "end": 17.32
+      },
+      {
+        "text": "next",
+        "start": 17.44,
+        "end": 17.56
+      },
+      {
+        "text": "one",
+        "start": 17.64,
+        "end": 17.72
+      },
+      {
+        "text": "reads",
+        "start": 17.8,
+        "end": 18.12
+      },
+      {
+        "text": "where",
+        "start": 18.28,
+        "end": 18.44
+      },
+      {
+        "text": "tests",
+        "start": 18.52,
+        "end": 18.84
+      },
+      {
+        "text": "run,",
+        "start": 18.92,
+        "end": 19.48
+      },
+      {
+        "text": "runs",
+        "start": 19.56,
+        "end": 19.8
+      },
+      {
+        "text": "them,",
+        "start": 19.88,
+        "end": 20.2
+      },
+      {
+        "text": "and",
+        "start": 20.28,
+        "end": 20.36
+      },
+      {
+        "text": "writes",
+        "start": 20.44,
+        "end": 20.68
+      },
+      {
+        "text": "down",
+        "start": 20.76,
+        "end": 20.92
+      },
+      {
+        "text": "what",
+        "start": 21,
+        "end": 21.08
+      },
+      {
+        "text": "it",
+        "start": 21.16,
+        "end": 21.24
+      },
+      {
+        "text": "found.",
+        "start": 21.4,
+        "end": 21.8
+      }
+    ],
+    "lines": [
+      {
+        "text": "Session twenty in an empty folder still asks where tests run.",
+        "start": 0,
+        "end": 4.04
+      },
+      {
+        "text": "Nothing was written down, so the next one asks again.",
+        "start": 4.67,
+        "end": 7.63
+      },
+      {
+        "text": "Give it shared instructions, a knowledge index, and a record of decisions.",
+        "start": 8.62,
+        "end": 12.94
+      },
+      {
+        "text": "Then each session can start from what's already been checked.",
+        "start": 13.53,
+        "end": 16.49
+      },
+      {
+        "text": "The next one reads where tests run, runs them, and writes down what it found.",
+        "start": 17.24,
+        "end": 21.8
+      }
+    ]
+  },
+  "excerpt": {
+    "text": "Write docs/workspace-layout.md with a table of path, job and writer",
+    "source": "playbooks/act-1.md:68",
+    "at": 21.8,
+    "hold": 2.5
+  },
+  "cta": {
+    "text": "Comment WORKSPACE for the agent-workspace setup prompts and verification checks.",
+    "keyword": "WORKSPACE",
+    "at": 24.3,
+    "dur": 4.64,
+    "audio": "v2/v2-cta.mp3",
+    "words": [
+      {
+        "text": "Comment",
+        "start": 24.3,
+        "end": 24.7
+      },
+      {
+        "text": "WORKSPACE",
+        "start": 24.78,
+        "end": 25.34
+      },
+      {
+        "text": "for",
+        "start": 25.42,
+        "end": 25.5
+      },
+      {
+        "text": "the",
+        "start": 25.58,
+        "end": 25.66
+      },
+      {
+        "text": "agent-workspace",
+        "start": 25.74,
+        "end": 26.62
+      },
+      {
+        "text": "setup",
+        "start": 26.7,
+        "end": 26.94
+      },
+      {
+        "text": "prompts",
+        "start": 27.02,
+        "end": 27.42
+      },
+      {
+        "text": "and",
+        "start": 27.5,
+        "end": 27.58
+      },
+      {
+        "text": "verification",
+        "start": 27.66,
+        "end": 28.3
+      },
+      {
+        "text": "checks.",
+        "start": 28.38,
+        "end": 28.94
+      }
+    ]
+  },
+  "end": {
+    "at": 24.3,
+    "card": [
+      "Build your layout · route AGENTS.md · check what survives",
+      "Next: can your next agent check what this one found?"
+    ],
+    "hold": 2.5
+  },
+  "captions": {
+    "version": "1.0",
+    "metadata": {
+      "duration": 31.44,
+      "language": "en",
+      "generator": "reels/tts.mjs --v2 (River character alignment)"
+    },
+    "cast": [
+      {
+        "id": "S0",
+        "name": "River",
+        "color": "#6B8AFF"
+      }
+    ],
+    "captions": [
+      {
+        "id": "e01",
+        "speaker_id": "S0",
+        "start": 0,
+        "end": 2,
+        "words": [
+          {
+            "text": "Session",
+            "start": 0,
+            "end": 0.4,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "twenty",
+            "start": 0.48,
+            "end": 0.88,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "in",
+            "start": 0.96,
+            "end": 1.04,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "an",
+            "start": 1.08,
+            "end": 1.12,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "empty",
+            "start": 1.2,
+            "end": 1.52,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "folder",
+            "start": 1.6,
+            "end": 2,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e02",
+        "speaker_id": "S0",
+        "start": 2.16,
+        "end": 4.04,
+        "words": [
+          {
+            "text": "still",
+            "start": 2.16,
+            "end": 2.4,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "asks",
+            "start": 2.56,
+            "end": 2.88,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "where",
+            "start": 2.96,
+            "end": 3.04,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "tests",
+            "start": 3.12,
+            "end": 3.44,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "run.",
+            "start": 3.52,
+            "end": 4.04,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e03",
+        "speaker_id": "S0",
+        "start": 4.67,
+        "end": 5.95,
+        "words": [
+          {
+            "text": "Nothing",
+            "start": 4.67,
+            "end": 4.91,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "was",
+            "start": 4.99,
+            "end": 5.07,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "written",
+            "start": 5.19,
+            "end": 5.31,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "down,",
+            "start": 5.39,
+            "end": 5.95,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e04",
+        "speaker_id": "S0",
+        "start": 6.07,
+        "end": 7.63,
+        "words": [
+          {
+            "text": "so",
+            "start": 6.07,
+            "end": 6.19,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "the",
+            "start": 6.27,
+            "end": 6.31,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "next",
+            "start": 6.35,
+            "end": 6.59,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "one",
+            "start": 6.67,
+            "end": 6.83,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "asks",
+            "start": 6.91,
+            "end": 7.15,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "again.",
+            "start": 7.23,
+            "end": 7.63,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e05",
+        "speaker_id": "S0",
+        "start": 8.62,
+        "end": 10.62,
+        "words": [
+          {
+            "text": "Give",
+            "start": 8.62,
+            "end": 8.7,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "it",
+            "start": 8.78,
+            "end": 8.86,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "shared",
+            "start": 8.94,
+            "end": 9.18,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "instructions,",
+            "start": 9.26,
+            "end": 10.14,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "a",
+            "start": 10.18,
+            "end": 10.22,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "knowledge",
+            "start": 10.3,
+            "end": 10.62,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e06",
+        "speaker_id": "S0",
+        "start": 10.86,
+        "end": 12.94,
+        "words": [
+          {
+            "text": "index,",
+            "start": 10.86,
+            "end": 11.26,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "and",
+            "start": 11.38,
+            "end": 11.5,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "a",
+            "start": 11.58,
+            "end": 11.66,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "record",
+            "start": 11.74,
+            "end": 11.98,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "of",
+            "start": 12.02,
+            "end": 12.06,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "decisions.",
+            "start": 12.14,
+            "end": 12.94,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e07",
+        "speaker_id": "S0",
+        "start": 13.53,
+        "end": 15.29,
+        "words": [
+          {
+            "text": "Then",
+            "start": 13.53,
+            "end": 13.85,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "each",
+            "start": 14.01,
+            "end": 14.17,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "session",
+            "start": 14.25,
+            "end": 14.57,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "can",
+            "start": 14.65,
+            "end": 14.81,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "start",
+            "start": 14.89,
+            "end": 15.13,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "from",
+            "start": 15.21,
+            "end": 15.29,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e08",
+        "speaker_id": "S0",
+        "start": 15.37,
+        "end": 16.49,
+        "words": [
+          {
+            "text": "what's",
+            "start": 15.37,
+            "end": 15.53,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "already",
+            "start": 15.69,
+            "end": 15.85,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "been",
+            "start": 15.93,
+            "end": 16.01,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "checked.",
+            "start": 16.09,
+            "end": 16.49,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e09",
+        "speaker_id": "S0",
+        "start": 17.24,
+        "end": 19.48,
+        "words": [
+          {
+            "text": "The",
+            "start": 17.24,
+            "end": 17.32,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "next",
+            "start": 17.44,
+            "end": 17.56,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "one",
+            "start": 17.64,
+            "end": 17.72,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "reads",
+            "start": 17.8,
+            "end": 18.12,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "where",
+            "start": 18.28,
+            "end": 18.44,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "tests",
+            "start": 18.52,
+            "end": 18.84,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "run,",
+            "start": 18.92,
+            "end": 19.48,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e10",
+        "speaker_id": "S0",
+        "start": 19.56,
+        "end": 21.8,
+        "words": [
+          {
+            "text": "runs",
+            "start": 19.56,
+            "end": 19.8,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "them,",
+            "start": 19.88,
+            "end": 20.2,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "and",
+            "start": 20.28,
+            "end": 20.36,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "writes",
+            "start": 20.44,
+            "end": 20.68,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "down",
+            "start": 20.76,
+            "end": 20.92,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "what",
+            "start": 21,
+            "end": 21.08,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "it",
+            "start": 21.16,
+            "end": 21.24,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "found.",
+            "start": 21.4,
+            "end": 21.8,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e01",
+        "speaker_id": "S0",
+        "start": 24.3,
+        "end": 26.62,
+        "words": [
+          {
+            "text": "Comment",
+            "start": 24.3,
+            "end": 24.7,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "WORKSPACE",
+            "start": 24.78,
+            "end": 25.34,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "for",
+            "start": 25.42,
+            "end": 25.5,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "the",
+            "start": 25.58,
+            "end": 25.66,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "agent-workspace",
+            "start": 25.74,
+            "end": 26.62,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e02",
+        "speaker_id": "S0",
+        "start": 26.7,
+        "end": 28.94,
+        "words": [
+          {
+            "text": "setup",
+            "start": 26.7,
+            "end": 26.94,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "prompts",
+            "start": 27.02,
+            "end": 27.42,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "and",
+            "start": 27.5,
+            "end": 27.58,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "verification",
+            "start": 27.66,
+            "end": 28.3,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "checks.",
+            "start": 28.38,
+            "end": 28.94,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      }
+    ]
+  },
+  "total_dur": 31.44
+}

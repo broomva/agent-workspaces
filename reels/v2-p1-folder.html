@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=1080"><title>Agent Workspaces Act I</title><style>
+@font-face{font-family:Raleway;src:url(../deck/fonts/Raleway-300.woff2)} @font-face{font-family:Inter;src:url(../deck/fonts/Inter-400.woff2)} @font-face{font-family:Roboto;src:url(../deck/fonts/RobotoFlex-Regular.ttf)}
+*{box-sizing:border-box;margin:0} html,body{width:1080px;height:1920px;overflow:hidden;background:#111b2b;color:#f7f9fc;font-family:Inter} canvas{position:absolute;inset:0} #h{position:absolute;left:151px;top:190px;width:800px;font:300 84px/1.06 Raleway;color:#f7f9fc} #h em{font-style:normal;color:#75aeff}
+.glass{position:absolute;left:170px;top:650px;width:700px;height:380px;border-radius:28px;background:linear-gradient(180deg,#344554dd,#202d3ce8);box-shadow:0 30px 80px -30px #000,inset 0 1px 0 #ffffff33}
+#scene{display:flex;align-items:center;justify-content:center;text-align:center;padding:48px;font:500 60px/1.22 Inter} #scene .content{width:100%} #scene strong{color:#80b7ff} #scene .bar{height:18px;background:#b6cce580;border-radius:10px;margin:24px auto} #scene .symbol{font-size:110px;color:#edc874}
+#ex{height:auto;min-height:300px;padding:56px 54px 92px;font:400 58px/1.22 Raleway} #ex .rule{position:absolute;left:54px;bottom:46px;height:6px;background:#edc874} .end{padding:60px 54px;display:flex;align-items:center;font:300 62px/1.18 Raleway}
+#cap{position:absolute;left:540px;bottom:482px;transform:translateX(-50%);max-width:640px;width:max-content;padding:12px 28px 14px;border-radius:30px;text-align:center;font:400 50px/1.12 Roboto,Inter;background:linear-gradient(180deg,#344554aa,#202d3cbb)} #cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
+</style></head><body><canvas id="bg" width="1080" height="1920"></canvas><h1 id="h">The same context.<br><em>Rebuilt again.</em></h1><div id="scene" class="glass"><div class="content"></div></div><div id="ex" class="glass"><p></p><i class="rule"></i></div><div id="end" class="glass end"><p></p></div><div id="cap"></div><script>
+const S=window.REEL_V2,$=id=>document.getElementById(id),TAU=Math.PI*2; const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)); const ease=x=>{x=clamp(x,0,1);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2}; const ramp=(t,a,d)=>ease((t-a)/d);
+const bg = $('bg').getContext('2d');
+function background(t) {
+  bg.clearRect(0, 0, 1080, 1920);
+  bg.fillStyle = 'oklch(0.155 0.028 250)'; bg.fillRect(0, 0, 1080, 1920);
+  const lights = [[0.6, 1.4, 'oklch(0.55 0.16 252 / .55)', 470], [-0.45, 3.6, 'oklch(0.55 0.12 70 / .38)', 420], [0.32, 5.4, 'oklch(0.6 0.12 200 / .3)', 380]];
+  for (const [w, ph, c, r] of lights) {
+    const x = 540 + Math.cos(t * w + ph) * 250, y = 860 + Math.sin(t * w * 1.3 + ph) * 290;
+    const g = bg.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, c); g.addColorStop(1, 'oklch(0.155 0.028 250 / 0)');
+    bg.fillStyle = g; bg.fillRect(0, 0, 1080, 1920);
+  }
+  bg.fillStyle = 'oklch(0.78 0.03 245 / .07)';
+  const off = (t * 22) % 60;
+  for (let y = 470 - off; y < 1290; y += 60) for (let x = 170; x < 870; x += 60) { bg.beginPath(); bg.arc(x, y, 2.4, 0, TAU); bg.fill() }
+}
+
+
+const capEl = $('cap'), CAPS = S.captions.captions, COL = 'oklch(0.8 0.12 245)', KW = 'oklch(0.86 0.12 88)';
+CAPS.forEach((ev, i) => {
+  ev.until = i + 1 < CAPS.length && CAPS[i + 1].start - ev.end < 1 ? CAPS[i + 1].start : ev.end + .5;
+  ev.chainOut = i + 1 < CAPS.length && CAPS[i + 1].start - ev.end < .5; ev.chainIn = i > 0 && CAPS[i - 1].chainOut;
+});
+let capShown = -1;
+function captions(t) {
+  let i = -1; for (let k = 0; k < CAPS.length; k++) if (t >= CAPS[k].start - .12) i = k;
+  const ev = CAPS[i];
+  // the playbook excerpt holds alone: no caption from the end of the take to the CTA's first word
+  if (!ev || t > ev.until || (t >= S.excerpt.at && t < S.cta.at)) { capEl.style.visibility = 'hidden'; return }
+  capEl.style.visibility = '';
+  if (capShown !== i) {
+    capEl.innerHTML = ev.words.map(w => `<span class="w">${w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join(' ');
+    capShown = i;
+    ev.words.forEach((w, j) => { if (w.emphasis) capEl.children[j].style.margin = `0 ${Math.ceil(capEl.children[j].getBoundingClientRect().width * .08)}px` });
+  }
+  const inK = ev.chainIn ? 1 : ramp(t, ev.start - .12, .18), outK = ev.chainOut ? 1 : 1 - ramp(t, ev.until - .14, .14), k = Math.min(inK, outK);
+  capEl.style.opacity = k >= 1 ? '' : String(k);
+  ev.words.forEach((w, j) => {
+    const el = capEl.children[j], col = w.text.includes(S.cta.keyword) ? KW : COL;
+    const p = ease((t - w.start - .1) / .6);
+    const rise = ease((t - w.start + .05) / .22);
+    const bump = w.emphasis ? Math.sin(Math.PI * clamp((t - w.start) / .45, 0, 1)) : 0;
+    el.style.fontWeight = String(w.weight); el.style.fontSize = `${(50 * w.size).toFixed(1)}px`;
+    el.style.color = p >= 1 ? col : p <= 0 ? '#fff' : `color-mix(in oklab, ${col} ${(p * 100).toFixed(1)}%, #fff)`;
+    el.style.opacity = rise >= 1 ? '' : (.38 + .62 * rise).toFixed(3);
+    el.style.transform = bump > 0 ? `scale(${(1 + .15 * bump).toFixed(4)})` : rise >= 1 ? '' : `translateY(${((1 - rise) * 10).toFixed(2)}px)`;
+    el.style.textShadow = w.emphasis && t >= w.start ? `0 0 ${(20 * Math.max(bump, .35)).toFixed(1)}px ${col}` : '';
+  });
+}
+
+
+const scene=$('scene'), box=scene.querySelector('.content'); $('ex').querySelector('p').textContent=S.excerpt.text; $('end').querySelector('p').textContent=S.end.card[0];
+function show(el,k){el.style.visibility=k>0.001?'visible':'hidden';el.style.opacity=String(clamp(k,0,1))}
+window.renderAt=function(t){ background(t);captions(t); let lines=S.take.lines; let i=0; for(let k=1;k<lines.length;k++)if(t>=lines[k].start)i=k;
+let content=''; if(i===0){content=t<.6?'<strong>SESSION 020</strong><div class="bar" style="width:85%"></div>RETAINED 000':'<strong>SESSION 020</strong><div class="bar" style="width:'+Math.max(5,85-(t-.6)*60)+'%"></div>RETAINED 000'} else if(i===1){content='<strong>New session</strong><div class="bar" style="width:'+Math.min(90,10+(t-lines[i].start)*23)+'%"></div>'}else if(i===2){content='<strong>SESSION '+String(20+Math.min(1,Math.floor(t-lines[i].start))).padStart(3,'0')+'</strong><div class="bar" style="width:40%"></div>RETAINED 000'}else if(i===3){content='<strong>SESSION 021</strong><div class="bar" style="width:25%"></div><span class="symbol">?</span>'}else if(i===4){let words=['Shared instructions','Knowledge index','Decision record'];let n=Math.min(2,Math.floor((t-lines[i].start)/Math.max(1,(lines[i].end-lines[i].start)/3)));content='<strong>'+words[n]+'</strong><div class="bar" style="width:'+Math.min(90,20+(t-lines[i].start)*12)+'%"></div>'}else{content='<strong>Checked ✓</strong><div class="bar" style="width:80%"></div>RETAINED 001'}
+box.innerHTML=content; scene.style.background=t>=.6 && t<.8 ? '#a4c9e8' : ''; scene.style.color=t>=.6 && t<.8 ? '#152638' : ''; show(scene,t<S.take.dur?1:0); show($('h'),1-ramp(t,lines[1].start-.3,.3)); show($('ex'),t>=S.excerpt.at&&t<S.cta.at?1:0); $('ex').querySelector('.rule').style.width=(592*clamp((t-S.excerpt.at)/S.excerpt.hold,0,1))+'px'; show($('end'),t>=S.cta.at?1:0); $('end').style.transform=`translateY(${Math.sin(t*1.3)*10}px)`;
+}; document.fonts.ready.then(()=>{window.renderAt(0);window.__ready=true});
+</script></body></html>

@@ -76,5 +76,153 @@
     "firstLine": "{spokenHook}",
     "body": "Part {part}/5 of Agent Workspaces, Act I. {cardCta}.\nFull keynote and field guide: broomva.tech/agent-workspaces",
     "hashtags": ["#AIAgents", "#AgenticAI", "#ClaudeCode", "#DevTools", "#AgentWorkspaces"]
+  },
+  "v2": {
+    "$comment": "Act I v2 (BRO-3825): re-scripted through content-flow; the keynote-slice rule is lifted by owner decision (2026-11-17). Everything above this key is v1 and still renders as before. reels/tts.mjs --v2 and reels/render.mjs read this key; SERIES.md explains the shape.",
+    "scriptsFrom": "broomva/content-flow accounts/broomva.tech/runs/2026-11-17-act1-v2/<part>/script.json (cf-script@1, reviewed by a provider other than the writer)",
+    "voice": { "voiceId": "SAz9YHcvj6GT2YYXdXww", "modelId": "eleven_v4", "endpoint": "with-timestamps" },
+    "budget": {
+      "$comment": "Owner decision 2026-11-17: the CTA is recorded once and reused; each part voices only its hook and body. River bills about 0.44 credits per character (character-cost in every receipt, 0.434-0.448 so far); the estimate uses the highest observed rate rounded up. A line whose estimate exceeds its cap stops before any request.",
+      "creditsPerCharacter": 0.45,
+      "ctaCapCredits": 40,
+      "partCapCredits": 135
+    },
+    "cta": {
+      "asset": "v2-cta",
+      "spoken": "Comment WORKSPACE for the agent-workspace setup prompts and verification checks.",
+      "keyword": "WORKSPACE",
+      "endCard": "Build your layout · route AGENTS.md · check what survives",
+      "gets": "the Act I playbook: five copy-paste agent prompts, each with a verification check (playbooks/act-1.md)"
+    },
+    "excerptHold": { "$comment": "read at 4 words/s, at least 2.5 s, rounded up to a tenth", "wordsPerSecond": 4, "minSeconds": 2.5 },
+    "lineGapSeconds": 0.35,
+    "$lineGapSeconds": "the script cards plan 0.35 s between spoken lines (body start_s = words / 2.6 + 0.35); one River take runs them together, so tts.mjs --v2 inserts the gap at each line boundary at zero cost (<reel>.gapped.wav)",
+    "endHoldSeconds": 2.5,
+    "parts": [
+      {
+        "part": 1,
+        "key": "folder",
+        "capCredits": 166,
+        "reel": "v2-p1-folder",
+        "title": "Session twenty, and this agent still starts from zero.",
+        "script": "p1-folder/script.json",
+        "scriptSha256": "sha256:394af3fe399296d6aff46b745e2e11d8a2af1ca8cb4c0eae3a44870cdb891214",
+        "headline": "The same context. Rebuilt again.",
+        "spoken": [
+          "Session twenty, and this agent still starts from zero.",
+          "Each new session has to piece its context together.",
+          "The counter rises. What it retains stays at zero.",
+          "What could the next session read before it starts?",
+          "Give it shared instructions, a knowledge index, and a record of decisions.",
+          "Then it starts from what's already been checked, and leaves something useful behind."
+        ],
+        "emphasis": ["session", "twenty", "zero", "context", "counter", "retains", "read", "instructions", "index", "decisions", "checked", "useful"],
+        "excerpt": { "text": "Write docs/workspace-layout.md with a table of path, job and writer", "source": "playbooks/act-1.md:68" },
+        "next": "Next: can your next agent check what this one found?"
+      },
+      {
+        "part": 1,
+        "key": "folder",
+        "capCredits": 166,
+        "reel": "v6-p1-folder",
+        "title": "Session twenty in an empty folder still asks where tests run.",
+        "script": "p1-folder/script.v7.json",
+        "scriptSha256": "sha256:82a414dd3aa0affe7f7955f4bd91946f7c1baf0618a1b193864146df621db74f",
+        "headline": "20 sessions. Same question.",
+        "spoken": [
+          "Session twenty in an empty folder still asks where tests run.",
+          "Nothing was written down, so the next one asks again.",
+          "Give it shared instructions, a knowledge index, and a record of decisions.",
+          "Then each session can start from what's already been checked.",
+          "The next one reads where tests run, runs them, and writes down what it found."
+        ],
+        "emphasis": ["session", "tests", "nothing", "read", "instructions", "index", "decisions", "checked", "useful"],
+        "excerpt": { "text": "Write docs/workspace-layout.md with a table of path, job and writer", "source": "playbooks/act-1.md:68" },
+        "next": "Next: can your next agent check what this one found?"
+      },
+      {
+        "part": 2,
+        "key": "findings",
+        "reel": "v2-p2-findings",
+        "title": "Can your next agent check what this one found?",
+        "script": "p2-findings/script.json",
+        "scriptSha256": "sha256:0ba0542f63b170be587dfbae7890545498c4a72ce13b1e4743f5d876cd322a6c",
+        "headline": "The chat closes. The evidence stays.",
+        "spoken": [
+          "Can your next agent check what this one found?",
+          "Findings can get buried in chat history.",
+          "Give it a filesystem and a shell.",
+          "Now it can open the file, run the test, and leave a record.",
+          "A claim can point to a file. A fix, to a test and its result.",
+          "So the next agent can find it, and check it."
+        ],
+        "emphasis": ["check", "found", "buried", "filesystem", "shell", "file", "test", "record", "claim", "fix", "result", "find"],
+        "excerpt": { "text": "Cite each claim as path:line or as the command you ran.", "source": "playbooks/act-1.md:41" },
+        "next": "Next: where does your agent look before it touches a file?"
+      },
+      {
+        "part": 3,
+        "key": "primer",
+        "capCredits": 142,
+        "reel": "v2-p3-primer",
+        "title": "Can your agent find the right check before it finishes?",
+        "script": "p3-primer/script.json",
+        "scriptSha256": "sha256:31dd15c65c4cc9c62d131d54bcce272f6d4f3d509e6acc4c49f3f9b51e14c51f",
+        "headline": "One route. One check.",
+        "spoken": [
+          "Can your agent find the right check before it finishes?",
+          "Start with AGENTS.md: a short table of when, and what to read.",
+          "Changing tests? The table routes the agent to the testing doc.",
+          "Read top-down before writing. Write evidence back as you work.",
+          "Then it runs the check the primer names, before calling the work done."
+        ],
+        "emphasis": ["find", "check", "finishes", "agentsmd", "table", "tests", "testing", "top-down", "evidence", "runs", "done"],
+        "excerpt": { "text": "Draft AGENTS.md for this repository as a routing primer, under 300 lines.", "source": "playbooks/act-1.md:91" },
+        "next": "Next: change agent tools without rebuilding an integration"
+      },
+      {
+        "part": 4,
+        "key": "harness",
+        "reel": "v2-p4-harness",
+        "title": "Can you change agent tools without rebuilding an integration?",
+        "script": "p4-harness/script.json",
+        "scriptSha256": "sha256:5fe2b2f4bac34d9ddd88e5c05ff7a5700774df5135a54aee6566d8314b53cf40",
+        "headline": "Change the agent. Keep the integration?",
+        "spoken": [
+          "Can you change agent tools without rebuilding an integration?",
+          "The harness is the loop making model and tool calls.",
+          "Keep the integration outside that loop.",
+          "Put it behind a CLI or an MCP server, where that boundary makes sense.",
+          "Then changing harnesses need not mean rebuilding every capability."
+        ],
+        "emphasis": ["change", "tools", "integration", "harness", "loop", "model", "tool", "outside", "cli", "mcp", "boundary", "harnesses", "capability"],
+        "excerpt": { "text": "say whether the same capability could live behind an MCP server or a CLI that any harness can call", "source": "playbooks/act-1.md:125" },
+        "next": "Next: where did this answer come from?"
+      },
+      {
+        "part": 5,
+        "key": "provenance",
+        "reel": "v2-p5-provenance",
+        "title": "Can you trace this agent result back to its source?",
+        "script": "p5-provenance/script.json",
+        "scriptSha256": "sha256:3a4d2daca060529d67283007359d43602c12df071aab2077364a241052c20501",
+        "headline": "Where did this answer come from?",
+        "spoken": [
+          "Can you trace this agent result back to its source?",
+          "Keep three folders.",
+          "Bronze holds the source. Silver holds what was extracted. Gold holds the accepted result.",
+          "Your agent can search, read, and compare these files.",
+          "Keep links between them, so a result can be traced back to its inputs."
+        ],
+        "emphasis": ["trace", "source", "three", "folders", "bronze", "silver", "gold", "search", "read", "compare", "links", "traced", "inputs"],
+        "excerpt": { "text": "silver: typed records citing file, page and span in bronze", "source": "playbooks/act-1.md:161" },
+        "next": "Next, Act II: what actually loads into your agent's context?"
+      }
+    ],
+    "postCopy": {
+      "firstLine": "{title}",
+      "body": "Part {part}/5 of Agent Workspaces, Act I. Comment WORKSPACE → get the agent-workspace setup prompts and verification checks.\nbroomva.tech/agent-workspaces",
+      "hashtags": ["#AIAgents", "#AgenticAI", "#ClaudeCode", "#DevTools", "#AgentWorkspaces"]
+    }
   }
 }

@@ -1,0 +1,50 @@
+{
+  "line": "take",
+  "derived": "planned inter-line gaps inserted (zero credits; no request sent)",
+  "part": 2,
+  "reel": "v2-p2-findings",
+  "script": "sha256:0ba0542f63b170be587dfbae7890545498c4a72ce13b1e4743f5d876cd322a6c",
+  "voice_id": "SAz9YHcvj6GT2YYXdXww",
+  "model_id": "eleven_v4",
+  "requestSha256": "1745508991ec5f04aa1050c29da4150048ceb8fea90426474b5dc1fac64abf3a",
+  "audioSha256": "4851132af746a55b835db07ab57c95bb9fd4a95ec461d08cfa4b91810e17f5d3",
+  "alignmentSha256": "38f7b8a7b68974a1b2d6768566101cb352ca2d62d4801be133e42de41c152034",
+  "format": "wav pcm_s16le mono 44100",
+  "lineGapSeconds": 0.35,
+  "cuts": [
+    {
+      "afterLine": 1,
+      "sourceSample": 109896,
+      "sourceAt": 2.492
+    },
+    {
+      "afterLine": 2,
+      "sourceSample": 234356,
+      "sourceAt": 5.3142
+    },
+    {
+      "afterLine": 3,
+      "sourceSample": 325204,
+      "sourceAt": 7.3742
+    },
+    {
+      "afterLine": 4,
+      "sourceSample": 489472,
+      "sourceAt": 11.0991
+    },
+    {
+      "afterLine": 5,
+      "sourceSample": 680632,
+      "sourceAt": 15.4338
+    }
+  ],
+  "credits": 0,
+  "source": {
+    "receipt": "v2-p2-findings.receipt.json",
+    "receiptSha256": "ec87436790d2c302f6c33fd0bae8e353428ce73ac67e4bcbd8b24af5498a45e0",
+    "audioSha256": "4ed86d18df4cc2035643a6f1991255427f23b93d2579e15c219eefd8928a7a23",
+    "alignmentSha256": "41f344dcb544d1e4598d4cd79290eb21f224594497b47389b06618f66a06fc83",
+    "requestId": "hcIP7KDONwv6TQ3Fdxkd",
+    "characterCost": "127"
+  }
+}

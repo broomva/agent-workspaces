@@ -1,0 +1,244 @@
+<!doctype html>
+<!--
+GOAL:    Part 1 of Agent Workspaces Act I. A viewer watches an agent rebuild the same context every
+         session, then sees three real files fix it, then gets the playbook offer. Readable muted.
+OUTPUT:  one self-contained HTML file, plain DOM + JS, 1080x1920 (9:16). Style frame A (owner-approved
+         2026-11-18): terminal on paper. Audio is the approved narration, muxed after the render.
+TIME:    34.2 s x 30 fps = 1026 frames. No loop. Beats from the narration's word timings:
+         collapse 0.6; session ticks on "rises" 8.54 / 9.20 / 9.86; zero thud on "zero" 11.02;
+         files on "instructions" 15.96, "index" 17.64, "decisions" 18.92; counter fills to 9/9 by
+         "checked" 22.39; record written back on "behind" 23.91; excerpt 24.55-27.05;
+         CTA 27.05-31.69; end card 31.69-34.19.
+LOOK:    page #F2EFE8, ink #111111, terminal #141615, text #E8E6E1, dim #8A8F8B, one accent #FF5A1F.
+         Headline Helvetica Neue 800 84 px, tracking -0.03em. Terminal Menlo 40 px / 64 px.
+         Counter DIN Condensed 170 px. Captions Helvetica Neue 800 52 px on #111 pill.
+LAYOUT:  content-engine reels-organic: headline in the title band (y 121-436); all text x 150-860
+         below y 922 (action rail x >= 872); captions centred in the band y 1288-1463; nothing in
+         y >= 1686.
+MOTION:  type-on 3 chars per frame; session change = lines collapse to the top edge over 6 frames
+         (ease-in-expo); the zero answers each tick with a horizontal shake (spring zeta 0.35, 10 px,
+         no scale); file lines enter from 24 px below over 8 frames (ease-out-expo); counter counts
+         up linearly. No CSS transitions, no clock, no randomness.
+BANNED:  glow, gradients, particles, dark void, floating small cards, everything at once,
+         centred-everything, text moving while it is read.
+QA:      contact sheet every 30 frames; stills at each beat; content-flow gates on the muxed file.
+-->
+<html><head><meta charset="utf-8"><style>
+  html,body{-webkit-font-smoothing:antialiased;margin:0;width:1080px;height:1920px;overflow:hidden;background:#F2EFE8;color:#111}
+  #head{position:absolute;left:150px;top:150px;width:760px;font:800 84px/1.04 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.03em}
+  #head b{color:#FF5A1F;font-weight:800}
+  #term{position:absolute;left:100px;top:470px;width:780px;height:790px;background:#141615;border-radius:28px;overflow:hidden}
+  #bar{height:74px;display:flex;align-items:center;padding:0 30px 0 62px;gap:12px;border-bottom:2px solid #262927}
+  .dot{width:18px;height:18px;border-radius:50%;background:#3A3E3C}
+  #ttl{margin-left:16px;font:600 32px Menlo,monospace;color:#9AA09C;white-space:nowrap}
+  #ttl span{color:#FF5A1F}
+  #lines{will-change:transform;transform-origin:50% 0;position:absolute;left:62px;top:104px;right:20px;font:400 52px/74px Menlo,monospace;color:#E8E6E1;white-space:pre}
+  .dim{color:#8A8F8B}.acc{color:#FF5A1F}.ok{color:#FF5A1F}
+  .hl{background:#FF5A1F;color:#141615}
+  .hl .acc,.hl .dim{color:#141615}
+  #big{position:absolute;left:172px;top:520px;width:690px;display:none}
+  #cap{position:absolute;left:220px;top:1300px;width:640px;display:flex;justify-content:center}
+  #cap div{will-change:transform;box-sizing:border-box;background:#111;color:#F2EFE8;font:800 52px/1.12 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.02em;padding:16px 24px;border-radius:16px;text-align:center}
+  #cap em{font-style:normal;color:#FF5A1F}
+  #ret{position:absolute;left:150px;top:1468px;font:800 32px "Helvetica Neue",Helvetica,sans-serif;letter-spacing:0.1em}
+  #ret #rv{display:block;margin-top:14px;font:700 140px/0.85 "DIN Condensed","Helvetica Neue",sans-serif;color:#FF5A1F}
+  #ret i{font-style:normal;color:#111;font-size:76px}
+  .cta1{font:800 64px/1.1 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.02em}
+  .cta2{font:700 180px/0.9 "DIN Condensed","Helvetica Neue",sans-serif;color:#FF5A1F;margin:12px 0 18px}
+  .cta3{font:800 62px/1.12 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.02em}
+  .chip{display:inline-block;margin-top:34px;padding:14px 22px;border:3px solid #111;border-radius:14px;font:700 36px Menlo,monospace;white-space:nowrap}
+  .end1{font:800 70px/1.12 "Helvetica Neue",Helvetica,sans-serif;letter-spacing:-0.03em}
+  .end1 b{color:#FF5A1F}
+  .end2{margin-top:56px;font:800 48px/1.18 "Helvetica Neue",Helvetica,sans-serif;color:#FF5A1F;letter-spacing:-0.02em}
+  .end3{margin-top:56px;font:400 30px/1.3 Menlo,monospace;color:#5E625F}
+</style></head><body>
+<div id="head"></div>
+<div id="term"><div id="bar"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div id="ttl"></div></div><div id="lines"></div></div>
+<div id="big"></div>
+<div id="cap"><div id="capt"></div></div>
+<div id="ret"><span id="rl">QUESTIONS ASKED AGAIN</span><span id="rv"></span></div>
+<script>
+const FPS = 30;
+const WORDS = {"take": [["Session", 0, 0.4], ["twenty", 0.48, 0.88], ["in", 0.96, 1.04], ["an", 1.08, 1.12], ["empty", 1.2, 1.52], ["folder", 1.6, 2], ["still", 2.16, 2.4], ["asks", 2.56, 2.88], ["where", 2.96, 3.04], ["tests", 3.12, 3.44], ["run.", 3.52, 4.04], ["Nothing", 4.67, 4.91], ["was", 4.99, 5.07], ["written", 5.19, 5.31], ["down,", 5.39, 5.95], ["so", 6.07, 6.19], ["the", 6.27, 6.31], ["next", 6.35, 6.59], ["one", 6.67, 6.83], ["asks", 6.91, 7.15], ["again.", 7.23, 7.63], ["Give", 8.62, 8.7], ["it", 8.78, 8.86], ["shared", 8.94, 9.18], ["instructions,", 9.26, 10.14], ["a", 10.18, 10.22], ["knowledge", 10.3, 10.62], ["index,", 10.86, 11.26], ["and", 11.38, 11.5], ["a", 11.58, 11.66], ["record", 11.74, 11.98], ["of", 12.02, 12.06], ["decisions.", 12.14, 12.94], ["Then", 13.53, 13.85], ["each", 14.01, 14.17], ["session", 14.25, 14.57], ["can", 14.65, 14.81], ["start", 14.89, 15.13], ["from", 15.21, 15.29], ["what's", 15.37, 15.53], ["already", 15.69, 15.85], ["been", 15.93, 16.01], ["checked.", 16.09, 16.49], ["The", 17.24, 17.32], ["next", 17.44, 17.56], ["one", 17.64, 17.72], ["reads", 17.8, 18.12], ["where", 18.28, 18.44], ["tests", 18.52, 18.84], ["run,", 18.92, 19.48], ["runs", 19.56, 19.8], ["them,", 19.88, 20.2], ["and", 20.28, 20.36], ["writes", 20.44, 20.68], ["down", 20.76, 20.92], ["what", 21, 21.08], ["it", 21.16, 21.24], ["found.", 21.4, 21.8]], "cta": [["Comment", 25.8, 26.2], ["WORKSPACE", 26.28, 26.84], ["for", 26.92, 27.0], ["the", 27.08, 27.16], ["agent-workspace", 27.24, 28.12], ["setup", 28.2, 28.44], ["prompts", 28.52, 28.92], ["and", 29.0, 29.08], ["verification", 29.16, 29.8], ["checks.", 29.88, 30.44]]};
+function bez(x1,y1,x2,y2){return function(x){if(x<=0)return 0;if(x>=1)return 1;let lo=0,hi=1,t=x;for(let i=0;i<40;i++){t=(lo+hi)/2;const cx=3*x1*t*(1-t)*(1-t)+3*x2*t*t*(1-t)+t*t*t;if(cx<x)lo=t;else hi=t;}return 3*y1*t*(1-t)*(1-t)+3*y2*t*t*(1-t)+t*t*t;};}
+const ENTER = bez(0.16,1,0.3,1), EXIT = bez(0.7,0,0.84,0);
+function spring(t,zeta=0.7,f=2){if(t<=0)return 0;const w=2*Math.PI*f;const wd=w*Math.sqrt(1-zeta*zeta);return 1-Math.exp(-zeta*w*t)*(Math.cos(wd*t)+((zeta*w)/wd)*Math.sin(wd*t));}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function mix(a, b, p){ const h = x => [1,3,5].map(i => parseInt(x.slice(i, i+2), 16)); const A = h(a), B = h(b);
+  return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * p)).join(',') + ')'; }
+const BG = '#141615';
+
+// ---- beats (seconds, from the narration's word timings) ----
+const T = { collapse: 0.6, nothing: 4.67, tick: 6.35, files: [9.26, 10.86, 12.14], start: 13.53,
+            startFrom: 14.89, checkedW: 16.09, where: 18.28, runs: 19.56, ok: 19.88, writes: 20.44, excerpt: 21.8, cta: 25.8, end: 30.44 };
+const SHIFT = 0;                                     // v7: the CTA words are already at their place (excerpt hold 4.0 s)
+
+// ---- terminal scripts: [prefix, rest, restClass]; typed 3 chars/frame from a start time ----
+const REBUILD = [['$ ','agent start','plain','dim'],['AGENTS.md ... ','missing','acc'],['notes/ ...... ','missing','acc'],
+                 ['? where do tests run','',''],['? which style rules','',''],['? what did we decide','','']];
+function typed(lines, sinceFrames, cps){
+  let left = sinceFrames * cps, out = [];
+  for (const [a,b,cls,pcls] of lines){
+    if (left <= 0) break;
+    const full = a + b, shown = full.slice(0, Math.min(full.length, left));
+    left -= full.length + 4 * cps;                     // a 4-frame beat between lines
+    let h;
+    if (pcls === 'dim') h = '<span class="dim">' + esc(shown.slice(0,2)) + '</span>' + esc(shown.slice(2));
+    else if (shown.length > a.length) h = esc(a) + '<span class="' + cls + '">' + esc(shown.slice(a.length)) + '</span>';
+    else h = esc(shown);
+    out.push(h);
+  }
+  return out;
+}
+function bar(n){ return '<span class="acc">' + '█'.repeat(n) + '░'.repeat(9-n) + ' ' + n + '/9</span>'; }
+const f2t = f => f / FPS;
+
+// ---- captions: chunks of up to 4 words inside each spoken line, current word in accent ----
+const LINE_BREAKS = new Set(['run.','down,','again.','decisions.','checked.','run,','them,','found.','checks.']);
+function chunks(words){
+  const out = []; let cur = [];
+  for (const w of words){
+    // v7: break before a chunk outgrows one caption line (~18 characters at 52 px in 640 px)
+    if (cur.length && cur.map(x => x[0]).join(' ').length + 1 + w[0].length > 18) { out.push(cur); cur = []; }
+    cur.push(w); if (cur.length === 4 || LINE_BREAKS.has(w[0]) || /,$/.test(w[0])) { out.push(cur); cur = []; } }
+  if (cur.length) out.push(cur); return out;
+}
+const CH = chunks(WORDS.take).concat(chunks(WORDS.cta.map(w => [w[0], w[1] + SHIFT, w[2] + SHIFT])));
+function caption(t){
+  for (let i = 0; i < CH.length; i++){
+    const c = CH[i], start = c[0][1], next = i + 1 < CH.length ? CH[i+1][0][1] : 1e9;
+    const endHold = c[c.length-1][2] + 0.35;
+    if (t >= start && t < Math.min(next, Math.max(endHold, start + 0.6)))
+      return c.map(w => (t >= w[1] && t < w[2] + 0.12) ? '<em>' + esc(w[0]) + '</em>' : esc(w[0])).join(' ');
+  }
+  return '';
+}
+
+window.renderAt = function(t){
+  const f = Math.round(t * FPS);
+  const head = document.getElementById('head'), L = document.getElementById('lines'), ttl = document.getElementById('ttl');
+  const term = document.getElementById('term'), big = document.getElementById('big'), ret = document.getElementById('ret');
+  let lines = [], session = null, title = '', headline = '20 sessions.<br><b>Same question.</b>';
+  let collapse = 0, retained = 0, shake = 0, showTerm = true, showRet = true, asked = 0, answered = false, illus = false;
+
+  const fC = Math.round(T.collapse * FPS);
+  const SCAN = [['$ ','agent start','plain','dim'], ['reading before start:','',''],
+                [' AGENTS.md ... ','none','acc'], [' notes/ ...... ','none','acc'], [' decisions/ .. ','none','acc'],
+                ['→ ','nothing to read','acc']];
+  if (t < T.collapse) {                                           // S1a: session 19 ends with the question still open
+    session = 19; lines = typed(REBUILD, 999, 3); lines.push('rebuild ' + bar(7));
+    lines[3] = '<span class="hl" style="font-size:58px">? where do tests run</span>';   // the concrete failure, big at frame 0
+    asked = 3;
+  } else if (t < T.nothing) {                                     // S1b: session 20 retypes the same questions
+    session = 20;
+    const since = f - fC;
+    if (since < 6) { collapse = EXIT(since / 6); lines = typed(REBUILD, 999, 3); lines.push('rebuild ' + bar(7)); asked = 3; }
+    else {
+      lines = typed(REBUILD, since - 6, 3);
+      asked = 3 + Math.max(0, lines.length - 3);
+      if (t > 3.0) lines.push('rebuild ' + bar(clamp(Math.floor((t - 3.0) / 0.4), 0, 4)));
+      if (lines.length > 3) lines[3] = '<span class="hl">' + lines[3] + '</span>';   // the same question, again
+    }
+  } else if (t < T.tick) {                                        // S2a: nothing was written down - the scan finds nothing
+    session = 21; asked = 6; headline = 'What could it<br><b>read first?</b>';
+    const since = f - Math.round(T.nothing * FPS);
+    if (since < 5) { collapse = EXIT(since / 5); lines = typed(REBUILD, 999, 3); }
+    else lines = typed(SCAN, since - 5, 3);
+  } else if (t < T.files[0] - 0.5) {                              // S2b: so the next one asks again
+    session = 22; headline = 'What could it<br><b>read first?</b>';
+    const since = f - Math.round(T.tick * FPS);
+    if (since < 5) { collapse = EXIT(since / 5); lines = typed(SCAN, 999, 3); asked = 6; }
+    else { lines = typed(REBUILD, since - 5, 5); asked = 9 + Math.max(0, lines.length - 3); }
+    const ks = t - T.tick;
+    if (ks >= 0 && ks < 0.6) shake = 10 * Math.exp(-6 * ks) * Math.sin(2 * Math.PI * 7 * ks);
+  } else if (t < T.start) {                                       // S3: three things to read, on the words
+    asked = 12;
+    title = 'repo · write it down once'; headline = 'Give it something<br><b>to read first.</b>';
+    lines = ['<span class="dim">$ git add</span>'];
+    const files = [['+ AGENTS.md','shared instructions'],['+ research/entities/','knowledge index'],['+ docs/conversations/','record of decisions']];
+    files.forEach((fl, i) => {
+      if (t >= T.files[i]) {
+        const p = ENTER(clamp((t - T.files[i]) * FPS / 8, 0, 1));
+        lines.push('<span style="color:' + mix(BG, '#FF5A1F', p) + '">' + esc(fl[0]) + '</span>');
+        lines.push('<span style="color:' + mix(BG, '#8A8F8B', p) + '">  ' + esc(fl[1]) + '</span>');
+      }
+    });
+  } else if (t < T.excerpt) {                                     // S4: the next session reads, runs, writes back (illustrative)
+    session = 23; illus = true; headline = 'Now it starts from<br><b>what’s checked.</b>';
+    const since = f - Math.round(T.start * FPS);
+    if (since < 6) { collapse = EXIT(since / 6); lines = ['<span class="dim">$ git add</span>']; }
+    else {
+      lines = typed([['$ ','agent start','plain','dim']], since - 6, 3);
+      const add = (at, txt) => { if (t >= at) { const p = ENTER(clamp((t - at) * FPS / 8, 0, 1)); lines.push(txt(p)); } };
+      // v7: it reads on the words - instructions on 'start from', the record of what was checked on 'checked.'
+      add(T.startFrom, p => '<span style="color:' + mix(BG, '#E8E6E1', p) + '">AGENTS.md ... </span><span style="color:' + mix(BG, '#FF5A1F', p) + '">read ✓</span>');
+      add(T.checkedW,  p => '<span style="color:' + mix(BG, '#E8E6E1', p) + '">conversations/ </span><span style="color:' + mix(BG, '#FF5A1F', p) + '">read ✓</span>');
+      add(T.where,  p => '<span style="color:' + mix(BG, '#E8E6E1', p) + '">  tests: </span><span style="color:' + mix(BG, '#FF5A1F', p) + '">make check</span>');
+      add(T.runs,   p => '<span style="color:' + mix(BG, '#8A8F8B', p) + '">$ </span><span style="color:' + mix(BG, '#E8E6E1', p) + '">make check</span>');
+      add(T.ok,     p => '<span style="color:' + mix(BG, '#E8E6E1', p) + '">ok </span><span style="color:' + mix(BG, '#FF5A1F', p) + '">✓</span>');
+      add(T.writes, p => '<span style="color:' + mix(BG, '#FF5A1F', p) + '">+ docs/conversations/</span>');
+      add(T.writes + 0.25, p => '<span style="color:' + mix(BG, '#E8E6E1', p) + '">  decided:</span>');
+      add(T.writes + 0.5,  p => '<span style="color:' + mix(BG, '#FF5A1F', p) + '">  tests via make check</span>');
+      if (t < T.where && Math.floor(t * 2) % 2 === 0) lines.push('▌');   // the cursor waits between reads
+    }
+    asked = 12; answered = t >= T.ok;                             // one question answered, not a reset to 0
+  } else if (t < T.cta) {                                         // S5: the playbook excerpt, complete for the whole hold
+    showTerm = false; showRet = false; headline = 'One setup prompt:';
+    const rd = clamp((t - T.excerpt) / (T.cta - T.excerpt - 0.4), 0, 1);
+    const lit = Math.floor(Math.min(1, rd / 0.7) * 3 + 0.0001);
+    const cell = (w, i) => '<div style="flex:1;padding:16px 0 16px 20px;border-left:' + (i ? '4px solid #111' : '0') + ';color:' + (lit > i ? '#FF5A1F' : '#111') + '">' + w + '</div>';
+    big.innerHTML = '<div style="font:400 34px Menlo,monospace;color:#5E625F;margin-bottom:22px">playbooks/act-1.md · step 2</div>' +
+      '<div style="font:800 64px/1.16 \'Helvetica Neue\',Helvetica,sans-serif;letter-spacing:-0.02em">“Write<br>' +
+      '<span style="font:400 46px/1.5 Menlo,monospace;white-space:nowrap;color:#FF5A1F">docs/workspace-layout.md</span><br>' +
+      'with a table of path, job and writer”</div>' +
+      '<div style="display:flex;margin-top:40px;border:4px solid #111;border-radius:12px;font:800 56px \'Helvetica Neue\',Helvetica,sans-serif">' +
+        ['path', 'job', 'writer'].map(cell).join('') + '</div>' +
+      '<div style="height:96px;border:4px solid #111;border-top:0;border-radius:0 0 12px 12px;margin-top:-12px"></div>' +
+      '<div style="margin-top:36px;height:16px;width:' + (rd * 100).toFixed(2) + '%;background:#111;border-radius:8px"></div>';
+  } else if (t < T.end) {                                         // S6: the ask, on the CTA words
+    showTerm = false; showRet = false; headline = 'Want the<br><b>setup prompts?</b>';
+    const at = (s0) => { const p = ENTER(clamp((t - s0) * FPS / 10, 0, 1)); return 'style="opacity:' + p.toFixed(3) + ';transform:translateY(' + (40 * (1 - p)).toFixed(1) + 'px)"'; };
+    const ul = ENTER(clamp((t - 28.2) * FPS / 20, 0, 1));
+    big.innerHTML = '<div class="cta1" ' + at(25.8) + '>Comment</div>' +
+      '<div class="cta2" ' + at(26.28) + '>WORKSPACE</div>' +
+      '<div style="height:12px;background:#FF5A1F;width:' + (ul * 100).toFixed(2) + '%;margin:-6px 0 24px"></div>' +
+      '<div class="cta3" ' + at(27.24) + '>for the agent-workspace setup prompts and verification checks.</div>' +
+      '<div class="chip" ' + at(29.0) + '>5 steps, each checked</div>';
+  } else {                                                        // S9: end card
+    showTerm = false; showRet = false; headline = 'Agent Workspaces<br><b>Act I · 1 of 5</b>';
+    big.innerHTML = '<div class="end1">Build your layout ·<br>route <b>AGENTS.md</b> ·<br>check what survives</div>' +
+                    '<div class="end2">Next: can your next agent check what this one found?</div>' +
+                    '<div class="end3">AI-generated narration<br>(ElevenLabs stock voice)</div>';
+  }
+
+  head.innerHTML = headline;
+  term.style.display = showTerm ? 'block' : 'none';
+  big.style.display = showTerm ? 'none' : 'block';
+  ret.style.display = showRet ? 'block' : 'none';
+  ttl.innerHTML = session !== null ? 'agent · session <span>' + session + '</span>' + (illus ? ' · illustrative' : '') : esc(title);
+  ttl.style.fontSize = illus ? '28px' : '';
+  L.innerHTML = lines.join('\n');
+  L.style.transform = 'scaleY(' + (1 - collapse).toFixed(4) + ')';
+  document.getElementById('rl').textContent = answered ? 'WHERE DO TESTS RUN?' : 'QUESTIONS ASKED AGAIN';
+  document.getElementById('rv').innerHTML = answered ? '<span style="display:block;margin-top:14px;font:800 52px \'Helvetica Neue\',Helvetica,sans-serif;color:#FF5A1F;letter-spacing:-0.01em">answered from AGENTS.md</span>' : String(asked);
+  document.getElementById('rv').style.transform = 'translateX(' + shake.toFixed(2) + 'px)';
+  const capText = t >= T.cta ? '' : caption(t);              // the CTA's own big type carries those words (creative review)
+  document.getElementById('capt').innerHTML = capText;
+  document.getElementById('cap').style.display = capText ? 'flex' : 'none';
+  // Snap the centred pill to an even whole-pixel width: a half-pixel left edge made the rounded
+  // corner's anti-aliasing depend on what was drawn before (render.mjs --verify, frame 535).
+  const capt = document.getElementById('capt');
+  capt.style.width = '';
+  if (capText) capt.style.width = (2 * Math.ceil(capt.getBoundingClientRect().width / 2)) + 'px';
+};
+const q = new URLSearchParams(location.search).get('t');
+window.renderAt(q === null ? 0 : parseFloat(q));
+const warm = document.createElement('div');
+warm.setAttribute('aria-hidden', 'true');
+warm.style.cssText = 'position:absolute;left:-6000px;top:0';
+warm.innerHTML = '<div style="font:800 52px Helvetica Neue">' + CH.map(c => c.map(w => w[0]).join(' ')).join('<br>') + '</div>' +
+  '<div style="font:700 200px DIN Condensed">WORKSPACE 0123456789</div><div style="font:400 40px Menlo">█░▌✓ abc</div>';
+document.body.appendChild(warm);
+document.fonts.ready.then(() => { warm.remove(); window.renderAt(q === null ? 0 : parseFloat(q)); window.__ready = true; });
+</script></body></html>

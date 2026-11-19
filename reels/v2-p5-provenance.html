@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agent Workspaces · Act I v2 · Part 5 · Can you trace this agent result back to its source?</title>
+<meta name="viewport" content="width=1080">
+<!-- Act I v2, Part 5 (BRO-3825), storyboarded from the script card's scene notes (content-flow
+     accounts/broomva.tech/runs/2026-11-17-act1-v2/p5-provenance/script.json). Vertical-native 1080x1920.
+     window.REEL_V2 (reels/audio/v2/v2-p5-provenance.timeline.js, written by `bun reels/tts.mjs --v2`) carries the River
+     line and word timings of the gapped take; every beat below is keyed to them. Every frame is a pure function of t:
+     window.renderAt(t). Geometry: the content-engine 9:16 contract (reels-organic): title band y 121-436, caption band
+     x 220-860 y 1288-1463, action rail x > 872 below y 922 kept empty; the stage (y 460-1270) never holds still for 3 s.
+     One readable element at a time in the stage; all meaningful text is at least 46 px. -->
+<style>
+@font-face{font-family:'Inter';font-weight:300 700;src:url(../deck/fonts/Inter-400.woff2) format('woff2')}
+@font-face{font-family:'Raleway';font-weight:200 600;src:url(../deck/fonts/Raleway-300.woff2) format('woff2')}
+@font-face{font-family:'Roboto Flex';font-weight:400;src:url(../deck/fonts/RobotoFlex-Regular.ttf) format('truetype')}
+@font-face{font-family:'Roboto Flex';font-weight:700;src:url(../deck/fonts/RobotoFlex-Bold.ttf) format('truetype')}
+@font-face{font-family:'JetBrains Mono';font-weight:300 700;src:url(../deck/fonts/JetBrainsMono-400.woff2) format('woff2')}
+:root{
+  --deep:oklch(0.155 0.028 250);--t1:oklch(0.975 0.004 250);--t2:oklch(0.83 0.015 248);--t3:oklch(0.65 0.022 248);
+  --blue:oklch(0.71 0.15 252);--green:oklch(0.76 0.19 148);--amber:oklch(0.82 0.15 75);
+  --bronze:oklch(0.66 0.11 52);--silver:oklch(0.84 0.012 250);--gold:oklch(0.84 0.15 88);
+  --bar:oklch(0.78 0.03 245 / .28);
+  --display:'Raleway',sans-serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--deep);color:var(--t1)}
+body{position:relative;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+canvas{position:absolute;left:0;top:0;width:1080px;height:1920px}
+svg{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible}
+.abs{position:absolute}
+.glass{position:absolute;border-radius:28px;
+  background:linear-gradient(180deg,oklch(0.36 0.03 248 / .5),oklch(0.22 0.03 250 / .55) 55%,oklch(0.19 0.03 250 / .62));
+  box-shadow:0 30px 80px -30px oklch(0.04 0.02 250 / .85),inset 0 1px 0 oklch(1 0 0 / .2),inset 0 0 0 1.5px oklch(1 0 0 / .07)}
+.barr{position:absolute;height:22px;border-radius:11px;background:var(--bar)}
+/* headline: complete and at full brightness from frame 0, inside the title band (y 121-436) */
+#h{position:absolute;left:151px;top:190px;width:800px;font:300 84px/1.06 var(--display);letter-spacing:-.03em;color:var(--t1)}
+#h em{font-style:normal;font-weight:400;color:var(--blue)}
+/* cold open: a result card whose source link goes nowhere visible */
+#card{left:190px;top:540px;width:700px;height:360px}
+#card .fl{position:absolute;inset:0;border-radius:28px;background:oklch(0.71 0.15 252 / .5)}
+#link{position:absolute;left:54px;top:250px;font:500 54px/1 var(--sans);color:var(--blue);text-decoration:underline;text-underline-offset:10px;
+  text-decoration-thickness:4px}
+#cur{position:absolute;width:0;height:0;border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:56px solid var(--t1);
+  transform-origin:50% 0;filter:drop-shadow(0 6px 10px oklch(0.04 0.02 250 / .8))}
+#rip{position:absolute;width:140px;height:140px;margin:-70px 0 0 -70px;border-radius:50%;border:5px solid oklch(0.71 0.15 252 / .8)}
+#dest{left:190px;top:950px;width:700px;height:270px;overflow:hidden}
+#dest .barr{filter:blur(9px)}
+#q{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);font:600 140px/1 var(--sans);color:var(--amber)}
+/* the three folders */
+.fold{position:absolute;width:190px;height:150px;margin:-75px 0 0 -95px}
+.fold .tab{position:absolute;left:0;top:0;width:84px;height:34px;border-radius:14px 14px 0 0}
+.fold .body{position:absolute;left:0;top:22px;right:0;bottom:0;border-radius:6px 18px 18px 18px}
+#fb .tab,#fb .body{background:var(--bronze)} #fs .tab,#fs .body{background:var(--silver)} #fg .tab,#fg .body{background:var(--gold)}
+.fold .tab{filter:brightness(.8)}
+.fold .ok{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);font:700 70px/1 var(--sans);color:var(--deep)}
+/* one file leaves the focused folder */
+#file{position:absolute;width:96px;height:120px;margin:-60px 0 0 -48px;border-radius:10px;background:var(--t1)}
+#file::after{content:"";position:absolute;right:0;top:0;width:30px;height:30px;background:var(--deep);border-bottom-left-radius:8px}
+/* the one readable line under the folders */
+#path{position:absolute;left:540px;top:1000px;transform:translate(-50%,-50%);white-space:pre;font:500 50px/1 var(--mono);letter-spacing:-.02em;color:var(--t1)}
+/* search, read, compare: a scan beam crosses the folders */
+#beam{position:absolute;top:610px;width:16px;height:220px;margin-left:-8px;border-radius:8px;
+  background:linear-gradient(180deg,oklch(0.71 0.15 252 / 0),oklch(0.85 0.12 252 / .95),oklch(0.71 0.15 252 / 0));box-shadow:0 0 40px var(--blue)}
+/* the bronze page with the cited span */
+#page{left:300px;top:1060px;width:480px;height:190px;padding:0}
+#page .hl{background:oklch(0.82 0.15 75 / .85);box-shadow:0 0 24px oklch(0.82 0.15 75 / .6)}
+/* playbook excerpt, alone */
+#ex{left:170px;top:640px;width:700px;padding:56px 54px 92px}
+#ex p{font:400 58px/1.22 var(--display);letter-spacing:-.015em;color:var(--t1)}
+#ex .rule{position:absolute;left:54px;bottom:46px;height:6px;border-radius:3px;background:var(--amber)}
+/* end card: one line at a time */
+.endl{left:170px;top:660px;width:700px;min-height:400px;padding:60px 54px;display:flex;align-items:center}
+.endl p{font:300 62px/1.18 var(--display);letter-spacing:-.02em;color:var(--t1)}
+.endl p b{font-weight:400;color:var(--blue)}
+/* Caption with Intention, in the caption band: one event at a time, word by word from the River alignment */
+#cap{position:absolute;left:540px;bottom:482px;transform:translateX(-50%);max-width:640px;width:max-content;padding:12px 28px 14px;
+  border-radius:30px;text-align:center;font:400 50px/1.12 'Roboto Flex',var(--sans);letter-spacing:-.01em;text-wrap:balance;
+  background:linear-gradient(180deg,oklch(0.3 0.03 248 / .62),oklch(0.18 0.03 250 / .7));box-shadow:inset 0 1px 0 oklch(1 0 0 / .18)}
+#cap .w{display:inline-block;white-space:pre;transform-origin:50% 70%}
+</style>
+<style>
+#example { position:absolute; left:170px; top:650px; width:700px; min-height:390px; padding:42px; z-index:8; background:#243748; border:2px solid #70899a; border-radius:28px; box-shadow:0 25px 60px #08121b99; }
+#example .tag { font: 500 32px/1.2 var(--sans); color:#f4d38a; margin-bottom:32px; }
+#example .main { font: 600 40px/1.22 var(--mono); color:#fff; overflow-wrap:anywhere; }
+#example .detail { font: 500 38px/1.25 var(--sans); color:#b8d5e3; margin-top:26px; overflow-wrap:anywhere; }
+#example .progress { height:8px; margin-top:36px; background:#8cc6ed; border-radius:4px; }
+</style>
+</head>
+<body>
+<canvas id="bg" width="1080" height="1920"></canvas>
+<h1 id="h">Where did this<br><em>answer come from?</em></h1>
+
+<div class="glass" id="card"><i class="barr" style="left:54px;top:60px;width:420px"></i><i class="barr" style="left:54px;top:110px;width:560px"></i>
+  <i class="barr" style="left:54px;top:160px;width:330px"></i><span id="link">source ↗</span><i class="fl"></i></div>
+<div class="glass" id="dest"><i class="barr" style="left:54px;top:60px;width:380px"></i><i class="barr" style="left:54px;top:110px;width:520px"></i>
+  <i class="barr" style="left:54px;top:160px;width:300px"></i><i class="barr" style="left:54px;top:210px;width:450px"></i><span id="q">?</span></div>
+<div id="rip"></div><div id="cur"></div>
+
+<svg viewBox="0 0 1080 1920"><path id="arcGS" fill="none" stroke-linecap="round" stroke-width="7"/><path id="arcSB" fill="none" stroke-linecap="round" stroke-width="7"/></svg>
+<div class="fold" id="fb"><i class="tab"></i><i class="body"></i><span class="ok"></span></div>
+<div class="fold" id="fs"><i class="tab"></i><i class="body"></i><span class="ok"></span></div>
+<div class="fold" id="fg"><i class="tab"></i><i class="body"></i><span class="ok"></span></div>
+<div id="beam"></div>
+<div id="file"></div>
+<div id="path"></div>
+<div class="glass" id="page"></div>
+
+<div class="glass" id="ex"><p></p><i class="rule"></i></div>
+<div class="glass endl" id="endA"><p></p></div>
+<div class="glass endl" id="endB"><p></p></div>
+
+<div id="example"><div class="tag"></div><div class="main"></div><div class="detail"></div><div class="progress"></div></div>
+<div id="cap"></div>
+
+<script>
+const S = window.REEL_V2;
+if (!S) throw new Error('window.REEL_V2 is missing: run bun reels/tts.mjs --v2 --reel v2-p5-provenance, or render with reels/render.mjs');
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k, TAU = Math.PI * 2;
+const ease = x => { x = clamp(x, 0, 1); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 };
+const ramp = (t, a, d) => ease((t - a) / d);
+const win = (t, a, b, fi = .3, fo = .3) => Math.min(ramp(t, a, fi), 1 - ramp(t, b - fo, fo));   // in at a, out by b
+const L = S.take.lines, W = S.take.words;
+const nth = (text, n) => W.filter(w => w.text.replace(/[^\w-]/g, '').toLowerCase() === text)[n];
+const TL = {
+  click: 0.5,                                   // the source link is clicked (script card: cold_open.event_at_s)
+  keep: L[1].start, three: nth('three', 0).start, folders: nth('folders', 0).start,
+  bronze: nth('bronze', 0).start, silver: nth('silver', 0).start, gold: nth('gold', 0).start,
+  agent: L[3].start, search: nth('search', 0).start, read: nth('read', 0).start, compare: nth('compare', 0).start,
+  links0: L[4].start, links: nth('links', 0).start, result: nth('result', 2).start, traced: nth('traced', 0).start,
+  inputs: nth('inputs', 0).start, takeEnd: S.take.dur,
+  ex: S.excerpt.at, exEnd: S.excerpt.at + S.excerpt.hold, cta: S.cta.at, endSwap: S.cta.at + 2.4, total: S.total_dur,
+};
+window.__TL = TL;
+
+// ── background: soft lights orbit the stage, so the stage is never still (dead_stretch), and a faint drifting grid ──
+const bg = $('bg').getContext('2d');
+function background(t) {
+  bg.clearRect(0, 0, 1080, 1920);
+  bg.fillStyle = 'oklch(0.155 0.028 250)'; bg.fillRect(0, 0, 1080, 1920);
+  const lights = [[0.6, 1.4, 'oklch(0.55 0.16 252 / .55)', 470], [-0.45, 3.6, 'oklch(0.55 0.12 70 / .38)', 420], [0.32, 5.4, 'oklch(0.6 0.12 200 / .3)', 380]];
+  for (const [w, ph, c, r] of lights) {
+    const x = 540 + Math.cos(t * w + ph) * 250, y = 860 + Math.sin(t * w * 1.3 + ph) * 290;
+    const g = bg.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, c); g.addColorStop(1, 'oklch(0.155 0.028 250 / 0)');
+    bg.fillStyle = g; bg.fillRect(0, 0, 1080, 1920);
+  }
+  bg.fillStyle = 'oklch(0.78 0.03 245 / .07)';
+  const off = (t * 22) % 60;
+  for (let y = 470 - off; y < 1290; y += 60) for (let x = 170; x < 870; x += 60) { bg.beginPath(); bg.arc(x, y, 2.4, 0, TAU); bg.fill() }
+}
+
+$('ex').querySelector('p').textContent = S.excerpt.text;
+$('endA').querySelector('p').textContent = S.end.card[0];
+$('endB').querySelector('p').innerHTML = S.end.card[1].replace(/^(Next[^:]*:)/, '<b>$1</b>');
+// the bronze page: text lines as bars, one of them the cited span
+const PAGE = [[40, 300], [80, 380], [120, 250], [160, 340]];
+PAGE.forEach(([y, w], i) => { const b = document.createElement('i'); b.className = `barr${i === 2 ? ' hl' : ''}`; b.style.left = '40px'; b.style.top = `${y - 20}px`; b.style.width = `${w}px`; $('page').appendChild(b) });
+
+// An element at rest carries no transform, filter or opacity (a leftover blur(0) composites differently).
+function show(el, k, tf = () => '', blur = 0) {
+  el.style.visibility = k > 0.001 ? '' : 'hidden';
+  el.style.opacity = k >= 1 ? '' : String(clamp(k, 0, 1));
+  const f = tf(k); el.style.transform = f || '';
+  el.style.filter = blur > 0 ? `blur(${blur.toFixed(2)}px)` : '';
+}
+
+// ── captions: CWI-shaped events from the River alignment, drawn word by word ──
+const capEl = $('cap'), CAPS = S.captions.captions, COL = 'oklch(0.8 0.12 245)', KW = 'oklch(0.86 0.12 88)';
+CAPS.forEach((ev, i) => {
+  ev.until = i + 1 < CAPS.length && CAPS[i + 1].start - ev.end < 1 ? CAPS[i + 1].start : ev.end + .5;
+  ev.chainOut = i + 1 < CAPS.length && CAPS[i + 1].start - ev.end < .5; ev.chainIn = i > 0 && CAPS[i - 1].chainOut;
+});
+let capShown = -1;
+function captions(t) {
+  let i = -1; for (let k = 0; k < CAPS.length; k++) if (t >= CAPS[k].start - .12) i = k;
+  const ev = CAPS[i];
+  // the playbook excerpt holds alone: no caption from the end of the take to the CTA's first word
+  if (!ev || t > ev.until || (t >= S.excerpt.at && t < S.cta.at)) { capEl.style.visibility = 'hidden'; return }
+  capEl.style.visibility = '';
+  if (capShown !== i) {
+    capEl.innerHTML = ev.words.map(w => `<span class="w">${w.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join(' ');
+    capShown = i;
+    ev.words.forEach((w, j) => { if (w.emphasis) capEl.children[j].style.margin = `0 ${Math.ceil(capEl.children[j].getBoundingClientRect().width * .08)}px` });
+  }
+  const inK = ev.chainIn ? 1 : ramp(t, ev.start - .12, .18), outK = ev.chainOut ? 1 : 1 - ramp(t, ev.until - .14, .14), k = Math.min(inK, outK);
+  capEl.style.opacity = k >= 1 ? '' : String(k);
+  ev.words.forEach((w, j) => {
+    const el = capEl.children[j], col = w.text.includes(S.cta.keyword) ? KW : COL;
+    const p = ease((t - w.start - .1) / .6);
+    const rise = ease((t - w.start + .05) / .22);
+    const bump = w.emphasis ? Math.sin(Math.PI * clamp((t - w.start) / .45, 0, 1)) : 0;
+    el.style.fontWeight = String(w.weight); el.style.fontSize = `${(50 * w.size).toFixed(1)}px`;
+    el.style.color = p >= 1 ? col : p <= 0 ? '#fff' : `color-mix(in oklab, ${col} ${(p * 100).toFixed(1)}%, #fff)`;
+    el.style.opacity = rise >= 1 ? '' : (.38 + .62 * rise).toFixed(3);
+    el.style.transform = bump > 0 ? `scale(${(1 + .15 * bump).toFixed(4)})` : rise >= 1 ? '' : `translateY(${((1 - rise) * 10).toFixed(2)}px)`;
+    el.style.textShadow = w.emphasis && t >= w.start ? `0 0 ${(20 * Math.max(bump, .35)).toFixed(1)}px ${col}` : '';
+  });
+}
+
+// folder geometry: bronze, silver, gold left to right
+const FX = { fb: 310, fs: 540, fg: 770 }, FY = 720;
+// one readable line at a time under the folders: [from, to, text]
+const PATHS = () => [
+  [TL.bronze - .1, TL.silver - .15, 'bronze/source.pdf'],
+  [TL.silver - .1, TL.gold - .15, 'silver/record.json'],
+  [TL.gold - .1, TL.agent - .2, 'gold/result.md'],
+  [TL.search - .1, TL.read - .1, 'search'],
+  [TL.read - .1, TL.compare - .1, 'read'],
+  [TL.compare - .1, TL.links0 - .15, 'compare'],
+  [TL.links0 - .05, TL.links + .5, 'gold/result.md'],
+  [TL.links + .55, TL.result + .05, '→ silver/record.json'],
+  [TL.result + .1, TL.traced + .55, '→ bronze/source.pdf'],
+  [TL.traced + .6, TL.takeEnd, 'page 4 · span 212–260'],
+];
+
+window.renderAt = function (t) {
+  background(t);
+  captions(t);
+  show($('h'), 1 - ramp(t, TL.keep - .1, .45), k => k < 1 ? `translateY(${((1 - k) * -18).toFixed(1)}px)` : '');
+
+  // ── cold open: the result card; the cursor clicks "source" at 0.5 s; the destination opens but stays hidden ──
+  const coldOut = ramp(t, TL.keep - .2, .35);
+  show($('card'), 1 - coldOut, k => k < 1 ? `translateY(${((1 - k) * -30).toFixed(1)}px)` : '');
+  $('card').querySelector('.fl').style.opacity = clamp(1 - Math.abs(t - TL.click - .03) / .16, 0, 1).toFixed(3);   // the click lights the card
+  const ct = clamp(t / TL.click, 0, 1), ce = 1 - Math.pow(1 - ct, 3);
+  const cur = $('cur'), press = t >= TL.click && t < TL.click + .18 ? .85 : 1;
+  show(cur, (1 - ramp(t, 1.4, .3)), () => `rotate(-28deg) scale(${press})`);
+  cur.style.left = `${lerp(700, 300, ce).toFixed(1)}px`; cur.style.top = `${lerp(1120, 820, ce).toFixed(1)}px`;
+  const rp = clamp((t - TL.click) / .5, 0, 1);
+  show($('rip'), rp > 0 && rp < 1 ? 1 - rp : 0, () => `scale(${(.3 + rp).toFixed(4)})`);
+  $('rip').style.left = '320px'; $('rip').style.top = '808px';
+  const dIn = ramp(t, TL.click + .08, .3);
+  show($('dest'), dIn * (1 - coldOut), k => `translateY(${((1 - dIn) * 60).toFixed(1)}px)`);
+  const qPulse = .5 + .5 * Math.sin(t * 5);
+  $('q').style.transform = `translate(-50%,-52%) scale(${(1 + .06 * qPulse).toFixed(4)})`;
+
+  // ── the folders: appear one per word on "Keep three folders", focus one at a time, then carry the links ──
+  const appear = { fb: TL.keep - .05, fs: TL.three - .05, fg: TL.folders - .05 };
+  const focus = t >= TL.bronze - .1 && t < TL.silver - .1 ? 'fb' : t >= TL.silver - .1 && t < TL.gold - .1 ? 'fs'
+    : t >= TL.gold - .1 && t < TL.agent - .2 ? 'fg'
+      : t >= TL.links0 - .05 && t < TL.links + .5 ? 'fg' : t >= TL.links + .5 && t < TL.result + .05 ? 'fs' : t >= TL.result + .05 && t < TL.takeEnd ? 'fb' : null;
+  const end = 1 - ramp(t, TL.takeEnd - .15, .15);
+  for (const id of ['fb', 'fs', 'fg']) {
+    const el = $(id), k = ramp(t, appear[id], .35) * end;
+    const on = focus === id, dim = focus && !on ? .4 : 1;
+    const bob = Math.sin(t * 2.2 + FX[id] / 90) * 6;
+    show(el, k * dim, () => `translateY(${(bob + (on ? -14 : 0)).toFixed(1)}px) scale(${((on ? 1.12 : 1) * lerp(.6, 1, k)).toFixed(4)})`);
+    el.style.left = `${FX[id]}px`; el.style.top = `${FY}px`;
+    el.style.filter = on ? `drop-shadow(0 0 26px ${id === 'fb' ? 'oklch(0.66 0.11 52 / .8)' : id === 'fs' ? 'oklch(0.84 0.012 250 / .7)' : 'oklch(0.84 0.15 88 / .8)'})` : '';
+  }
+  // the gold folder takes a green check when the chain reaches the inputs
+  const traced = t >= TL.inputs;
+  $('fg').querySelector('.ok').textContent = traced ? '✓' : '';
+
+  // one file comes out of the focused folder while it is named (bronze, silver, gold)
+  const fileFor = t < TL.silver - .1 ? ['fb', TL.bronze] : t < TL.gold - .1 ? ['fs', TL.silver] : ['fg', TL.gold];
+  const ft = clamp((t - fileFor[1] + .05) / .45, 0, 1), fileK = win(t, fileFor[1] - .05, (fileFor[0] === 'fg' ? TL.agent - .2 : fileFor[1] + 1.7), .2, .2);
+  const fe = 1 - Math.pow(1 - ft, 3);
+  show($('file'), t >= TL.bronze - .1 && t < TL.agent ? fileK : 0, () => `rotate(${((1 - fe) * -12).toFixed(2)}deg) scale(${(.5 + .5 * fe).toFixed(4)})`);
+  $('file').style.left = `${FX[fileFor[0]]}px`; $('file').style.top = `${lerp(FY, 858, fe).toFixed(1)}px`;
+
+  // search, read, compare: a beam sweeps across the three folders
+  const bt = (t - TL.search + .2) / 1.1;
+  const beamK = win(t, TL.search - .25, TL.links0 - .1, .2, .3);
+  show($('beam'), beamK);
+  $('beam').style.left = `${(220 + (1 - Math.abs((((bt % 2) + 2) % 2) - 1)) * 640).toFixed(1)}px`;   // a triangle wave, x 220-860
+
+  // the one readable line
+  const P = PATHS().find(([a, b]) => t >= a && t < b), pathEl = $('path');
+  pathEl.textContent = P ? P[2] : '';
+  show(pathEl, P ? Math.min(ramp(t, P[0], .18), 1 - ramp(t, P[1] - .15, .15)) : 0, () => 'translate(-50%,-50%)');
+  pathEl.style.color = P && P[2].startsWith('page') ? 'var(--amber)' : '';
+
+  // the links: gold → silver, then silver → bronze, drawn above the folders
+  const arc = (el, x0, x1, k, col) => {
+    const mx = (x0 + x1) / 2, top = FY - 175;
+    el.setAttribute('d', `M ${x0} ${FY - 80} Q ${mx} ${top} ${x1} ${FY - 80}`);
+    const len = el.getTotalLength();
+    el.style.strokeDasharray = `${len}`; el.style.strokeDashoffset = `${(len * (1 - k)).toFixed(1)}`;
+    el.style.stroke = col; el.style.visibility = k > .001 ? '' : 'hidden'; el.style.opacity = String(end);
+  };
+  arc($('arcGS'), FX.fg, FX.fs, ramp(t, TL.links - .1, .55), traced ? 'oklch(0.76 0.19 148)' : 'oklch(0.84 0.15 88)');
+  arc($('arcSB'), FX.fs, FX.fb, ramp(t, TL.result - .05, .55), traced ? 'oklch(0.76 0.19 148)' : 'oklch(0.84 0.012 250)');
+
+  // the bronze page, its cited span lit, when the chain reaches page and span
+  const pageK = win(t, TL.traced + .5, TL.takeEnd, .3, .15);
+  show($('page'), pageK, k => k < 1 ? `translateY(${((1 - k) * 40).toFixed(1)}px)` : '');
+  $('page').querySelector('.hl').style.width = `${(250 * clamp((t - TL.traced - .7) / .5, 0, 1)).toFixed(1)}px`;
+  $('path').style.top = pageK > 0 ? '1000px' : '';
+
+  // the playbook excerpt, alone, for its full hold; an amber rule reads across it
+  const exK = win(t, TL.ex - .1, TL.exEnd + .12, .1, .12);
+  show($('ex'), exK);
+  $('ex').querySelector('.rule').style.width = `${(592 * clamp((t - TL.ex) / S.excerpt.hold, 0, 1)).toFixed(1)}px`;
+
+  // end card: what the CTA delivers, then the next question; each gently floats
+  const aK = win(t, TL.exEnd - .02, TL.endSwap, .2, .2), bK = ramp(t, TL.endSwap - .02, .25);
+  show($('endA'), aK, () => `translateY(${(Math.sin((t - TL.cta) * 1.3) * 10).toFixed(1)}px)`);
+  show($('endB'), bK, () => `translateY(${(Math.sin((t - TL.endSwap) * 1.3) * 10).toFixed(1)}px)`);
+};
+
+// Concrete example replaces the schematic stage; timing and captions remain unchanged.
+const exampleBeats = [[0, "Illustrative · result", "Gold: revenue is $100", "Checking source…"], [0.6, "Illustrative · disputed result", "Gold: revenue is $100", "Source says $90?"], [3.2, "Illustrative · accepted result", "gold/revenue.md", "Revenue: $100 · see silver"], [6.1, "Illustrative · extracted record", "silver/revenue.json", "Revenue: $100 · see bronze"], [9.2, "Illustrative · source citation", "bronze/report.pdf", "page 4 · span 12–24"], [12.0, "Illustrative · source text", "bronze/report.pdf · page 4", "“Revenue: $90”"], [15.0, "Illustrative · verify claim", "Gold: $100", "Bronze: $90 · mismatch"], [17.5, "Illustrative · trace", "gold → silver → bronze", "Page 4 · span 12–24"]];
+const originalRenderAt = window.renderAt;
+window.renderAt = function(t) {
+  originalRenderAt(t);
+  for (const id of "card,dest,rip,cur,arcGS,arcSB,fb,fs,fg,beam,file,path,page".split(',')) $(id).style.visibility = 'hidden';
+  const el = $('example');
+  el.style.visibility = t < S.take.dur ? 'visible' : 'hidden';
+  if (t < S.take.dur) {
+    let i = 0; while (i + 1 < exampleBeats.length && t >= exampleBeats[i + 1][0]) i++;
+    const [start, tag, main, detail] = exampleBeats[i];
+    el.querySelector('.tag').textContent = tag;
+    el.querySelector('.main').textContent = main;
+    el.querySelector('.detail').textContent = detail;
+    const end = i + 1 < exampleBeats.length ? exampleBeats[i + 1][0] : S.take.dur;
+    el.querySelector('.progress').style.width = `${Math.max(0, Math.min(100, 100*(t-start)/(end-start)))}%`;
+    el.style.transform = `translateY(${(Math.sin(t*1.6)*7).toFixed(2)}px)`;
+    if (i === 0 && t < 1) el.style.transform += ` scale(${(1 - .035 * Math.min(1,t/.6)).toFixed(3)})`;
+  }
+};
+
+const Q = new URLSearchParams(location.search);
+Promise.all(['300 84px Raleway', '400 84px Raleway', '400 50px "Roboto Flex"', '700 50px "Roboto Flex"', '500 50px "JetBrains Mono"', '500 54px Inter', '600 140px Inter']
+  .map(f => document.fonts.load(f).catch(() => null))).then(() => document.fonts.ready).then(() => {
+  window.renderAt(+(Q.get('t') || 0));
+  window.__ready = true;
+  if (!Q.has('t')) {
+    const t0 = performance.now();
+    const loop = () => { window.renderAt(((performance.now() - t0) / 1000) % S.total_dur); requestAnimationFrame(loop) };
+    requestAnimationFrame(loop);
+  }
+});
+</script>
+</body>
+</html>

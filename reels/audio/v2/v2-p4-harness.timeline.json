@@ -1,0 +1,956 @@
+{
+  "version": 2,
+  "part": 4,
+  "total": 5,
+  "reel": "v2-p4-harness",
+  "title": "Can you change agent tools without rebuilding an integration?",
+  "series": "Agent Workspaces",
+  "act": "I",
+  "script": "sha256:5fe2b2f4bac34d9ddd88e5c05ff7a5700774df5135a54aee6566d8314b53cf40",
+  "headline": "Change the agent. Keep the integration?",
+  "disclosure": "AI-generated narration using ElevenLabs River stock voice, selected by the author; not a recording or clone of Carlos Escobar.",
+  "take": {
+    "text": "Can you change agent tools without rebuilding an integration? The harness is the loop making model and tool calls. Keep the integration outside that loop. Put it behind a CLI or an MCP server, where that boundary makes sense. Then changing harnesses need not mean rebuilding every capability.",
+    "at": 0,
+    "dur": 19.8,
+    "audio": "v2/v2-p4-harness.gapped.wav",
+    "source": "v2/v2-p4-harness.mp3",
+    "gaps": {
+      "seconds": 0.35,
+      "cuts": [
+        {
+          "afterLine": 1,
+          "sourceSample": 164600,
+          "sourceAt": 3.7324
+        },
+        {
+          "afterLine": 2,
+          "sourceSample": 308336,
+          "sourceAt": 6.9917
+        },
+        {
+          "afterLine": 3,
+          "sourceSample": 421108,
+          "sourceAt": 9.5489
+        },
+        {
+          "afterLine": 4,
+          "sourceSample": 621148,
+          "sourceAt": 14.085
+        }
+      ]
+    },
+    "words": [
+      {
+        "text": "Can",
+        "start": 0,
+        "end": 0.16
+      },
+      {
+        "text": "you",
+        "start": 0.2,
+        "end": 0.24
+      },
+      {
+        "text": "change",
+        "start": 0.4,
+        "end": 0.72
+      },
+      {
+        "text": "agent",
+        "start": 0.8,
+        "end": 1.04
+      },
+      {
+        "text": "tools",
+        "start": 1.12,
+        "end": 1.44
+      },
+      {
+        "text": "without",
+        "start": 1.52,
+        "end": 1.92
+      },
+      {
+        "text": "rebuilding",
+        "start": 2,
+        "end": 2.48
+      },
+      {
+        "text": "an",
+        "start": 2.52,
+        "end": 2.56
+      },
+      {
+        "text": "integration?",
+        "start": 2.88,
+        "end": 3.48
+      },
+      {
+        "text": "The",
+        "start": 4.11,
+        "end": 4.19
+      },
+      {
+        "text": "harness",
+        "start": 4.23,
+        "end": 4.67
+      },
+      {
+        "text": "is",
+        "start": 4.75,
+        "end": 4.83
+      },
+      {
+        "text": "the",
+        "start": 4.87,
+        "end": 4.91
+      },
+      {
+        "text": "loop",
+        "start": 4.99,
+        "end": 5.31
+      },
+      {
+        "text": "making",
+        "start": 5.39,
+        "end": 5.63
+      },
+      {
+        "text": "model",
+        "start": 5.79,
+        "end": 6.11
+      },
+      {
+        "text": "and",
+        "start": 6.15,
+        "end": 6.19
+      },
+      {
+        "text": "tool",
+        "start": 6.35,
+        "end": 6.51
+      },
+      {
+        "text": "calls.",
+        "start": 6.59,
+        "end": 7.23
+      },
+      {
+        "text": "Keep",
+        "start": 7.82,
+        "end": 7.98
+      },
+      {
+        "text": "the",
+        "start": 8.06,
+        "end": 8.1
+      },
+      {
+        "text": "integration",
+        "start": 8.14,
+        "end": 8.78
+      },
+      {
+        "text": "outside",
+        "start": 8.86,
+        "end": 9.34
+      },
+      {
+        "text": "that",
+        "start": 9.42,
+        "end": 9.5
+      },
+      {
+        "text": "loop.",
+        "start": 9.58,
+        "end": 10.22
+      },
+      {
+        "text": "Put",
+        "start": 10.61,
+        "end": 10.65
+      },
+      {
+        "text": "it",
+        "start": 10.73,
+        "end": 10.81
+      },
+      {
+        "text": "behind",
+        "start": 10.89,
+        "end": 11.13
+      },
+      {
+        "text": "a",
+        "start": 11.21,
+        "end": 11.29
+      },
+      {
+        "text": "CLI",
+        "start": 11.37,
+        "end": 11.93
+      },
+      {
+        "text": "or",
+        "start": 12.01,
+        "end": 12.09
+      },
+      {
+        "text": "an",
+        "start": 12.17,
+        "end": 12.25
+      },
+      {
+        "text": "MCP",
+        "start": 12.33,
+        "end": 12.81
+      },
+      {
+        "text": "server,",
+        "start": 12.89,
+        "end": 13.37
+      },
+      {
+        "text": "where",
+        "start": 13.45,
+        "end": 13.53
+      },
+      {
+        "text": "that",
+        "start": 13.61,
+        "end": 13.69
+      },
+      {
+        "text": "boundary",
+        "start": 13.77,
+        "end": 14.09
+      },
+      {
+        "text": "makes",
+        "start": 14.21,
+        "end": 14.33
+      },
+      {
+        "text": "sense.",
+        "start": 14.53,
+        "end": 15.13
+      },
+      {
+        "text": "Then",
+        "start": 15.64,
+        "end": 15.8
+      },
+      {
+        "text": "changing",
+        "start": 16.04,
+        "end": 16.36
+      },
+      {
+        "text": "harnesses",
+        "start": 16.44,
+        "end": 17
+      },
+      {
+        "text": "need",
+        "start": 17.16,
+        "end": 17.4
+      },
+      {
+        "text": "not",
+        "start": 17.52,
+        "end": 17.64
+      },
+      {
+        "text": "mean",
+        "start": 17.76,
+        "end": 17.88
+      },
+      {
+        "text": "rebuilding",
+        "start": 17.96,
+        "end": 18.52
+      },
+      {
+        "text": "every",
+        "start": 18.6,
+        "end": 18.92
+      },
+      {
+        "text": "capability.",
+        "start": 19.24,
+        "end": 19.8
+      }
+    ],
+    "lines": [
+      {
+        "text": "Can you change agent tools without rebuilding an integration?",
+        "start": 0,
+        "end": 3.48
+      },
+      {
+        "text": "The harness is the loop making model and tool calls.",
+        "start": 4.11,
+        "end": 7.23
+      },
+      {
+        "text": "Keep the integration outside that loop.",
+        "start": 7.82,
+        "end": 10.22
+      },
+      {
+        "text": "Put it behind a CLI or an MCP server, where that boundary makes sense.",
+        "start": 10.61,
+        "end": 15.13
+      },
+      {
+        "text": "Then changing harnesses need not mean rebuilding every capability.",
+        "start": 15.64,
+        "end": 19.8
+      }
+    ]
+  },
+  "excerpt": {
+    "text": "say whether the same capability could live behind an MCP server or a CLI that any harness can call",
+    "source": "playbooks/act-1.md:125",
+    "at": 19.8,
+    "hold": 4.8
+  },
+  "cta": {
+    "text": "Comment WORKSPACE for the agent-workspace setup prompts and verification checks.",
+    "keyword": "WORKSPACE",
+    "at": 24.6,
+    "dur": 4.64,
+    "audio": "v2/v2-cta.mp3",
+    "words": [
+      {
+        "text": "Comment",
+        "start": 24.6,
+        "end": 25
+      },
+      {
+        "text": "WORKSPACE",
+        "start": 25.08,
+        "end": 25.64
+      },
+      {
+        "text": "for",
+        "start": 25.72,
+        "end": 25.8
+      },
+      {
+        "text": "the",
+        "start": 25.88,
+        "end": 25.96
+      },
+      {
+        "text": "agent-workspace",
+        "start": 26.04,
+        "end": 26.92
+      },
+      {
+        "text": "setup",
+        "start": 27,
+        "end": 27.24
+      },
+      {
+        "text": "prompts",
+        "start": 27.32,
+        "end": 27.72
+      },
+      {
+        "text": "and",
+        "start": 27.8,
+        "end": 27.88
+      },
+      {
+        "text": "verification",
+        "start": 27.96,
+        "end": 28.6
+      },
+      {
+        "text": "checks.",
+        "start": 28.68,
+        "end": 29.24
+      }
+    ]
+  },
+  "end": {
+    "at": 24.6,
+    "card": [
+      "Build your layout · route AGENTS.md · check what survives",
+      "Next: where did this answer come from?"
+    ],
+    "hold": 2.5
+  },
+  "captions": {
+    "version": "1.0",
+    "metadata": {
+      "duration": 31.74,
+      "language": "en",
+      "generator": "reels/tts.mjs --v2 (River character alignment)"
+    },
+    "cast": [
+      {
+        "id": "S0",
+        "name": "River",
+        "color": "#6B8AFF"
+      }
+    ],
+    "captions": [
+      {
+        "id": "e01",
+        "speaker_id": "S0",
+        "start": 0,
+        "end": 1.44,
+        "words": [
+          {
+            "text": "Can",
+            "start": 0,
+            "end": 0.16,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "you",
+            "start": 0.2,
+            "end": 0.24,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "change",
+            "start": 0.4,
+            "end": 0.72,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "agent",
+            "start": 0.8,
+            "end": 1.04,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "tools",
+            "start": 1.12,
+            "end": 1.44,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e02",
+        "speaker_id": "S0",
+        "start": 1.52,
+        "end": 3.48,
+        "words": [
+          {
+            "text": "without",
+            "start": 1.52,
+            "end": 1.92,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "rebuilding",
+            "start": 2,
+            "end": 2.48,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "an",
+            "start": 2.52,
+            "end": 2.56,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "integration?",
+            "start": 2.88,
+            "end": 3.48,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e03",
+        "speaker_id": "S0",
+        "start": 4.11,
+        "end": 5.31,
+        "words": [
+          {
+            "text": "The",
+            "start": 4.11,
+            "end": 4.19,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "harness",
+            "start": 4.23,
+            "end": 4.67,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "is",
+            "start": 4.75,
+            "end": 4.83,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "the",
+            "start": 4.87,
+            "end": 4.91,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "loop",
+            "start": 4.99,
+            "end": 5.31,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e04",
+        "speaker_id": "S0",
+        "start": 5.39,
+        "end": 7.23,
+        "words": [
+          {
+            "text": "making",
+            "start": 5.39,
+            "end": 5.63,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "model",
+            "start": 5.79,
+            "end": 6.11,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "and",
+            "start": 6.15,
+            "end": 6.19,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "tool",
+            "start": 6.35,
+            "end": 6.51,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "calls.",
+            "start": 6.59,
+            "end": 7.23,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e05",
+        "speaker_id": "S0",
+        "start": 7.82,
+        "end": 10.22,
+        "words": [
+          {
+            "text": "Keep",
+            "start": 7.82,
+            "end": 7.98,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "the",
+            "start": 8.06,
+            "end": 8.1,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "integration",
+            "start": 8.14,
+            "end": 8.78,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "outside",
+            "start": 8.86,
+            "end": 9.34,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "that",
+            "start": 9.42,
+            "end": 9.5,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "loop.",
+            "start": 9.58,
+            "end": 10.22,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e06",
+        "speaker_id": "S0",
+        "start": 10.61,
+        "end": 13.37,
+        "words": [
+          {
+            "text": "Put",
+            "start": 10.61,
+            "end": 10.65,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "it",
+            "start": 10.73,
+            "end": 10.81,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "behind",
+            "start": 10.89,
+            "end": 11.13,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "a",
+            "start": 11.21,
+            "end": 11.29,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "CLI",
+            "start": 11.37,
+            "end": 11.93,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "or",
+            "start": 12.01,
+            "end": 12.09,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "an",
+            "start": 12.17,
+            "end": 12.25,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "MCP",
+            "start": 12.33,
+            "end": 12.81,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "server,",
+            "start": 12.89,
+            "end": 13.37,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e07",
+        "speaker_id": "S0",
+        "start": 13.45,
+        "end": 15.13,
+        "words": [
+          {
+            "text": "where",
+            "start": 13.45,
+            "end": 13.53,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "that",
+            "start": 13.61,
+            "end": 13.69,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "boundary",
+            "start": 13.77,
+            "end": 14.09,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "makes",
+            "start": 14.21,
+            "end": 14.33,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "sense.",
+            "start": 14.53,
+            "end": 15.13,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e08",
+        "speaker_id": "S0",
+        "start": 15.64,
+        "end": 17.64,
+        "words": [
+          {
+            "text": "Then",
+            "start": 15.64,
+            "end": 15.8,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "changing",
+            "start": 16.04,
+            "end": 16.36,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "harnesses",
+            "start": 16.44,
+            "end": 17,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "need",
+            "start": 17.16,
+            "end": 17.4,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "not",
+            "start": 17.52,
+            "end": 17.64,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e09",
+        "speaker_id": "S0",
+        "start": 17.76,
+        "end": 19.8,
+        "words": [
+          {
+            "text": "mean",
+            "start": 17.76,
+            "end": 17.88,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "rebuilding",
+            "start": 17.96,
+            "end": 18.52,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "every",
+            "start": 18.6,
+            "end": 18.92,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "capability.",
+            "start": 19.24,
+            "end": 19.8,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          }
+        ]
+      },
+      {
+        "id": "e01",
+        "speaker_id": "S0",
+        "start": 24.6,
+        "end": 26.92,
+        "words": [
+          {
+            "text": "Comment",
+            "start": 24.6,
+            "end": 25,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "WORKSPACE",
+            "start": 25.08,
+            "end": 25.64,
+            "weight": 700,
+            "size": 1.08,
+            "emphasis": true
+          },
+          {
+            "text": "for",
+            "start": 25.72,
+            "end": 25.8,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "the",
+            "start": 25.88,
+            "end": 25.96,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "agent-workspace",
+            "start": 26.04,
+            "end": 26.92,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      },
+      {
+        "id": "e02",
+        "speaker_id": "S0",
+        "start": 27,
+        "end": 29.24,
+        "words": [
+          {
+            "text": "setup",
+            "start": 27,
+            "end": 27.24,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "prompts",
+            "start": 27.32,
+            "end": 27.72,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "and",
+            "start": 27.8,
+            "end": 27.88,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "verification",
+            "start": 27.96,
+            "end": 28.6,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          },
+          {
+            "text": "checks.",
+            "start": 28.68,
+            "end": 29.24,
+            "weight": 400,
+            "size": 1,
+            "emphasis": false
+          }
+        ]
+      }
+    ]
+  },
+  "total_dur": 31.74
+}

@@ -9,9 +9,20 @@
 // API exactly as the keynote generator (river-eleven-v4/generate-river.py): POST /v1/text-to-speech/<voice>/with-timestamps.
 // The key is ELEVENLABS_API_KEY parsed from $ELEVENLABS_ENV_FILE (default: the workspace .env.local under the
 // home directory). It is only read when a line has to be generated, and it is never printed or written.
+//
+// v2 mode (Act I v2, BRO-3825): bun reels/tts.mjs --v2 --reel <v2 reel> [--dry-run | --offline]
+//   Reads series.json `v2`. Generates the shared CTA once (reels/audio/v2/v2-cta.*, reused by every part), then the
+//   part's hook and body as one take (reels/audio/v2/<reel>.*), each with alignment and receipt, then the part's
+//   timeline reels/audio/v2/<reel>.timeline.json/.js (window.REEL_V2): take → excerpt hold → CTA → end hold, the line
+//   and word timings from the River alignment, and CWI-shaped caption events. Before every request the cost is
+//   estimated from the characters (v2.budget.creditsPerCharacter); a line over its cap (ctaCapCredits /
+//   partCapCredits) stops before anything is spent. v2 MP3s are media and are not committed: each one is copied to
+//   the content-flow media store (~/.local/share/content-flow/media/sha256/<audioSha256>.mp3, or $CF_MEDIA_DIR) and
+//   restored from there when a checkout lacks it; the receipt's audioSha256 still has to match.
 
+import { SR, insertGaps, quietestCut, shiftAlignment } from './gap.mjs';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -22,11 +33,12 @@ const VOICE_ID = 'SAz9YHcvj6GT2YYXdXww', MODEL_ID = 'eleven_v4', GAP = 0.25, TOT
 const argv = process.argv.slice(2), arg = k => { const i = argv.indexOf(k); return i < 0 ? null : argv[i + 1] };
 const DRY = argv.includes('--dry-run'), OFFLINE = argv.includes('--offline');   // --offline: never call the API (render.mjs uses it)
 const series = JSON.parse(readFileSync(path.join(here, 'series.json'), 'utf8'));
-const want = arg('--reel');
-if (!want && !argv.includes('--all')) { console.error('usage: bun reels/tts.mjs [--reel <id> | --all] [--dry-run | --offline]'); process.exit(2) }
-const parts = series.parts.filter(p => !want || p.reel === want);
-if (!parts.length) { console.error(`no part with reel "${want}" in series.json`); process.exit(2) }
+const want = arg('--reel'), V2 = argv.includes('--v2');
+if (!want && (V2 || !argv.includes('--all'))) { console.error('usage: bun reels/tts.mjs [--reel <id> | --all] [--dry-run | --offline]\n       bun reels/tts.mjs --v2 --reel <v2 reel> [--dry-run | --offline]'); process.exit(2) }
+const parts = V2 ? [] : series.parts.filter(p => !want || p.reel === want);
+if (!V2 && !parts.length) { console.error(`no part with reel "${want}" in series.json`); process.exit(2) }
 if (!DRY) mkdirSync(AUDIO, { recursive: true });
+const MEDIA = process.env.CF_MEDIA_DIR || path.join(homedir(), '.local', 'share', 'content-flow', 'media', 'sha256');
 
 const sha = b => createHash('sha256').update(b).digest('hex');
 // Python json.dumps(..., sort_keys=True) (default separators, ensure_ascii), so a receipt digest here equals the
@@ -52,10 +64,23 @@ function apiKey() {
 }
 
 let charactersUsed = 0;
-async function line(stem, text, meta) {
+const billed = [];
+// budget: { rate, cap } (v2 only). The estimate is made before the request; over the cap, nothing is sent.
+async function line(stem, text, meta, budget = null) {
   const mp3 = path.join(AUDIO, `${stem}.mp3`), rec = path.join(AUDIO, `${stem}.receipt.json`), ali = path.join(AUDIO, `${stem}.alignment.json`);
   const payload = { text, model_id: MODEL_ID, language_code: 'en' };
   const requestSha256 = sha(pyJson({ voice_id: VOICE_ID, payload }));
+  if (budget && !existsSync(mp3) && existsSync(rec)) {     // v2 media lives in the content-flow store, not in git
+    const r0 = JSON.parse(readFileSync(rec, 'utf8')), stored = r0.audioSha256 && path.join(MEDIA, `${r0.audioSha256}.mp3`);
+    if (stored && existsSync(stored)) {
+      if (!DRY) { copyFileSync(stored, mp3); console.log(`restored ${stem}.mp3 from the media store`) }
+    } else if (r0.requestSha256 === requestSha256) {
+      // the receipt vouches for this exact request, so the take was paid for: never pay for it again by accident
+      const why = `${stem}.mp3 (sha256:${r0.audioSha256}) is not in the media store ${MEDIA}, and its receipt matches this request: the take was already paid for`;
+      if (DRY) { console.log(`missing  ${why}; a real run refuses`); return null }
+      throw new Error(`${why}. Restore it there; nothing was sent. (To pay for a new take on purpose, delete ${stem}.receipt.json first.)`);
+    }
+  }
   if (existsSync(mp3) && existsSync(rec) && existsSync(ali)) {
     const r = JSON.parse(readFileSync(rec, 'utf8'));
     if (r.requestSha256 === requestSha256) {
@@ -69,8 +94,10 @@ async function line(stem, text, meta) {
     }
     console.log(`changed  ${stem}: the request differs from its receipt, regenerating`);
   }
-  if (DRY) { console.log(`would generate ${stem}: ${text.length} characters`); return null }
-  if (OFFLINE) throw new Error(`${stem} needs new audio (its text changed in series.json); run bun reels/tts.mjs --reel <id> first`);
+  const estimate = budget ? Math.ceil(text.length * budget.rate) : null;
+  if (budget && estimate > budget.cap) throw new Error(`Stopped before spending on ${stem}: ${text.length} characters × ${budget.rate} ≈ ${estimate} credits, over its cap of ${budget.cap}. Nothing was sent.`);
+  if (DRY) { console.log(`would generate ${stem}: ${text.length} characters${budget ? ` ≈ ${estimate} credits (cap ${budget.cap})` : ''}`); return null }
+  if (OFFLINE) throw new Error(`${stem} needs new audio (no receipt vouches for this text); run bun reels/tts.mjs ${V2 ? '--v2 ' : ''}--reel <id> first`);
   const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/with-timestamps?output_format=mp3_44100_128`, {
     method: 'POST', headers: { 'xi-api-key': apiKey(), 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   });
@@ -84,10 +111,15 @@ async function line(stem, text, meta) {
   const response = Object.fromEntries(['request-id', 'character-cost'].filter(h => res.headers.get(h)).map(h => [h, res.headers.get(h)]));
   writeFileSync(rec, `${JSON.stringify({
     ...meta, voice_id: VOICE_ID, model_id: MODEL_ID, endpoint: 'with-timestamps', outputFormat: 'mp3_44100_128',
-    requestSha256, audioSha256: sha(audio), alignmentSha256: sha(aliText), characters: text.length, generatedAt: new Date().toISOString(), response,
+    requestSha256, audioSha256: sha(audio), alignmentSha256: sha(aliText), characters: text.length,
+    ...(budget ? { estimateCredits: estimate, capCredits: budget.cap, creditsPerCharacter: budget.rate } : {}),
+    generatedAt: new Date().toISOString(), response,
   }, null, 2)}\n`);
   charactersUsed += text.length;
+  billed.push({ stem, characters: text.length, estimate, billed: response['character-cost'] ?? null });
+  if (budget) { mkdirSync(MEDIA, { recursive: true }); copyFileSync(mp3, path.join(MEDIA, `${sha(audio)}.mp3`)) }
   console.log(`generated ${stem}: ${text.length} characters${response['character-cost'] ? ` (billed ${response['character-cost']})` : ''}`);
+  if (budget && +response['character-cost'] > budget.cap) console.error(`WARNING ${stem}: billed ${response['character-cost']} credits, over its cap of ${budget.cap} (estimate was ${estimate})`);
   return { mp3, ali };
 }
 
@@ -113,6 +145,7 @@ function words(aliFile, text, dur) {
 }
 
 const fill = (tpl, v) => tpl.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? `{${k}}`);
+if (V2) { await v2(); process.exit(0) }
 const cta = await line('cta', series.funnel.spokenCta, { line: 'cta', field: 'funnel.spokenCta' });
 for (const p of parts) {
   const hook = await line(`${p.reel}-hook`, p.spokenHook, { line: 'hook', field: 'spokenHook', part: p.part, reel: p.reel });
@@ -138,3 +171,151 @@ for (const p of parts) {
   console.log(`${p.reel}: hook ${hookDur}s + gap ${GAP}s + body ${bodyDur}s + cta ${ctaDur}s + hold ${hold}s = ${S.total_dur}s`);
 }
 console.log(`ElevenLabs characters used this run: ${charactersUsed}`);
+
+// ── v2 (Act I v2, BRO-3825) ─────────────────────────────────────────────────────────────────────────────────────
+// One take per part (hook + body, as the reviewed script card speaks them), the shared CTA, and the timeline:
+//   0 ── take ── take.dur ── excerpt hold ── cta.at ── CTA ── end.at ── end hold ── total_dur
+// (function declarations, not consts: v2() runs from the middle of the file, before a const here would exist)
+function bare(w) { return w.toLowerCase().replace(/[^\p{L}\p{N}-]/gu, '') }
+// CWI-shaped caption events from River word timings: one per spoken line. A line longer than MAX_EVENT_CHARS is split
+// where the halves are most even, preferring a break after punctuation and never ending on a function word (no
+// orphaned last word), recursively until every event fits.
+function events(lines, emph, keyword) {
+  const MAX_EVENT_CHARS = 42;                               // FCC caption length, as in the v1 CWI renderer
+  const FUNC = /^(a|an|the|of|to|in|on|and|or|but|for|with|by|its|it|is|be|can|that)$/i;
+  const len = ws => ws.map(w => w.text).join(' ').length;
+  const split = ws => {
+    if (ws.length < 2 || len(ws) <= MAX_EVENT_CHARS) return [ws];
+    let best = 1, cost = Infinity;
+    for (let c = 1; c < ws.length; c++) {
+      const a = ws.slice(0, c), b = ws.slice(c);
+      const k = Math.abs(len(a) - len(b)) - (/[.,;:?!]$/.test(a.at(-1).text) ? 12 : 0) + (FUNC.test(a.at(-1).text) ? 100 : 0)
+        + (len(a) > MAX_EVENT_CHARS || len(b) > MAX_EVENT_CHARS ? 50 : 0);
+      if (k < cost) { cost = k; best = c }
+    }
+    return [...split(ws.slice(0, best)), ...split(ws.slice(best))];
+  };
+  const out = lines.flatMap(split);
+  return out.map((ws, i) => ({
+    id: `e${String(i + 1).padStart(2, '0')}`, speaker_id: 'S0', start: ws[0].start, end: ws.at(-1).end,
+    words: ws.map(w => {
+      const em = emph.has(bare(w.text)) || (!!keyword && w.text.includes(keyword));
+      return { text: w.text, start: w.start, end: w.end, weight: em ? 700 : 400, size: em ? 1.08 : 1, emphasis: em };
+    }),
+  }));
+}
+function shift(ws, at) { return ws.map(w => ({ ...w, start: +(w.start + at).toFixed(3), end: +(w.end + at).toFixed(3) })) }
+
+async function v2() {
+  const V = series.v2, P = V.parts.find(p => p.reel === want);
+  if (!P?.spoken) { console.error(`no v2 part with reel "${want}" and spoken lines in series.json v2.parts`); process.exit(2) }
+  const D = path.join(AUDIO, 'v2'); if (!DRY) mkdirSync(D, { recursive: true });
+  const rate = V.budget.creditsPerCharacter, partCap = P.capCredits ?? V.budget.partCapCredits, takeText = P.spoken.join(' ');
+  for (const [name, v] of [['v2.budget.creditsPerCharacter', rate], ['v2.budget.ctaCapCredits', V.budget.ctaCapCredits], [`the cap for ${P.reel}`, partCap]])
+    if (!(Number.isFinite(v) && v > 0)) throw new Error(`series.json ${name} must be a positive number, got ${JSON.stringify(v)}; without it no cap holds. Nothing was sent.`);
+  // pre-flight: both lines are checked against their caps before either request, so a run never spends half
+  for (const [what, text, cap] of [['the shared CTA', V.cta.spoken, V.budget.ctaCapCredits], [P.reel, takeText, partCap]])
+    if (Math.ceil(text.length * rate) > cap)
+      throw new Error(`Stopped before spending: ${what} is ${text.length} characters × ${rate} ≈ ${Math.ceil(text.length * rate)} credits, over its cap of ${cap}. Nothing was sent.`);
+  const cta = await line(`v2/${V.cta.asset}`, V.cta.spoken, { line: 'cta', field: 'v2.cta.spoken', shared: 'every v2 part' },
+    { rate, cap: V.budget.ctaCapCredits });
+  const take = await line(`v2/${P.reel}`, takeText, { line: 'take', field: 'v2.parts[].spoken', part: P.part, reel: P.reel, script: P.scriptSha256 },
+    { rate, cap: partCap });
+  if (DRY || !cta || !take) { console.log(`${P.reel}: timeline would be rebuilt (dry run writes nothing)`); return summary() }
+  const gapped = gapTake(take, P, takeText, V.lineGapSeconds, D);
+  const takeDur = gapped.dur, ctaDur = duration(cta.mp3);
+  const tw = words(gapped.ali, takeText, takeDur), cw = words(cta.ali, V.cta.spoken, ctaDur);
+  let k = 0;
+  const lineWords = P.spoken.map(text => { const n = text.split(/\s+/).length, ws = tw.slice(k, k + n); k += n; return ws });
+  if (k !== tw.length || lineWords.some((ws, i) => ws.map(w => w.text).join(' ') !== P.spoken[i]))
+    throw new Error(`${P.reel}: the take's words do not split back into its ${P.spoken.length} spoken lines`);
+  const exWords = P.excerpt.text.split(/\s+/).length;
+  const hold = Math.ceil(Math.max(V.excerptHold.minSeconds, exWords / V.excerptHold.wordsPerSecond) * 10) / 10;
+  const ctaAt = +(takeDur + hold).toFixed(3), endAt = +(ctaAt + ctaDur).toFixed(3), total = +(endAt + V.endHoldSeconds).toFixed(3);
+  const ctaWords = shift(cw, ctaAt), emph = new Set((P.emphasis || []).map(bare));
+  const S = {
+    version: 2, part: P.part, total: 5, reel: P.reel, title: P.title, series: series.series, act: series.act,
+    script: P.scriptSha256, headline: P.headline, disclosure: series.voice.disclosure,
+    take: { text: takeText, at: 0, dur: takeDur, audio: `v2/${P.reel}.gapped.wav`, source: `v2/${P.reel}.mp3`,
+      gaps: { seconds: V.lineGapSeconds, cuts: gapped.cuts }, words: tw,
+      lines: lineWords.map((ws, i) => ({ text: P.spoken[i], start: ws[0].start, end: ws.at(-1).end })) },
+    excerpt: { text: P.excerpt.text, source: P.excerpt.source, at: takeDur, hold },
+    cta: { text: V.cta.spoken, keyword: V.cta.keyword, at: ctaAt, dur: ctaDur, audio: `v2/${V.cta.asset}.mp3`, words: ctaWords },
+    end: { at: ctaAt, card: [V.cta.endCard, P.next], hold: V.endHoldSeconds },
+    captions: {
+      version: '1.0', metadata: { duration: total, language: 'en', generator: 'reels/tts.mjs --v2 (River character alignment)' },
+      cast: [{ id: 'S0', name: 'River', color: '#6B8AFF' }],
+      captions: [...events(lineWords, emph), ...events([ctaWords], new Set(), V.cta.keyword)],
+    },
+    total_dur: total,
+  };
+  const json = JSON.stringify(S, null, 2);
+  writeFileSync(path.join(D, `${P.reel}.timeline.json`), `${json}\n`);
+  writeFileSync(path.join(D, `${P.reel}.timeline.js`),
+    `// GENERATED by reels/tts.mjs --v2 from series.json v2 and the River alignments. Do not edit.\nwindow.REEL_V2=${json};\n`);
+  console.log(`${P.reel}: take ${takeDur}s + excerpt ${hold}s + cta ${ctaDur}s + hold ${V.endHoldSeconds}s = ${total}s`);
+  summary();
+}
+// The script card plans `lineGapSeconds` of silence between spoken lines (its body start_s are word count / 2.6 + 0.35);
+// one River take runs the lines together. This inserts the planned gap at each line boundary, at no cost: the take is
+// decoded to 16-bit PCM, cut at the quietest 10 ms inside the silence the alignment gives between the two lines, and
+// exactly round(gap × 44100) zero samples go in, with a 4 ms fade either side of the cut. The alignment is shifted by
+// the same amounts (characters unchanged, so the River request digest still holds) and a derived receipt names the River
+// receipt it came from. The result, <reel>.gapped.wav, is the part's narration: it is what the render plays, and what
+// content-flow's `gate asset`/`gate render` measure. It is rebuilt on every run and must reproduce its receipt's digest.
+function gapTake(take, P, text, gap, D) {
+  if (!(gap >= 0)) throw new Error('series.json v2.lineGapSeconds is missing');
+  const stem = `${P.reel}.gapped`, src = JSON.parse(readFileSync(path.join(D, `${P.reel}.receipt.json`), 'utf8'));
+  const dec = spawnSync('ffmpeg', ['-v', 'error', '-i', take.mp3, '-f', 's16le', '-acodec', 'pcm_s16le', '-ac', '1', '-ar', String(SR), '-'],
+    { maxBuffer: 1 << 28 });
+  if (dec.status) throw new Error(`ffmpeg could not decode ${path.basename(take.mp3)}: ${dec.stderr}`);
+  const pcm = new Int16Array(dec.stdout.buffer.slice(dec.stdout.byteOffset, dec.stdout.byteOffset + dec.stdout.length));
+  const a = alignmentChars(take.ali, text), s = a.character_start_times_seconds, e = a.character_end_times_seconds;
+  // first character index of each spoken line in the joined take text
+  const firsts = []; let at = 0;
+  for (const l of P.spoken) { firsts.push(at); at += l.length + 1 }
+  const INS = Math.round(gap * SR);
+  const cuts = firsts.slice(1).map((c, i) => {
+    const sp = c - 1;                                          // the space between the two lines spans their silence
+    if (a.characters[sp] !== ' ') throw new Error(`${P.reel}: no space between lines ${i + 1} and ${i + 2} in the alignment`);
+    const { sample } = quietestCut(pcm, Math.round(s[sp] * SR), Math.round(e[sp] * SR), `${P.reel} after line ${i + 1}`);
+    return { afterLine: i + 1, sourceSample: sample, sourceAt: +(sample / SR).toFixed(4) };
+  });
+  const out = insertGaps(pcm, cuts.map(c => c.sourceSample), INS);
+  const hdr = Buffer.alloc(44), bytes = out.length * 2;
+  hdr.write('RIFF', 0); hdr.writeUInt32LE(36 + bytes, 4); hdr.write('WAVE', 8); hdr.write('fmt ', 12); hdr.writeUInt32LE(16, 16);
+  hdr.writeUInt16LE(1, 20); hdr.writeUInt16LE(1, 22); hdr.writeUInt32LE(SR, 24); hdr.writeUInt32LE(SR * 2, 28); hdr.writeUInt16LE(2, 32);
+  hdr.writeUInt16LE(16, 34); hdr.write('data', 36); hdr.writeUInt32LE(bytes, 40);
+  const wav = Buffer.concat([hdr, Buffer.from(out.buffer)]);
+  // shift: every character of line n moves by (n - 1) gaps; the boundary space keeps its start and ends after the gap
+  const { starts, ends } = shiftAlignment(s, e, firsts, gap);
+  const aliText = `${JSON.stringify({
+    alignment: { characters: a.characters, character_start_times_seconds: starts, character_end_times_seconds: ends },
+    derived: { from: `${P.reel}.alignment.json`, fromSha256: src.alignmentSha256, lineGapSeconds: gap, cuts },
+  }, null, 2)}\n`;
+  const audioSha256 = sha(wav), recFile = path.join(D, `${stem}.receipt.json`);
+  if (existsSync(recFile)) {
+    const old = JSON.parse(readFileSync(recFile, 'utf8'));
+    if (old.audioSha256 !== audioSha256 || old.alignmentSha256 !== sha(aliText) || old.source?.receiptSha256 !== sha(readFileSync(path.join(D, `${P.reel}.receipt.json`))))
+      throw new Error(`${stem}: the rebuilt gapped take does not reproduce ${stem}.receipt.json; delete that receipt to re-derive it on purpose`);
+  }
+  writeFileSync(path.join(D, `${stem}.wav`), wav);
+  writeFileSync(path.join(D, `${stem}.alignment.json`), aliText);
+  writeFileSync(recFile, `${JSON.stringify({
+    line: 'take', derived: 'planned inter-line gaps inserted (zero credits; no request sent)', part: P.part, reel: P.reel,
+    script: P.scriptSha256, voice_id: src.voice_id, model_id: src.model_id,
+    requestSha256: src.requestSha256, audioSha256, alignmentSha256: sha(aliText), format: 'wav pcm_s16le mono 44100',
+    lineGapSeconds: gap, cuts, credits: 0,
+    source: { receipt: `${P.reel}.receipt.json`, receiptSha256: sha(readFileSync(path.join(D, `${P.reel}.receipt.json`))),
+      audioSha256: src.audioSha256, alignmentSha256: src.alignmentSha256, requestId: src.response?.['request-id'] ?? null,
+      characterCost: src.response?.['character-cost'] ?? null },
+  }, null, 2)}\n`);
+  if (!DRY) { mkdirSync(MEDIA, { recursive: true }); copyFileSync(path.join(D, `${stem}.wav`), path.join(MEDIA, `${audioSha256}.wav`)) }
+  const dur = +(out.length / SR).toFixed(3);
+  console.log(`gapped   ${stem}: ${cuts.length} × ${gap}s inserted, ${+(pcm.length / SR).toFixed(3)}s → ${dur}s (sha256:${audioSha256})`);
+  return { wav: path.join(D, `${stem}.wav`), ali: path.join(D, `${stem}.alignment.json`), dur, cuts };
+}
+function summary() {
+  for (const b of billed) console.log(`billed   ${b.stem}: ${b.characters} characters, estimate ${b.estimate}, character-cost ${b.billed}`);
+  console.log(`ElevenLabs characters used this run: ${charactersUsed}`);
+}

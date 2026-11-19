@@ -53,3 +53,80 @@ No claim may go beyond what the keynote slice says. The Act I review on 2026-10-
 ## Post copy
 
 `postCopy` in `series.json`. The first line is the spoken hook. Then the part number, the keyword ask, the guide link and hashtags. The AI disclosure is the upload tag, not caption text. Trial Reels go through reel-loop's `publish` with `trial_params` once the owner approves each post.
+
+---
+
+# Act I v2: re-scripted through content-flow (BRO-3825)
+
+Owner decision, 2026-11-17: the keynote-slice rule above ("never re-voiced") is **lifted for v2**. Each part now
+has its own 25-35 s script with one problem, one mechanism and one demonstrated payoff. The scripts are written
+and reviewed in broomva/content-flow (`accounts/broomva.tech/runs/2026-11-17-act1-v2/<part>/script.json`, flow
+`cf-script@1`, reviewed by a provider other than the writer). They restate keynote claims and go no further.
+Everything above this line is v1, and it still renders as before. v2 data lives under `series.json` → `v2`.
+
+## What one v2 reel is
+
+```
+0 ─────────────────────────────── take ── +hold ─────── +CTA ──────── +2.5 s
+│ incident cold open → body scenes        │ playbook │ spoken CTA     │ end  │
+│ (one River take: hook + body, the       │ excerpt, │ (shared asset, │ hold │
+│  script card's spoken lines; captions   │ alone,   │  same in every │      │
+│  word by word from the alignment)       │ silent)  │  part)         │      │
+```
+
+- **Take.** The part's hook and body, voiced as one River take (`SAz9YHcvj6GT2YYXdXww`, `eleven_v4`,
+  with-timestamps) by `bun reels/tts.mjs --v2 --reel <id>`. It writes the MP3, the alignment and a receipt.
+- **Excerpt.** A real line from `playbooks/act-1.md` is shown alone, with no caption, before the ask. It is held
+  for the word count at 4 words/s, and for at least 2.5 s.
+- **CTA.** "Comment WORKSPACE for the agent-workspace setup prompts and verification checks." It is recorded once
+  as a shared asset (`audio/v2/v2-cta.*`) and reused by all five parts.
+- **End card.** "Build your layout · route AGENTS.md · check what survives", then the part's `next` line. They
+  show one at a time.
+- **Captions.** CWI-style: one event at a time, word by word. Each word lifts as it is spoken and fades from
+  white to the speaker colour, and emphasised words bounce. The timings come from the River alignment, not from
+  an OpenCaptions pass. The events sit in the caption band (x 220-860, y 1288-1463). `tts.mjs --v2` builds them
+  and writes them into the timeline.
+- **Timeline.** `audio/v2/<id>.timeline.json` and `.js` (`window.REEL_V2`) are rebuilt from series.json and the
+  receipts on every render. A scene keys its beats to the alignment's line and word times, never to guesses.
+
+## Budget (owner decision, 2026-11-17)
+
+River bills about 0.44 credits per character (`character-cost` in each receipt). The CTA's cap is 40 credits,
+spent once. Each part's take is capped at 135 credits. `tts.mjs --v2` estimates each line before any request,
+at `v2.budget.creditsPerCharacter` (0.45, the highest rate seen so far, rounded up). If either line would go
+over its cap, the run stops before anything is sent. Receipts record the estimate, the cap and the billed cost.
+
+## Media
+
+v2 MP3s and MP4s are media and are never committed (`.gitignore`). Each MP3 is copied to the content-flow media
+store, `~/.local/share/content-flow/media/sha256/<audioSha256>.mp3`. A checkout without it gets it restored from
+there, and the receipt must still match. The rendered MP4 goes to the same store as `<sha256>.mp4`. Receipts,
+alignments and timelines are committed.
+
+## The scene contract
+
+One `reels/<id>.html` per part. `renderAt(t)` is a pure function of time. The scene is storyboarded from the
+script card's `scene` notes.
+
+- **Cold open.** The incident happens by 1.0 s. The headline is complete at full brightness at frame 0 (no
+  dim-to-bright reveal), inside the title band (y 121-436), and within x 143-938.
+- **Text.** The stage shows one readable element at a time. Meaningful text is at least 1.5 % of the frame
+  height (29 px); v2 uses 40 px and up. There is no small decorative text.
+- **Keep-outs.** Nothing goes in the action rail (x > 872 below y 922), and nothing goes below the caption band.
+- **Motion.** The stage (y 460-1270) is never near-static for 3 s or more, end card included.
+
+## Quality bar: the gates
+
+A part is ready for cf-release when content-flow's gates pass on the exact MP4 bytes:
+
+```
+./bin/cf gate spec|layout|first_change|dead_stretch|hook_frame0|readability --format reel-9x16 --file <mp4> --sha256 sha256:<hex>
+```
+
+`layout` wraps the content-engine vertical layout gate (VL1-VL9). The format record
+`ontology/formats/reel-9x16.yaml` holds every threshold. After the gates comes cf-release: deterministic
+checks, two cross-provider retention reviews, and the owner's approval of that exact video. Nothing is
+published before that.
+
+Render: `bun reels/render.mjs <id> [--still S] [--safe]`. The v2 mode is chosen by `series.json` →
+`v2.parts`.
