@@ -15,7 +15,7 @@
 // 3. Frames are window.renderAt(t) screenshots of reels/<id>.html with window.REEL_V2 injected before the page loads.
 //    Captions are drawn by the page, word by word, from the alignment's CWI-shaped events (no OpenCaptions pass).
 import { createHash } from 'node:crypto';
-import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -33,34 +33,37 @@ export async function renderV2({ id, here, OUT, FPS, STILL, SAFE, safeCss, chrom
     ...silence(T.end.hold), '-filter_complex', filter, '-map', '[out]', '-c:a', 'aac', '-b:a', '192k', mux]);
 
   const b = await chromium.launch();
-  const page = await b.newPage({ viewport: { width: 1080, height: 1920 } });
-  page.on('pageerror', e => console.error('[page error]', e.message));
-  page.on('console', m => { if (m.type() === 'error') console.error('[console]', m.text()) });
-  await page.addInitScript({ content: readFileSync(path.join(A, 'v2', `${id}.timeline.js`), 'utf8') });
-  await page.goto(`${pathToFileURL(path.join(here, `${id}.html`)).href}?t=0`);
-  await page.waitForFunction(() => window.__ready === true);
-  if (SAFE) await page.addStyleTag({ content: safeCss });
-  if (STILL !== null) {
-    await page.evaluate(t => window.renderAt(t), STILL);
-    const png = path.join(OUT, `${id}-t${STILL.toFixed(1)}${SAFE ? '-safe' : ''}.png`);
-    writeFileSync(png, await page.screenshot({ type: 'png' }));
-    console.log(png);
-  } else {
-    const mp4 = path.join(OUT, `${id}${SAFE ? '-safe' : ''}.mp4`), part = path.join(OUT, `${id}.part.mp4`), t0 = Date.now();
-    const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-i', mux,
-      '-map', '0:v', '-map', '1:a', '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(FPS),
-      '-c:a', 'copy', '-metadata', `comment=${T.disclosure}`, '-movflags', '+faststart', '-f', 'mp4', part], { stdio: ['pipe', 'inherit', 'inherit'] });
-    const done = new Promise((ok, ko) => ff.on('close', c => c ? ko(new Error(`ffmpeg ${c}`)) : ok()));
-    for (let f = 0; f < N; f++) {
-      await page.evaluate(t => window.renderAt(t), f / FPS);
-      const buf = await page.screenshot({ type: 'jpeg', quality: 94 });
-      if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
-      if (f % 300 === 0) console.log(`${id} ${f}/${N} frames`);
+  try {
+    const page = await b.newPage({ viewport: { width: 1080, height: 1920 } });
+    page.on('pageerror', e => console.error('[page error]', e.message));
+    page.on('console', m => { if (m.type() === 'error') console.error('[console]', m.text()) });
+    await page.addInitScript({ content: readFileSync(path.join(A, 'v2', `${id}.timeline.js`), 'utf8') });
+    await page.goto(`${pathToFileURL(path.join(here, `${id}.html`)).href}?t=0`);
+    await page.waitForFunction(() => window.__ready === true);
+    if (SAFE) await page.addStyleTag({ content: safeCss });
+    if (STILL !== null) {
+      await page.evaluate(t => window.renderAt(t), STILL);
+      const png = path.join(OUT, `${id}-t${STILL.toFixed(1)}${SAFE ? '-safe' : ''}.png`);
+      writeFileSync(png, await page.screenshot({ type: 'png' }));
+      console.log(png);
+    } else {
+      const mp4 = path.join(OUT, `${id}${SAFE ? '-safe' : ''}.mp4`), part = path.join(OUT, `${id}.part.mp4`), t0 = Date.now();
+      const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', '-', '-i', mux,
+        '-map', '0:v', '-map', '1:a', '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-r', String(FPS),
+        '-c:a', 'copy', '-metadata', `comment=${T.disclosure}`, '-movflags', '+faststart', '-f', 'mp4', part], { stdio: ['pipe', 'inherit', 'inherit'] });
+      const done = new Promise((ok, ko) => ff.on('close', c => c ? ko(new Error(`ffmpeg ${c}`)) : ok()));
+      for (let f = 0; f < N; f++) {
+        await page.evaluate(t => window.renderAt(t), f / FPS);
+        const buf = await page.screenshot({ type: 'jpeg', quality: 94 });
+        if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
+        if (f % 300 === 0) console.log(`${id} ${f}/${N} frames`);
+      }
+      ff.stdin.end(); await done;
+      renameSync(part, mp4);                                // atomic: a killed run never leaves a half file under the final name
+      const hex = createHash('sha256').update(readFileSync(mp4)).digest('hex');
+      console.log(`${mp4} · ${N} frames · ${T.total_dur}s · sha256:${hex} · ${((Date.now() - t0) / 1000).toFixed(0)}s`);
     }
-    ff.stdin.end(); await done;
-    copyFileSync(part, mp4);                              // a killed run never leaves a half file under the final name
-    const hex = createHash('sha256').update(readFileSync(mp4)).digest('hex');
-    console.log(`${mp4} · ${N} frames · ${T.total_dur}s · sha256:${hex} · ${((Date.now() - t0) / 1000).toFixed(0)}s`);
+  } finally {
+    await b.close();                                    // also when a frame or ffmpeg throws
   }
-  await b.close();
 }

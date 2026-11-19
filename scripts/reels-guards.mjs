@@ -8,8 +8,10 @@
 // media store. The v2 gap arithmetic (reels/gap.mjs) is tested on synthetic PCM, so none of it needs media or ffmpeg.
 
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   cpSync,
+  existsSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -17,7 +19,7 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -385,6 +387,90 @@ refuses(
       JSON.stringify(ends) === JSON.stringify([0.1, 0.2, 0.85, 0.95, 1.05]),
     `${starts} / ${ends}`,
   );
+}
+
+// Every committed v2 part: its receipts, alignments, cuts and timeline agree (no media needed, so this runs in CI). Where
+// the takes are in the media store, an --offline rebuild in a disposable copy also reproduces the committed timeline.
+{
+  const v2 = path.join(root, "reels", "audio", "v2");
+  const sha = (f) => createHash("sha256").update(readFileSync(f)).digest("hex");
+  const json = (f) => JSON.parse(readFileSync(f, "utf8"));
+  const parts = readdirSync(v2)
+    .filter((n) => n.endsWith(".timeline.json"))
+    .map((n) => n.slice(0, -".timeline.json".length));
+  expect("v2: the committed parts are found", parts.length >= 6, parts.join(", "));
+  for (const reel of parts) {
+    const f = (ext) => path.join(v2, `${reel}${ext}`);
+    const take = json(f(".receipt.json")),
+      gapped = json(f(".gapped.receipt.json")),
+      tl = json(f(".timeline.json"));
+    const bad = [];
+    if (take.alignmentSha256 !== sha(f(".alignment.json")))
+      bad.push("the take alignment does not match its receipt");
+    if (gapped.alignmentSha256 !== sha(f(".gapped.alignment.json")))
+      bad.push("the gapped alignment does not match its receipt");
+    if (gapped.source?.receiptSha256 !== sha(f(".receipt.json")))
+      bad.push("the gapped receipt names another take receipt");
+    if (gapped.source?.audioSha256 !== take.audioSha256)
+      bad.push("the gapped receipt names another take");
+    if (gapped.credits !== 0) bad.push("the gapped take claims credits");
+    if (!(take.estimateCredits <= take.capCredits))
+      bad.push(`the take's estimate ${take.estimateCredits} is over its cap ${take.capCredits}`);
+    if (tl.take.audio !== `v2/${reel}.gapped.wav`)
+      bad.push("the timeline does not play the gapped take");
+    if (JSON.stringify(tl.take.gaps.cuts) !== JSON.stringify(gapped.cuts))
+      bad.push("the timeline's cuts differ from the gapped receipt's");
+    if (
+      !readFileSync(f(".timeline.js"), "utf8").endsWith(
+        `\nwindow.REEL_V2=${JSON.stringify(tl, null, 2)};\n`,
+      )
+    )
+      bad.push("timeline.js is not generated from timeline.json");
+    expect(
+      `v2 ${reel}: receipts, alignments, cuts and timeline agree`,
+      bad.length === 0,
+      bad.join("; "),
+    );
+  }
+  const media =
+    process.env.CF_MEDIA_DIR ||
+    path.join(homedir(), ".local", "share", "content-flow", "media", "sha256");
+  const stored = (rec) =>
+    existsSync(path.join(media, `${json(rec).audioSha256}.mp3`));
+  const ctaStored = stored(path.join(v2, "v2-cta.receipt.json"));
+  const present = parts.filter(
+    (r) => ctaStored && stored(path.join(v2, `${r}.receipt.json`)),
+  );
+  if (present.length < parts.length)
+    console.log(
+      `SKIPPED, NOT PROVED  v2 offline rebuild of ${parts.length - present.length} part(s): their takes are not in ${media} (the consistency checks above still ran)`,
+    );
+  for (const reel of present) {
+    const dir = fresh();
+    try {
+      const tlFile = path.join(dir, "reels", "audio", "v2", `${reel}.timeline.json`);
+      const before = readFileSync(tlFile, "utf8");
+      const r = spawnSync(
+        "bun",
+        [path.join(dir, "reels", "tts.mjs"), "--v2", "--reel", reel, "--offline"],
+        {
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            ELEVENLABS_ENV_FILE: path.join(dir, "no-such-key-file"),
+            CF_MEDIA_DIR: media,
+          },
+        },
+      );
+      expect(
+        `v2 ${reel}: an --offline rebuild reproduces the committed timeline`,
+        r.status === 0 && readFileSync(tlFile, "utf8") === before,
+        r.stderr,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
 }
 
 if (failures) {
