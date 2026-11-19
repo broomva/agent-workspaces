@@ -3,7 +3,9 @@
 // every series render. Each cached line is reused only if its receipt vouches for the request, the MP3 bytes and the
 // alignment bytes, and the alignment spells the line. This script tampers with a disposable copy and requires a refusal
 // for each case, after a control run on the untouched copy that must succeed and reproduce the committed timeline.
-// It never calls ElevenLabs: every run is --offline or --dry-run, with the key file pointed at a path that does not exist.
+// It never calls ElevenLabs: every run is --offline or --dry-run, or stops before any request (a cap, or a paid take
+// missing from the media store), always with the key file pointed at a path that does not exist and, for v2, an empty
+// media store. The v2 gap arithmetic (reels/gap.mjs) is tested on synthetic PCM, so none of it needs media or ffmpeg.
 
 import { spawnSync } from "node:child_process";
 import {
@@ -18,6 +20,15 @@ import {
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  FADE,
+  insertGaps,
+  MAX_CUT_RMS,
+  quietestCut,
+  SR,
+  shiftAlignment,
+  WIN,
+} from "../reels/gap.mjs";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const REEL = "r01-folder";
@@ -28,6 +39,10 @@ function fresh() {
   cpSync(
     path.join(root, "reels", "tts.mjs"),
     path.join(dir, "reels", "tts.mjs"),
+  );
+  cpSync(
+    path.join(root, "reels", "gap.mjs"),
+    path.join(dir, "reels", "gap.mjs"),
   );
   cpSync(
     path.join(root, "reels", "series.json"),
@@ -218,6 +233,7 @@ refuses(
           env: {
             ...process.env,
             ELEVENLABS_ENV_FILE: path.join(dir, "no-such-key-file"),
+            CF_MEDIA_DIR: path.join(dir, "empty-media"),
           },
         },
       );
@@ -257,6 +273,118 @@ refuses(
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+}
+
+// A v2 take whose receipt matches the request but whose audio is not in the media store was already paid for: a run
+// without --offline refuses before any request rather than paying again; --dry-run reports it and spends nothing.
+{
+  const dir = fresh();
+  try {
+    const v2dir = path.join(dir, "reels", "audio", "v2");
+    for (const n of readdirSync(v2dir))
+      if (/\.(mp3|wav)$/.test(n)) rmSync(path.join(v2dir, n)); // as in CI: v2 media is not in git
+    const v2run = (...extra) =>
+      spawnSync(
+        "bun",
+        [
+          path.join(dir, "reels", "tts.mjs"),
+          "--v2",
+          "--reel",
+          "v2-p2-findings",
+          ...extra,
+        ],
+        {
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            ELEVENLABS_ENV_FILE: path.join(dir, "no-such-key-file"),
+            CF_MEDIA_DIR: path.join(dir, "empty-media"),
+          },
+        },
+      );
+    const paid = v2run(),
+      dry = v2run("--dry-run");
+    expect(
+      "v2 refuses to pay again for a take missing from the media store",
+      paid.status !== 0 &&
+        /already paid for\. Restore it there; nothing was sent/.test(
+          paid.stderr,
+        ),
+      paid.stderr,
+    );
+    expect(
+      "v2 --dry-run reports a paid take missing from the media store",
+      dry.status === 0 && /missing .*already paid for/.test(dry.stdout),
+      dry.stderr + dry.stdout,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+// The gap arithmetic on synthetic PCM: speech at amplitude 2000, one stretch of silence per boundary.
+{
+  const loud = (n, seed) =>
+    Int16Array.from({ length: n }, (_, i) =>
+      Math.round(2000 * Math.sin((i + seed) * 0.37)),
+    );
+  const pcm = new Int16Array(3 * SR);
+  pcm.set(loud(SR, 0), 0);
+  pcm.set(loud(SR, 7), 2 * SR); // [SR, 2 SR) stays silent
+  const { sample, rms } = quietestCut(pcm, SR - 100, 2 * SR + 100, "t");
+  expect(
+    "a cut lands inside the silence",
+    sample >= SR && sample < 2 * SR && rms === 0,
+    `sample ${sample}, rms ${rms}`,
+  );
+  const threw = (fn, re) => {
+    try {
+      fn();
+      return false;
+    } catch (e) {
+      return re.test(String(e.message));
+    }
+  };
+  expect(
+    "a boundary with no silence is refused, not cut into speech",
+    threw(
+      () => quietestCut(loud(SR, 3), 1000, 5000, "t"),
+      new RegExp(`over ${MAX_CUT_RMS}; there is no silence`),
+    ),
+    "quietestCut accepted a window of speech",
+  );
+  expect(
+    "a boundary shorter than the cut window is refused",
+    threw(
+      () => quietestCut(pcm, SR, SR + WIN - 1, "t"),
+      /under the 10 ms a cut needs/,
+    ),
+    "quietestCut accepted a window under 10 ms",
+  );
+  const ins = Math.round(0.35 * SR),
+    out = insertGaps(pcm, [sample], ins);
+  const zeros = out.subarray(sample, sample + ins).every((v) => v === 0);
+  expect(
+    "exactly round(0.35 s × 44100) zero samples go in at the cut",
+    out.length === pcm.length + ins &&
+      zeros &&
+      out[sample + ins + FADE] === pcm[sample + FADE] &&
+      out[sample - 1 - FADE] === pcm[sample - 1 - FADE],
+    `length ${out.length}, zeros ${zeros}`,
+  );
+  // two lines "ab cd": the boundary space (index 2) keeps its start and ends after the gap; line 2 moves by one gap
+  const { starts, ends } = shiftAlignment(
+    [0, 0.1, 0.2, 0.5, 0.6],
+    [0.1, 0.2, 0.5, 0.6, 0.7],
+    [0, 3],
+    0.35,
+  );
+  expect(
+    "the alignment shifts line n by (n - 1) gaps",
+    JSON.stringify(starts) === JSON.stringify([0, 0.1, 0.2, 0.85, 0.95]) &&
+      JSON.stringify(ends) === JSON.stringify([0.1, 0.2, 0.85, 0.95, 1.05]),
+    `${starts} / ${ends}`,
+  );
 }
 
 if (failures) {

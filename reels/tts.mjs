@@ -20,6 +20,7 @@
 //   the content-flow media store (~/.local/share/content-flow/media/sha256/<audioSha256>.mp3, or $CF_MEDIA_DIR) and
 //   restored from there when a checkout lacks it; the receipt's audioSha256 still has to match.
 
+import { SR, insertGaps, quietestCut, shiftAlignment } from './gap.mjs';
 import { createHash } from 'node:crypto';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -70,8 +71,15 @@ async function line(stem, text, meta, budget = null) {
   const payload = { text, model_id: MODEL_ID, language_code: 'en' };
   const requestSha256 = sha(pyJson({ voice_id: VOICE_ID, payload }));
   if (budget && !existsSync(mp3) && existsSync(rec)) {     // v2 media lives in the content-flow store, not in git
-    const want = JSON.parse(readFileSync(rec, 'utf8')).audioSha256, stored = want && path.join(MEDIA, `${want}.mp3`);
-    if (stored && existsSync(stored) && !DRY) { copyFileSync(stored, mp3); console.log(`restored ${stem}.mp3 from the media store`) }
+    const r0 = JSON.parse(readFileSync(rec, 'utf8')), stored = r0.audioSha256 && path.join(MEDIA, `${r0.audioSha256}.mp3`);
+    if (stored && existsSync(stored)) {
+      if (!DRY) { copyFileSync(stored, mp3); console.log(`restored ${stem}.mp3 from the media store`) }
+    } else if (r0.requestSha256 === requestSha256) {
+      // the receipt vouches for this exact request, so the take was paid for: never pay for it again by accident
+      const why = `${stem}.mp3 (sha256:${r0.audioSha256}) is not in the media store ${MEDIA}, and its receipt matches this request: the take was already paid for`;
+      if (DRY) { console.log(`missing  ${why}; a real run refuses`); return null }
+      throw new Error(`${why}. Restore it there; nothing was sent. (To pay for a new take on purpose, delete ${stem}.receipt.json first.)`);
+    }
   }
   if (existsSync(mp3) && existsSync(rec) && existsSync(ali)) {
     const r = JSON.parse(readFileSync(rec, 'utf8'));
@@ -255,7 +263,7 @@ async function v2() {
 // content-flow's `gate asset`/`gate render` measure. It is rebuilt on every run and must reproduce its receipt's digest.
 function gapTake(take, P, text, gap, D) {
   if (!(gap >= 0)) throw new Error('series.json v2.lineGapSeconds is missing');
-  const SR = 44100, stem = `${P.reel}.gapped`, src = JSON.parse(readFileSync(path.join(D, `${P.reel}.receipt.json`), 'utf8'));
+  const stem = `${P.reel}.gapped`, src = JSON.parse(readFileSync(path.join(D, `${P.reel}.receipt.json`), 'utf8'));
   const dec = spawnSync('ffmpeg', ['-v', 'error', '-i', take.mp3, '-f', 's16le', '-acodec', 'pcm_s16le', '-ac', '1', '-ar', String(SR), '-'],
     { maxBuffer: 1 << 28 });
   if (dec.status) throw new Error(`ffmpeg could not decode ${path.basename(take.mp3)}: ${dec.stderr}`);
@@ -264,40 +272,21 @@ function gapTake(take, P, text, gap, D) {
   // first character index of each spoken line in the joined take text
   const firsts = []; let at = 0;
   for (const l of P.spoken) { firsts.push(at); at += l.length + 1 }
-  const WIN = Math.round(0.01 * SR), FADE = Math.round(0.004 * SR), INS = Math.round(gap * SR);
+  const INS = Math.round(gap * SR);
   const cuts = firsts.slice(1).map((c, i) => {
     const sp = c - 1;                                          // the space between the two lines spans their silence
     if (a.characters[sp] !== ' ') throw new Error(`${P.reel}: no space between lines ${i + 1} and ${i + 2} in the alignment`);
-    const lo = Math.round(s[sp] * SR), hi = Math.min(Math.round(e[sp] * SR), pcm.length);
-    let best = Math.round((lo + hi) / 2), min = Infinity;
-    for (let x = lo; x + WIN <= hi; x += 44) {
-      let en = 0; for (let k = x; k < x + WIN; k++) en += pcm[k] * pcm[k];
-      if (en < min) { min = en; best = x + (WIN >> 1) }
-    }
-    return { afterLine: i + 1, sourceSample: best, sourceAt: +(best / SR).toFixed(4) };
+    const { sample } = quietestCut(pcm, Math.round(s[sp] * SR), Math.round(e[sp] * SR), `${P.reel} after line ${i + 1}`);
+    return { afterLine: i + 1, sourceSample: sample, sourceAt: +(sample / SR).toFixed(4) };
   });
-  const out = new Int16Array(pcm.length + INS * cuts.length);
-  let from = 0, to = 0;
-  const holes = [];
-  for (const c of cuts) {
-    out.set(pcm.subarray(from, c.sourceSample), to); to += c.sourceSample - from;
-    holes.push(to); to += INS; from = c.sourceSample;              // out[to, to + INS) stays zero
-  }
-  out.set(pcm.subarray(from), to);
-  for (const h of holes) for (let k = 0; k < FADE; k++) {
-    if (h - 1 - k >= 0) out[h - 1 - k] = Math.round(out[h - 1 - k] * k / FADE);                     // fade out into the gap
-    if (h + INS + k < out.length) out[h + INS + k] = Math.round(out[h + INS + k] * k / FADE);       // fade in after it
-  }
+  const out = insertGaps(pcm, cuts.map(c => c.sourceSample), INS);
   const hdr = Buffer.alloc(44), bytes = out.length * 2;
   hdr.write('RIFF', 0); hdr.writeUInt32LE(36 + bytes, 4); hdr.write('WAVE', 8); hdr.write('fmt ', 12); hdr.writeUInt32LE(16, 16);
   hdr.writeUInt16LE(1, 20); hdr.writeUInt16LE(1, 22); hdr.writeUInt32LE(SR, 24); hdr.writeUInt32LE(SR * 2, 28); hdr.writeUInt16LE(2, 32);
   hdr.writeUInt16LE(16, 34); hdr.write('data', 36); hdr.writeUInt32LE(bytes, 40);
   const wav = Buffer.concat([hdr, Buffer.from(out.buffer)]);
   // shift: every character of line n moves by (n - 1) gaps; the boundary space keeps its start and ends after the gap
-  const line = c => firsts.filter(f => f <= c).length - 1;
-  const r4 = v => +v.toFixed(4);
-  const starts = s.map((v, c) => r4(v + gap * line(c)));
-  const ends = e.map((v, c) => r4(v + gap * (line(c) + (firsts.includes(c + 1) ? 1 : 0))));
+  const { starts, ends } = shiftAlignment(s, e, firsts, gap);
   const aliText = `${JSON.stringify({
     alignment: { characters: a.characters, character_start_times_seconds: starts, character_end_times_seconds: ends },
     derived: { from: `${P.reel}.alignment.json`, fromSha256: src.alignmentSha256, lineGapSeconds: gap, cuts },
