@@ -421,7 +421,11 @@ refuses(
   const parts = readdirSync(v2)
     .filter((n) => n.endsWith(".timeline.json"))
     .map((n) => n.slice(0, -".timeline.json".length));
-  expect("v2: the committed parts are found", parts.length >= 6, parts.join(", "));
+  expect(
+    "v2: the committed parts are found",
+    parts.length >= 6,
+    parts.join(", "),
+  );
   for (const reel of parts) {
     const f = (ext) => path.join(v2, `${reel}${ext}`);
     const take = json(f(".receipt.json")),
@@ -461,10 +465,14 @@ refuses(
         JSON.stringify(got.character_end_times_seconds) !==
           JSON.stringify(want.ends)
       )
-        bad.push("the gapped alignment is not the take's alignment shifted by its gaps");
+        bad.push(
+          "the gapped alignment is not the take's alignment shifted by its gaps",
+        );
     }
     if (!(take.estimateCredits <= take.capCredits))
-      bad.push(`the take's estimate ${take.estimateCredits} is over its cap ${take.capCredits}`);
+      bad.push(
+        `the take's estimate ${take.estimateCredits} is over its cap ${take.capCredits}`,
+      );
     if (tl.take.audio !== `v2/${reel}.gapped.wav`)
       bad.push("the timeline does not play the gapped take");
     if (JSON.stringify(tl.take.gaps.cuts) !== JSON.stringify(gapped.cuts))
@@ -497,7 +505,13 @@ refuses(
   for (const reel of present) {
     const dir = fresh();
     try {
-      const tlFile = path.join(dir, "reels", "audio", "v2", `${reel}.timeline.json`);
+      const tlFile = path.join(
+        dir,
+        "reels",
+        "audio",
+        "v2",
+        `${reel}.timeline.json`,
+      );
       const before = readFileSync(tlFile, "utf8");
       const scratch = path.join(dir, "media"); // never write into the real store
       mkdirSync(scratch);
@@ -507,7 +521,13 @@ refuses(
       }
       const r = spawnSync(
         "bun",
-        [path.join(dir, "reels", "tts.mjs"), "--v2", "--reel", reel, "--offline"],
+        [
+          path.join(dir, "reels", "tts.mjs"),
+          "--v2",
+          "--reel",
+          reel,
+          "--offline",
+        ],
         {
           encoding: "utf8",
           env: {
@@ -562,7 +582,8 @@ for (const [what, edit] of [
     const r = v2tts(dir, "v2-p2-findings");
     expect(
       `v2 refuses a budget without ${what}`,
-      r.status !== 0 && /must be a positive number.*Nothing was sent/.test(r.stderr),
+      r.status !== 0 &&
+        /must be a positive number.*Nothing was sent/.test(r.stderr),
       r.stderr,
     );
   } finally {
