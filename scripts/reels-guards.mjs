@@ -65,6 +65,7 @@ function tts(dir, ...args) {
       env: {
         ...process.env,
         ELEVENLABS_ENV_FILE: path.join(dir, "no-such-key-file"),
+        CF_MEDIA_DIR: path.join(dir, "empty-media"),
       },
     },
   );
@@ -266,7 +267,14 @@ refuses(
         "v2-p1-folder",
         "--dry-run",
       ],
-      { encoding: "utf8" },
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          ELEVENLABS_ENV_FILE: path.join(dir, "no-such-key-file"),
+          CF_MEDIA_DIR: path.join(dir, "empty-media"),
+        },
+      },
     );
     expect(
       "v2 override allows its part within its own cap",

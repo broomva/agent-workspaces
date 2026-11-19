@@ -73,8 +73,7 @@ async function line(stem, text, meta, budget = null) {
   if (budget && !existsSync(mp3) && existsSync(rec)) {     // v2 media lives in the content-flow store, not in git
     const r0 = JSON.parse(readFileSync(rec, 'utf8')), stored = r0.audioSha256 && path.join(MEDIA, `${r0.audioSha256}.mp3`);
     if (stored && existsSync(stored)) {
-      if (DRY) { console.log(`would restore ${stem}.mp3 from the media store (no request)`); return null }
-      copyFileSync(stored, mp3); console.log(`restored ${stem}.mp3 from the media store`);
+      if (!DRY) { copyFileSync(stored, mp3); console.log(`restored ${stem}.mp3 from the media store`) }
     } else if (r0.requestSha256 === requestSha256) {
       // the receipt vouches for this exact request, so the take was paid for: never pay for it again by accident
       const why = `${stem}.mp3 (sha256:${r0.audioSha256}) is not in the media store ${MEDIA}, and its receipt matches this request: the take was already paid for`;
